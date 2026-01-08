@@ -975,6 +975,1328 @@
                     // Usar Geoapify - API que SÍ funciona con CORS
                     const mode = profile === 'foot' ? 'walk' : 'bicycle';
 
+                    // Para bicicleta, añadir parámetros que optimicen para rutas ciclistas
+                    let url = `https://api.geoapify.com/v1/routing?` +
+                        `waypoints=${origin.lat},${origin.lon}|${destination.lat},${destination.lon}` +
+                        `&mode=${mode}`;
+
+                    // Si es bici, optimizar para carriles bici y evitar autopistas
+                    if (profile === 'bike') {
+                        url += `&avoid=highways`;  // Evitar autopistas/autovías
+                        url += `&details=route_details`;  // Detalles de ruta
+                    }
+
+                    url += `&apiKey=${this.GEOAPIFY_API_KEY}`;
+
+
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (data.features && data.features.length > 0) {
+                        const feature = data.features[0];
+                        const props = feature.properties;
+
+                        console.log('Geoapify', profile, '- Time:', props.time, 'Distance:', props.distance);
+
+                        return {
+                            summary: {
+                                distance: props.distance,
+                                duration: props.time // Geoapify devuelve segundos
+                            },
+                            geometry: feature.geometry.coordinates[0],
+                            segments: [{
+                                steps: props.legs[0].steps.map(step => ({
+                                    instruction: step.instruction.text || 'Continuar',
+                                    distance: step.distance,
+                                    type: 0
+                                }))
+                            }],
+                            profile: profile
+                        };
+                    }
+                    return null;
+                } catch (error) {
+                    console.error('Route fetch error:', error);
+                    return null;
+                }
+            },
+
+            getGraphHopperManeuverType(sign) {
+                const signs = {
+                    0: 0, 1: 2, 2: 2, 3: 2,
+                    '-1': 5, '-2': 5, '-3': 5,
+                    4: 11, 5: 0, 6: 0, '-98': 12
+                };
+                return signs[sign] || 0;
+            },
+
+            getManeuverType(type, modifier) {
+                // Mapear tipos de OSRM a iconos
+                const types = {
+                    'depart': 12,
+                    'arrive': 11,
+                    'turn': modifier?.includes('right') ? 2 : modifier?.includes('left') ? 5 : 0,
+                    'new name': 0,
+                    'continue': 0,
+                    'roundabout': 0
+                };
+                return types[type] || 0;
+            },
+
+            displayMultiModalRoute(data) {
+                // L impiar ruta anterior
+                this.clearRoute();
+
+                const { walkToStation, bikeRoute, walkFromStation, originStation, destStation } = data;
+
+                // Combinar las 3 geometrías
+                const walk1Coords = walkToStation.geometry.map(coord => [coord[1], coord[0]]);
+                const bikeCoords = bikeRoute.geometry.map(coord => [coord[1], coord[0]]);
+                const walk2Coords = walkFromStation.geometry.map(coord => [coord[1], coord[0]]);
+
+                // Dibujar 3 segmentos con diferentes colores
+                const walk1Layer = L.polyline(walk1Coords, {
+                    color: '#10b981', // verde (a pie)
+                    weight: 4,
+                    opacity: 0.7,
+                    dashArray: '5, 10', // línea punteada
+                    lineCap: 'round'
+                });
+
+                const bikeLayer = L.polyline(bikeCoords, {
+                    color: '#6366f1', // azul (en bici)
+                    weight: 5,
+                    opacity: 0.9,
+                    lineCap: 'round',
+                    lineJoin: 'round'
+                });
+
+                const walk2Layer = L.polyline(walk2Coords, {
+                    color: '#10b981', // verde (a pie)
+                    weight: 4,
+                    opacity: 0.7,
+                    dashArray: '5, 10', // línea punteada
+                    lineCap: 'round'
+                });
+
+                this.routeLayer = L.layerGroup([walk1Layer, bikeLayer, walk2Layer]).addTo(app.map);
+
+                // Marcadores para origen, estaciones y destino
+                const originIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: '<div class="w-8 h-8 bg-green-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center text-white font-bold text-xs">🚶</div>',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+
+                const stationOriginIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: '<div class="w-10 h-10 bg-indigo-600 rounded-full border-4 border-white shadow-xl flex items-center justify-center text-white font-bold text-sm">🚴</div>',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                });
+
+                const stationDestIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: '<div class="w-10 h-10 bg-purple-600 rounded-full border-4 border-white shadow-xl flex items-center justify-center text-white font-bold text-sm">🅿️</div>',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                });
+
+                const destIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: '<div class="w-8 h-8 bg-red-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center text-white font-bold text-xs">🏁</div>',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+
+                this.markersLayer = L.layerGroup([
+                    L.marker([this.originCoords.lat, this.originCoords.lon], { icon: originIcon })
+                        .bindPopup(`<b>Inicio</b><br>Camina ${(walkToStation.summary.distance / 1000).toFixed(2)} km`),
+                    L.marker([originStation.lat, originStation.lon], { icon: stationOriginIcon })
+                        .bindPopup(`<b>${originStation.name}</b><br>🚴 ${originStation.bikes} bicis disponibles`),
+                    L.marker([destStation.lat, destStation.lon], { icon: stationDestIcon })
+                        .bindPopup(`<b>${destStation.name}</b><br>🅿️ ${destStation.docks} anclajes libres`),
+                    L.marker([this.destinationCoords.lat, this.destinationCoords.lon], { icon: destIcon })
+                        .bindPopup(`<b>Destino</b><br>Camina ${(walkFromStation.summary.distance / 1000).toFixed(2)} km`)
+                ]).addTo(app.map);
+
+                // Ajustar vista
+                const allCoords = [...walk1Coords, ...bikeCoords, ...walk2Coords];
+                const bounds = L.latLngBounds(allCoords);
+                app.map.fitBounds(bounds, { padding: [50, 50] });
+
+                // Calcular totales
+                const totalDistance = walkToStation.summary.distance + bikeRoute.summary.distance + walkFromStation.summary.distance;
+                const totalDuration = walkToStation.summary.duration + bikeRoute.summary.duration + walkFromStation.summary.duration;
+
+                // Mostrar información   
+                document.getElementById('route-distance').textContent = (totalDistance / 1000).toFixed(1) + ' km';
+                document.getElementById('route-duration').textContent = Math.round(totalDuration / 60) + ' min';
+                document.getElementById('route-elevation').textContent = 'N/A';
+
+                // Generar instrucciones combinadas
+                const allSteps = [
+                    { type: 'header', text: `🚶 Caminar a ${originStation.name}`, dist: walkToStation.summary.distance },
+                    ...walkToStation.segments[0].steps,
+                    { type: 'header', text: `🚴 Recoger bici y pedalear a ${destStation.name}`, dist: bikeRoute.summary.distance },
+                    ...bikeRoute.segments[0].steps,
+                    { type: 'header', text: `🅿️ Dejar bici y caminar a destino`, dist: walkFromStation.summary.distance },
+                    ...walkFromStation.segments[0].steps
+                ];
+
+                this.displayInstructions(allSteps);
+
+                // Mostrar panel
+                document.getElementById('route-results').classList.remove('hidden');
+                document.getElementById('clear-route-btn').classList.remove('hidden');
+            },
+
+            displayRoute(routeData) {
+                // Limpiar ruta anterior
+                this.clearRoute();
+
+                const segment = routeData.segments[0];
+                const summary = routeData.summary;
+
+                // OSRM devuelve coordenadas en formato GeoJSON: [[lon, lat], [lon, lat], ...]
+                // Leaflet necesita [[lat, lon], [lat, lon], ...]
+                const coords = routeData.geometry.map(coord => [coord[1], coord[0]]);
+
+                // Dibujar ruta en el mapa
+                this.routeLayer = L.polyline(coords, {
+                    color: '#6366f1',
+                    weight: 5,
+                    opacity: 0.8,
+                    lineCap: 'round',
+                    lineJoin: 'round'
+                }).addTo(app.map);
+
+                // Añadir marcadores de inicio y fin
+                const startIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: '<div class="w-8 h-8 bg-green-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center text-white font-bold text-xs">A</div>',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+
+                const endIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: '<div class="w-8 h-8 bg-red-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center text-white font-bold text-xs">B</div>',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+
+                this.markersLayer = L.layerGroup([
+                    L.marker([this.originCoords.lat, this.originCoords.lon], { icon: startIcon }),
+                    L.marker([this.destinationCoords.lat, this.destinationCoords.lon], { icon: endIcon })
+                ]).addTo(app.map);
+
+                // Ajustar vista del mapa
+                app.map.fitBounds(this.routeLayer.getBounds(), { padding: [50, 50] });
+
+                // Mostrar información
+                document.getElementById('route-distance').textContent =
+                    (summary.distance / 1000).toFixed(1) + ' km';
+                document.getElementById('route-duration').textContent =
+                    Math.round(summary.duration / 60) + ' min';
+
+                // OSRM no proporciona datos de elevación
+                document.getElementById('route-elevation').textContent = 'N/A';
+
+                // Mostrar instrucciones
+                this.displayInstructions(segment.steps);
+
+                // Mostrar panel de resultados
+                document.getElementById('route-results').classList.remove('hidden');
+                document.getElementById('clear-route-btn').classList.remove('hidden');
+            },
+
+            displayInstructions(steps) {
+                const container = document.getElementById('instructions-list');
+                container.innerHTML = '';
+
+                steps.forEach((step, index) => {
+                    // Si es un header (separador de secciones)
+                    if (step.type === 'header') {
+                        const header = document.createElement('div');
+                        header.className = 'bg-indigo-600/20 p-2 rounded mt-2 mb-1 border-l-4 border-indigo-500';
+                        header.innerHTML = `
+                            <div class="font-bold text-indigo-200 text-sm">${step.text}</div>
+                            <div class="text-xs text-indigo-300 mt-0.5">${(step.dist / 1000).toFixed(2)} km</div>
+                        `;
+                        container.appendChild(header);
+                        return;
+                    }
+
+                    // Instrucción normal
+                    const div = document.createElement('div');
+                    div.className = 'flex items-start gap-2 p-2 bg-slate-800/50 rounded';
+
+                    const icon = this.getInstructionIcon(step.type);
+                    const distance = step.distance < 1000 ?
+                        Math.round(step.distance) + ' m' :
+                        (step.distance / 1000).toFixed(1) + ' km';
+
+                    div.innerHTML = `
+                        <div class="flex-shrink-0 w-5 h-5 flex items-center justify-center text-indigo-400">
+                            ${icon}
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-slate-200">${step.instruction}</div>
+                            <div class="text-[10px] text-slate-500 mt-0.5">${distance}</div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            getInstructionIcon(type) {
+                const icons = {
+                    0: '↑', // straight
+                    1: '↗', // right
+                    2: '→', // right
+                    3: '↘', // right
+                    4: '↙', // left
+                    5: '←', // left
+                    6: '↖', // left
+                    7: '⤵', // u-turn
+                    11: '🏁', // finish
+                    12: '🚴' // start
+                };
+                return icons[type] || '•';
+            },
+
+            decodePolyline(encoded) {
+                // Decodificar polyline de Google/OpenRouteService
+                const poly = [];
+                let index = 0, len = encoded.length;
+                let lat = 0, lng = 0;
+
+                while (index < len) {
+                    let b, shift = 0, result = 0;
+                    do {
+                        b = encoded.charCodeAt(index++) - 63;
+                        result |= (b & 0x1f) << shift;
+                        shift += 5;
+                    } while (b >= 0x20);
+                    const dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+                    lat += dlat;
+
+                    shift = 0;
+                    result = 0;
+                    do {
+                        b = encoded.charCodeAt(index++) - 63;
+                        result |= (b & 0x1f) << shift;
+                        shift += 5;
+                    } while (b >= 0x20);
+                    const dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+                    lng += dlng;
+
+                    poly.push([lat / 1e5, lng / 1e5]);
+                }
+                return poly;
+            },
+
+            clearRoute() {
+                if (this.routeLayer) {
+                    app.map.removeLayer(this.routeLayer);
+                    this.routeLayer = null;
+                }
+                if (this.markersLayer) {
+                    app.map.removeLayer(this.markersLayer);
+                    this.markersLayer = null;
+                }
+                document.getElementById('route-results').classList.add('hidden');
+                document.getElementById('clear-route-btn').classList.add('hidden');
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            app.init();
+            routing.init();
+        });
+
+    </script>
+</body>
+
+</html><!DOCTYPE html>
+<html lang="es" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biki Valladolid - Dark Mode</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Estilos base modo oscuro */
+        body {
+            background-color: #0f172a;
+            /* slate-900 */
+            color: #e2e8f0;
+            /* slate-200 */
+        }
+
+        /* Mapa en Modo Oscuro mediante filtros CSS */
+        .leaflet-layer,
+        .leaflet-control-zoom-in,
+        .leaflet-control-zoom-out,
+        .leaflet-control-attribution {
+            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
+
+        #map {
+            height: 600px;
+            /* Mapa más alto ya que no hay lista */
+            width: 100%;
+            z-index: 1;
+            background: #0f172a;
+        }
+
+        /* Personalización de los marcadores */
+        .custom-div-icon {
+            background: transparent;
+            border: none;
+        }
+
+        .marker-pin {
+            width: 30px;
+            height: 30px;
+            border-radius: 50% 50% 50% 0;
+            background: #6366f1;
+            /* indigo-500 */
+            position: absolute;
+            transform: rotate(-45deg);
+            left: 50%;
+            top: 50%;
+            margin: -15px 0 0 -15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+            /* Glow effect */
+            transition: all 0.3s ease;
+        }
+
+        /* Indicador de favorito */
+        .marker-fav .marker-pin {
+            border: 2px solid #fbbf24;
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+            z-index: 20;
+            transform: scale(1.1) rotate(-45deg);
+        }
+
+        .marker-pin::after {
+            content: '';
+            width: 24px;
+            height: 24px;
+            margin: 3px 0 0 3px;
+            background: #1e293b;
+            /* slate-800 (oscuro para el centro) */
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .marker-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            font-size: 12px;
+            z-index: 10;
+            color: #fff;
+            /* Texto blanco */
+        }
+
+        /* Variantes de color */
+        .marker-green .marker-pin {
+            background: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+        }
+
+        .marker-orange .marker-pin {
+            background: #f59e0b;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+        }
+
+        .marker-red .marker-pin {
+            background: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Estilos del Popup (Sobrescribir Leaflet para Dark Mode) */
+        .leaflet-popup-content-wrapper,
+        .leaflet-popup-tip {
+            background: #1e293b;
+            /* slate-800 */
+            color: #e2e8f0;
+            border: 1px solid #334155;
+        }
+
+        .leaflet-popup-content {
+            margin: 10px;
+        }
+
+        .leaflet-container a.leaflet-popup-close-button {
+            color: #94a3b8;
+        }
+
+        /* Animación */
+        .animate-spin-slow {
+            animation: spin 3s linear infinite;
+        }
+
+        /* Autocomplete Suggestions */
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-top: none;
+            border-radius: 0 0 0.5rem 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 9999;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .autocomplete-item {
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-bottom: 1px solid #334155;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover {
+            background: #334155;
+        }
+
+        .autocomplete-item-name {
+            color: #e2e8f0;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .autocomplete-item-address {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            margin-top: 0.125rem;
+        }
+    </style>
+</head>
+
+<body class="font-sans">
+
+    <div class="min-h-screen p-4 md:p-6 flex flex-col max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-white flex items-center gap-3">
+                        <div class="p-2 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
+                            <i data-lucide="bike" class="w-8 h-8 text-indigo-400"></i>
+                        </div>
+                        Biki Valladolid
+                    </h1>
+                    <p class="text-slate-400 text-sm mt-2 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        Sistema en tiempo real (10s)
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <span id="last-updated" class="text-xs text-slate-500 font-mono hidden sm:block"></span>
+                    <button onclick="app.fetchData()" id="refresh-btn"
+                        class="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-lg transition-all text-sm font-medium">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        <span id="refresh-text">Actualizar</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards (Dark) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 backdrop-blur-sm">
+                    <div
+                        class="flex items-center gap-2 text-slate-400 mb-2 text-xs font-medium uppercase tracking-wider">
+                        <i data-lucide="zap" class="w-3 h-3 text-amber-400"></i> Eléctricas
+                    </div>
+                    <div id="stat-ebikes" class="text-3xl font-bold text-white font-mono">-</div>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 backdrop-blur-sm">
+                    <div
+                        class="flex items-center gap-2 text-slate-400 mb-2 text-xs font-medium uppercase tracking-wider">
+                        <i data-lucide="settings" class="w-3 h-3 text-slate-400"></i> Mecánicas
+                    </div>
+                    <div id="stat-mechanical" class="text-3xl font-bold text-white font-mono">-</div>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 backdrop-blur-sm">
+                    <div
+                        class="flex items-center gap-2 text-slate-400 mb-2 text-xs font-medium uppercase tracking-wider">
+                        <i data-lucide="navigation" class="w-3 h-3 text-emerald-400"></i> Anclajes
+                    </div>
+                    <div id="stat-docks" class="text-3xl font-bold text-white font-mono">-</div>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 backdrop-blur-sm">
+                    <div
+                        class="flex items-center gap-2 text-slate-400 mb-2 text-xs font-medium uppercase tracking-wider">
+                        <i data-lucide="map-pin" class="w-3 h-3 text-indigo-400"></i> Estaciones
+                    </div>
+                    <div id="stat-stations" class="text-3xl font-bold text-white font-mono">-</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="space-y-4 flex-1 flex flex-col">
+
+            <!-- Filters Bar -->
+            <div
+                class="bg-slate-800 border border-slate-700 p-3 rounded-t-xl flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="relative w-full md:w-80">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4"></i>
+                    <input type="text" id="search-input" placeholder="Filtrar mapa..."
+                        class="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700 text-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-sm placeholder-slate-600 transition-all">
+                </div>
+
+                <div class="flex flex-wrap gap-2 w-full md:w-auto" id="filter-group">
+                    <button data-filter="all"
+                        class="filter-btn px-3 py-1.5 rounded-md text-xs font-medium transition-all bg-indigo-600 text-white shadow-lg shadow-indigo-500/20">Todas</button>
+                    <button data-filter="favorites"
+                        class="filter-btn px-3 py-1.5 rounded-md text-xs font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700 flex items-center gap-1">
+                        <i data-lucide="heart" class="w-3 h-3"></i> Favs
+                    </button>
+                    <button data-filter="electric"
+                        class="filter-btn px-3 py-1.5 rounded-md text-xs font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700 flex items-center gap-1">
+                        <i data-lucide="zap" class="w-3 h-3"></i> Elec
+                    </button>
+                    <button data-filter="bikes"
+                        class="filter-btn px-3 py-1.5 rounded-md text-xs font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700">Con
+                        Bicis</button>
+                    <button data-filter="docks"
+                        class="filter-btn px-3 py-1.5 rounded-md text-xs font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700">Con
+                        Sitio</button>
+                </div>
+            </div>
+
+            <!-- Routing Panel -->
+            <div id="routing-panel" class="bg-slate-800 border border-slate-700 p-4 rounded-xl mb-4 space-y-3">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i data-lucide="navigation" class="w-5 h-5 text-indigo-400"></i>
+                        Planificar Ruta
+                    </h3>
+                    <button id="clear-route-btn"
+                        class="text-slate-400 hover:text-red-400 transition-colors text-sm hidden"
+                        onclick="routing.clearRoute()">
+                        <i data-lucide="x-circle" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-2">
+                    <!-- Origen -->
+                    <div class="relative">
+                        <i data-lucide="circle"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 text-green-500 w-4 h-4 z-10"></i>
+                        <input type="text" id="route-origin" placeholder="Desde... (ej: Plaza Mayor, Calle Ferrari)"
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-700 text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm placeholder-slate-600"
+                            autocomplete="off">
+                        <div id="origin-suggestions" class="autocomplete-dropdown hidden"></div>
+                    </div>
+
+                    <!-- Botón de intercambio -->
+                    <div class="flex justify-center -my-1">
+                        <button onclick="routing.swapLocations()"
+                            class="p-1.5 bg-slate-700 hover:bg-slate-600 rounded-full transition-all text-slate-300">
+                            <i data-lucide="arrow-down-up" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <!-- Destino -->
+                    <div class="relative">
+                        <i data-lucide="map-pin"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 text-red-500 w-4 h-4 z-10"></i>
+                        <input type="text" id="route-destination" placeholder="Hasta... (ej: Campo Grande, Catedral)"
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-700 text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm placeholder-slate-600"
+                            autocomplete="off">
+                        <div id="destination-suggestions" class="autocomplete-dropdown hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Tipo de Ruta -->
+                <div class="flex gap-2 pt-2">
+                    <button data-route-type="recommended"
+                        class="route-type-btn flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-1">
+                        <i data-lucide="thumbs-up" class="w-3 h-3"></i>
+                        <span>Recomendada</span>
+                    </button>
+                    <button data-route-type="shortest"
+                        class="route-type-btn flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700 flex items-center justify-center gap-1">
+                        <i data-lucide="minimize-2" class="w-3 h-3"></i>
+                        <span>Más Corta</span>
+                    </button>
+                    <button data-route-type="fastest"
+                        class="route-type-btn flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700 flex items-center justify-center gap-1">
+                        <i data-lucide="zap" class="w-3 h-3"></i>
+                        <span>Más Rápida</span>
+                    </button>
+                </div>
+
+                <!-- Calcular -->
+                <button id="calculate-route-btn" onclick="routing.calculateRoute()"
+                    class="w-full px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg transition-all text-sm font-semibold shadow-lg">
+                    Calcular Ruta
+                </button>
+
+                <!-- Resultados -->
+                <div id="route-results" class="hidden pt-3 border-t border-slate-700 space-y-3">
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="bg-slate-900/50 p-2.5 rounded-lg text-center">
+                            <div class="text-xs text-slate-400 mb-1">Distancia</div>
+                            <div id="route-distance" class="text-lg font-bold text-white">-</div>
+                        </div>
+                        <div class="bg-slate-900/50 p-2.5 rounded-lg text-center">
+                            <div class="text-xs text-slate-400 mb-1">Tiempo</div>
+                            <div id="route-duration" class="text-lg font-bold text-white">-</div>
+                        </div>
+                        <div class="bg-slate-900/50 p-2.5 rounded-lg text-center">
+                            <div class="text-xs text-slate-400 mb-1">Elevación</div>
+                            <div id="route-elevation" class="text-lg font-bold text-white">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Instrucciones -->
+                    <div id="route-instructions" class="max-h-48 overflow-y-auto bg-slate-900/30 rounded-lg p-2">
+                        <div class="text-xs text-slate-400 mb-2 font-semibold uppercase tracking-wider">Instrucciones
+                        </div>
+                        <div id="instructions-list" class="space-y-1.5 text-xs text-slate-300">
+                            <!-- Se llenará dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Container -->
+            <div
+                class="bg-slate-800 rounded-b-xl border-x border-b border-slate-700 overflow-hidden relative shadow-2xl flex-1">
+                <div id="map" class="h-full"></div>
+
+                <!-- Legend -->
+                <div
+                    class="absolute bottom-6 left-6 bg-slate-900/90 backdrop-blur p-3 rounded-lg border border-slate-700 text-xs z-[1000] shadow-xl">
+                    <div class="font-bold text-slate-400 mb-2 uppercase tracking-wider text-[10px]">Disponibilidad</div>
+                    <div class="flex items-center gap-2 mb-1.5"><span
+                            class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                        <span class="text-slate-300">> 3 Bicis</span>
+                    </div>
+                    <div class="flex items-center gap-2 mb-1.5"><span
+                            class="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></span>
+                        <span class="text-slate-300">1-3 Bicis</span>
+                    </div>
+                    <div class="flex items-center gap-2"><span
+                            class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></span> <span
+                            class="text-slate-300">Vacía</span></div>
+                </div>
+            </div>
+
+            <!-- Error Container -->
+            <div id="error-container"
+                class="hidden p-4 bg-red-900/20 border border-red-900/50 rounded-xl flex items-start gap-3 text-red-400">
+                <i data-lucide="alert-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+                <div>
+                    <p class="font-semibold">Error cargando datos</p>
+                    <p id="error-text" class="text-sm opacity-90"></p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        const app = {
+            data: [],
+            vehicleTypesMap: {},
+            favorites: new Set(),
+            map: null,
+            markerLayer: null,
+            filter: 'all',
+            searchTerm: '',
+            urls: {
+                info: "https://valladolid.publicbikesystem.net/customer/gbfs/v2/es/station_information",
+                status: "https://valladolid.publicbikesystem.net/customer/gbfs/v2/es/station_status",
+                types: "https://valladolid.publicbikesystem.net/customer/gbfs/v2/es/vehicle_types"
+            },
+
+            init: async function () {
+                try {
+                    const savedFavs = JSON.parse(localStorage.getItem('biki_favorites') || '[]');
+                    this.favorites = new Set(savedFavs);
+                } catch (e) { console.log('Error loading favorites'); }
+
+                lucide.createIcons();
+
+                // Mapa estilo oscuro
+                this.map = L.map('map', {
+                    zoomControl: false // Movemos controles si queremos, por ahora default
+                }).setView([41.652, -4.724], 14);
+
+                L.control.zoom({ position: 'bottomright' }).addTo(this.map);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap'
+                }).addTo(this.map);
+
+                // Listeners
+                document.getElementById('search-input').addEventListener('input', (e) => {
+                    this.searchTerm = e.target.value;
+                    this.renderMap();
+                });
+
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.filter-btn').forEach(b => {
+                            b.className = "filter-btn px-3 py-1.5 rounded-md text-xs font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700 flex items-center gap-1";
+                        });
+                        const target = e.currentTarget;
+                        target.className = "filter-btn px-3 py-1.5 rounded-md text-xs font-medium transition-all bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 flex items-center gap-1";
+
+                        this.filter = target.dataset.filter;
+                        this.renderMap();
+                    });
+                });
+
+                await this.fetchVehicleTypes();
+                this.fetchData();
+                setInterval(() => this.fetchData(), 10000);
+            },
+
+            fetchVehicleTypes: async function () {
+                try {
+                    const res = await fetch(this.urls.types);
+                    const json = await res.json();
+                    json.data.vehicle_types.forEach(vt => {
+                        this.vehicleTypesMap[vt.vehicle_type_id] = vt.propulsion_type;
+                    });
+                } catch (e) {
+                    this.vehicleTypesMap = { "1": "human", "2": "electric_assist" };
+                }
+            },
+
+            fetchData: async function () {
+                const btn = document.getElementById('refresh-btn');
+                const btnIcon = btn.querySelector('i') || btn.querySelector('svg');
+                const btnText = document.getElementById('refresh-text');
+
+                if (btnIcon) btnIcon.classList.add('animate-spin');
+                if (btnText) btnText.textContent = "Loading...";
+
+                try {
+                    const [infoRes, statusRes] = await Promise.all([
+                        fetch(this.urls.info),
+                        fetch(this.urls.status)
+                    ]);
+
+                    if (!infoRes.ok || !statusRes.ok) throw new Error("Error API");
+
+                    const infoData = await infoRes.json();
+                    const statusData = await statusRes.json();
+
+                    const statusMap = {};
+                    statusData.data.stations.forEach(st => statusMap[st.station_id] = st);
+
+                    this.data = infoData.data.stations.map(st => {
+                        const status = statusMap[st.station_id];
+                        let mech = 0, elec = 0;
+
+                        if (status && status.vehicle_types_available) {
+                            status.vehicle_types_available.forEach(vt => {
+                                const type = this.vehicleTypesMap[vt.vehicle_type_id];
+                                if (type === 'electric_assist') elec += vt.count;
+                                else mech += vt.count;
+                            });
+                        } else if (status) {
+                            mech = status.num_bikes_available;
+                        }
+
+                        return {
+                            ...st,
+                            bikes: status ? status.num_bikes_available : 0,
+                            docks: status ? status.num_docks_available : 0,
+                            mech_bikes: mech,
+                            elec_bikes: elec,
+                            is_renting: status ? status.is_renting : false,
+                            status_code: status ? status.status : 'UNKNOWN'
+                        };
+                    });
+
+                    document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+                    document.getElementById('error-container').classList.add('hidden');
+
+                    this.updateStats();
+                    this.renderMap();
+
+                } catch (err) {
+                    console.error(err);
+                    if (this.data.length === 0) {
+                        const errorDiv = document.getElementById('error-container');
+                        errorDiv.classList.remove('hidden');
+                        document.getElementById('error-text').textContent = "Error de conexión.";
+                    }
+                } finally {
+                    if (btnIcon) btnIcon.classList.remove('animate-spin');
+                    if (btnText) btnText.textContent = "Actualizar";
+                }
+            },
+
+            updateStats: function () {
+                const totalMech = this.data.reduce((acc, st) => acc + st.mech_bikes, 0);
+                const totalElec = this.data.reduce((acc, st) => acc + st.elec_bikes, 0);
+                const totalDocks = this.data.reduce((acc, st) => acc + st.docks, 0);
+                const activeSt = this.data.filter(st => st.status_code === 'IN_SERVICE').length;
+
+                document.getElementById('stat-mechanical').textContent = totalMech;
+                document.getElementById('stat-ebikes').textContent = totalElec;
+                document.getElementById('stat-docks').textContent = totalDocks;
+                document.getElementById('stat-stations').textContent = `${activeSt}`;
+            },
+
+            toggleFavorite: function (id) {
+                if (this.favorites.has(id)) {
+                    this.favorites.delete(id);
+                } else {
+                    this.favorites.add(id);
+                }
+                localStorage.setItem('biki_favorites', JSON.stringify([...this.favorites]));
+                this.renderMap();
+            },
+
+            renderMap: function () {
+                // Filtrado
+                const filtered = this.data.filter(st => {
+                    const matchSearch = st.name.toLowerCase().includes(this.searchTerm.toLowerCase());
+                    let matchFilter = true;
+                    if (this.filter === 'bikes') matchFilter = st.bikes > 0;
+                    if (this.filter === 'docks') matchFilter = st.docks > 0;
+                    if (this.filter === 'electric') matchFilter = st.elec_bikes > 0;
+                    if (this.filter === 'favorites') matchFilter = this.favorites.has(st.station_id);
+                    return matchSearch && matchFilter;
+                });
+
+                // Mapa
+                if (this.markerLayer) this.map.removeLayer(this.markerLayer);
+
+                const markers = [];
+
+                filtered.forEach(st => {
+                    let colorClass = 'marker-green';
+                    if (st.bikes === 0) colorClass = 'marker-red';
+                    else if (st.bikes < 3) colorClass = 'marker-orange';
+
+                    const isFav = this.favorites.has(st.station_id);
+                    const extraClass = isFav ? 'marker-fav' : '';
+
+                    const icon = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div class='${colorClass} ${extraClass}'><div class='marker-pin'></div><span class='marker-text'>${st.bikes}</span></div>`,
+                        iconSize: [30, 42],
+                        iconAnchor: [15, 42]
+                    });
+
+                    const marker = L.marker([st.lat, st.lon], { icon: icon });
+
+                    // Popup con estilos oscuros inyectados inline para forzar override
+                    marker.bindPopup(`
+                        <div class="font-sans text-center min-w-[160px] text-slate-200">
+                            <div class="flex justify-between items-start mb-2 border-b border-slate-600 pb-2">
+                                <h3 class="font-bold text-sm text-left leading-tight pr-4">${st.name}</h3>
+                                <button onclick="app.toggleFavorite('${st.station_id}')" class="text-slate-400 hover:text-red-400 transition-colors">
+                                    ${isFav ? '❤️' : '🤍'}
+                                </button>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-2 text-xs mb-3">
+                                <div class="bg-amber-500/10 p-1.5 rounded border border-amber-500/20">
+                                    <span class="block font-bold text-amber-400 text-lg">${st.elec_bikes}</span>
+                                    <span class="text-amber-200/70">Eléctricas</span>
+                                </div>
+                                <div class="bg-slate-700/50 p-1.5 rounded border border-slate-600">
+                                    <span class="block font-bold text-slate-300 text-lg">${st.mech_bikes}</span>
+                                    <span class="text-slate-400">Mecánicas</span>
+                                </div>
+                            </div>
+                            <div class="text-xs text-slate-400 bg-slate-800 p-1 rounded">
+                                Anclajes Libres: <span class="text-white font-bold">${st.docks}</span>
+                            </div>
+                        </div>
+                    `);
+                    markers.push(marker);
+                });
+
+                this.markerLayer = L.layerGroup(markers).addTo(this.map);
+            }
+        };
+
+        // ==================== ROUTING SYSTEM ====================
+        const routing = {
+            routeType: 'recommended',
+            currentRoute: null,
+            routeLayer: null,
+            markersLayer: null,
+            originCoords: null,
+            destinationCoords: null,
+
+            // OpenRouteService API (usando clave pública demo - considera obtener una propia)
+            ORS_API_KEY: '5b3ce3597851110001cf6248a94e06b0e9144dd4a21dc326a1a0a89b',
+
+            // Geoapify API - Tu API key personal
+            GEOAPIFY_API_KEY: 'baf05662a8cb4aaf945882e530b67d41',
+
+            init: function () {
+                // Listeners para tipo de ruta
+                document.querySelectorAll('.route-type-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.route-type-btn').forEach(b => {
+                            b.className = "route-type-btn flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700 flex items-center justify-center gap-1";
+                        });
+                        e.currentTarget.className = "route-type-btn flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-1";
+                        this.routeType = e.currentTarget.dataset.routeType;
+                    });
+                });
+
+                // Enter key en los inputs
+                ['route-origin', 'route-destination'].forEach(id => {
+                    document.getElementById(id).addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') this.calculateRoute();
+                    });
+                });
+
+                // Autocomplete para origen
+                this.setupAutocomplete('route-origin', 'origin-suggestions');
+                // Autocomplete para destino
+                this.setupAutocomplete('route-destination', 'destination-suggestions');
+
+                // Cerrar sugerencias al hacer clic fuera
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.relative')) {
+                        document.querySelectorAll('.autocomplete-dropdown').forEach(el => {
+                            el.classList.add('hidden');
+                        });
+                    }
+                });
+            },
+
+            setupAutocomplete: function (inputId, suggestionsId) {
+                const input = document.getElementById(inputId);
+                const suggestionsDiv = document.getElementById(suggestionsId);
+                let debounceTimer;
+
+                input.addEventListener('input', (e) => {
+                    const query = e.target.value.trim();
+
+                    // Limpiar coordenadas guardadas al escribir
+                    if (inputId === 'route-origin') {
+                        this.originCoords = null;
+                    } else {
+                        this.destinationCoords = null;
+                    }
+
+                    clearTimeout(debounceTimer);
+
+                    if (query.length < 3) {
+                        suggestionsDiv.classList.add('hidden');
+                        return;
+                    }
+
+                    debounceTimer = setTimeout(async () => {
+                        const suggestions = await this.fetchSuggestions(query);
+                        this.displaySuggestions(suggestions, suggestionsDiv, input);
+                    }, 300);
+                });
+
+                input.addEventListener('focus', (e) => {
+                    if (suggestionsDiv.children.length > 0 && e.target.value.length >= 3) {
+                        suggestionsDiv.classList.remove('hidden');
+                    }
+                });
+            },
+
+            async fetchSuggestions(query) {
+                const searchText = query.toLowerCase().includes('valladolid') ?
+                    query : `${query}, Valladolid`;
+
+                console.log('Fetching suggestions for:', searchText);
+
+                try {
+                    // Usar Nominatim (OpenStreetMap) que soporta CORS
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchText)}&limit=5&viewbox=-4.8,41.6,-4.6,41.7&bounded=1`,
+                        {
+                            headers: {
+                                'User-Agent': 'BikiValladolid/1.0'
+                            }
+                        }
+                    );
+
+                    const data = await response.json();
+                    console.log('API response:', data);
+
+                    if (data && data.length > 0) {
+                        const suggestions = data.map(item => ({
+                            name: item.name || item.display_name.split(',')[0] || 'Sin nombre',
+                            address: item.display_name || '',
+                            coords: {
+                                lon: parseFloat(item.lon),
+                                lat: parseFloat(item.lat)
+                            }
+                        }));
+                        console.log('Mapped suggestions:', suggestions);
+                        return suggestions;
+                    }
+                    console.log('No results found in response');
+                    return [];
+                } catch (error) {
+                    console.error('Autocomplete error:', error);
+                    return [];
+                }
+            },
+
+            displaySuggestions(suggestions, container, inputElement) {
+                console.log('displaySuggestions called, suggestions:', suggestions.length);
+                console.log('Container element:', container);
+
+                container.innerHTML = '';
+
+                if (suggestions.length === 0) {
+                    console.log('No suggestions, hiding');
+                    container.classList.add('hidden');
+                    return;
+                }
+
+                suggestions.forEach(suggestion => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.innerHTML = `
+                        <div class="autocomplete-item-name">${suggestion.name}</div>
+                        <div class="autocomplete-item-address">${suggestion.address}</div>
+                    `;
+
+                    item.addEventListener('click', () => {
+                        inputElement.value = suggestion.name;
+                        container.classList.add('hidden');
+
+                        // Guardar coordenadas para uso posterior
+                        if (inputElement.id === 'route-origin') {
+                            this.originCoords = suggestion.coords;
+                        } else {
+                            this.destinationCoords = suggestion.coords;
+                        }
+                    });
+
+                    container.appendChild(item);
+                });
+
+                console.log('Showing dropdown, items:', container.children.length);
+                container.classList.remove('hidden');
+            },
+
+            swapLocations: function () {
+                const origin = document.getElementById('route-origin');
+                const destination = document.getElementById('route-destination');
+                const temp = origin.value;
+                origin.value = destination.value;
+                destination.value = temp;
+
+                // Swap coords también
+                const tempCoords = this.originCoords;
+                this.originCoords = this.destinationCoords;
+                this.destinationCoords = tempCoords;
+            },
+
+            async geocode(address) {
+                // Añadir "Valladolid" si no está incluido
+                const searchText = address.toLowerCase().includes('valladolid') ?
+                    address : `${address}, Valladolid`;
+
+                try {
+                    // Usar Nominatim (OpenStreetMap)
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchText)}&limit=1&viewbox=-4.8,41.6,-4.6,41.7&bounded=1`,
+                        {
+                            headers: {
+                                'User-Agent': 'BikiValladolid/1.0'
+                            }
+                        }
+                    );
+
+                    const data = await response.json();
+
+                    if (data && data.length > 0) {
+                        return {
+                            lon: parseFloat(data[0].lon),
+                            lat: parseFloat(data[0].lat)
+                        };
+                    }
+                    return null;
+                } catch (error) {
+                    console.error('Geocoding error:', error);
+                    return null;
+                }
+            },
+
+            async calculateRoute() {
+                const origin = document.getElementById('route-origin').value.trim();
+                const destination = document.getElementById('route-destination').value.trim();
+
+                if (!origin || !destination) {
+                    alert('Por favor, ingresa origen y destino');
+                    return;
+                }
+
+                const btn = document.getElementById('calculate-route-btn');
+                btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin mx-auto"></i>';
+                btn.disabled = true;
+
+                try {
+                    // Geocodificar solo si no tenemos coordenadas guardadas
+                    if (!this.originCoords) {
+                        this.originCoords = await this.geocode(origin);
+                    }
+                    if (!this.destinationCoords) {
+                        this.destinationCoords = await this.geocode(destination);
+                    }
+
+                    if (!this.originCoords) {
+                        alert('No se pudo encontrar la dirección de origen. Intenta seleccionar una sugerencia de la lista.');
+                        return;
+                    }
+                    if (!this.destinationCoords) {
+                        alert('No se pudo encontrar la dirección de destino. Intenta seleccionar una sugerencia de la lista.');
+                        return;
+                    }
+
+                    // NUEVA LÓGICA: Ruta multi-modal con estaciones Biki
+                    // 1. Encontrar estación más cercana al origen CON bicis
+                    const originStation = this.findNearestStation(this.originCoords, 'bikes');
+                    if (!originStation) {
+                        alert('No hay estaciones Biki con bicis disponibles cerca del origen. Intenta con otro punto de partida.');
+                        return;
+                    }
+
+                    // 2. Encontrar estación más cercana al destino CON anclajes
+                    const destStation = this.findNearestStation(this.destinationCoords, 'docks');
+                    if (!destStation) {
+                        alert('No hay estaciones Biki con anclajes disponibles cerca del destino. Intenta con otro destino.');
+                        return;
+                    }
+
+                    // 3. Calcular 3 rutas
+                    const route1 = await this.fetchRoute(
+                        this.originCoords,
+                        { lat: originStation.lat, lon: originStation.lon },
+                        'foot' // a pie
+                    );
+
+                    const route2 = await this.fetchRoute(
+                        { lat: originStation.lat, lon: originStation.lon },
+                        { lat: destStation.lat, lon: destStation.lon },
+                        'bike' // en bici
+                    );
+
+                    const route3 = await this.fetchRoute(
+                        { lat: destStation.lat, lon: destStation.lon },
+                        this.destinationCoords,
+                        'foot' // a pie
+                    );
+
+                    if (route1 && route2 && route3) {
+                        this.displayMultiModalRoute({
+                            walkToStation: route1,
+                            bikeRoute: route2,
+                            walkFromStation: route3,
+                            originStation: originStation,
+                            destStation: destStation
+                        });
+                    } else {
+                        alert('No se pudo calcular la ruta completa.');
+                    }
+
+                } catch (error) {
+                    console.error('Route calculation error:', error);
+                    alert('Error al calcular la ruta. Intenta de nuevo.');
+                } finally {
+                    btn.innerHTML = 'Calcular Ruta';
+                    btn.disabled = false;
+                    lucide.createIcons();
+                }
+            },
+
+            findNearestStation(coords, type) {
+                // type: 'bikes' o 'docks'
+                const stations = app.data.filter(st => {
+                    if (type === 'bikes') {
+                        return st.bikes > 0 && st.is_renting;
+                    } else {
+                        return st.docks > 0 && st.is_renting;
+                    }
+                });
+
+                if (stations.length === 0) return null;
+
+                // Calcular distancia a cada estación
+                let nearest = null;
+                let minDist = Infinity;
+
+                stations.forEach(st => {
+                    const dist = this.calculateDistance(coords.lat, coords.lon, st.lat, st.lon);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        nearest = st;
+                    }
+                });
+
+                return nearest;
+            },
+
+            calculateDistance(lat1, lon1, lat2, lon2) {
+                // Fórmula de Haversine para calcular distancia en km
+                const R = 6371; // Radio de la Tierra en km
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a =
+                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return R * c;
+            },
+
+            async fetchRoute(origin, destination, profile = 'bike') {
+                try {
+                    // Usar Geoapify - API que SÍ funciona con CORS
+                    const mode = profile === 'foot' ? 'walk' : 'bicycle';
+
                     const url = `https://api.geoapify.com/v1/routing?` +
                         `waypoints=${origin.lat},${origin.lon}|${destination.lat},${destination.lon}` +
                         `&mode=${mode}` +
@@ -1312,3 +2634,4 @@
 </body>
 
 </html>
+
