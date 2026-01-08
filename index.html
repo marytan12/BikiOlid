@@ -1076,7 +1076,7 @@
             originCoords: null,
             destinationCoords: null,
 
-            ORS_API_KEY: '5b3ce3597851110001cf6248a94e06b0e9144dd4a21dc326a1a0a89b',
+            ORS_API_KEY: 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6Ijg0NmVmMGY1ZGJjNzQwMzk5NGQ3YzRiNTQ5ZTU5NGJiIiwiaCI6Im11cm11cjY0In0=',
 
             init: function () {
                 // Enter key handlers
@@ -1240,28 +1240,44 @@
 
                 try {
                     const profile = 'cycling-regular';
-                    const coords = `${this.originCoords.lon},${this.originCoords.lat}|${this.destinationCoords.lon},${this.destinationCoords.lat}`;
 
                     const response = await fetch(
-                        `https://api.openrouteservice.org/v2/directions/${profile}?api_key=${this.ORS_API_KEY}&start=${this.originCoords.lon},${this.originCoords.lat}&end=${this.destinationCoords.lon},${this.destinationCoords.lat}`
+                        `https://api.openrouteservice.org/v2/directions/${profile}`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
+                                'Authorization': this.ORS_API_KEY,
+                                'Content-Type': 'application/json; charset=utf-8'
+                            },
+                            body: JSON.stringify({
+                                coordinates: [
+                                    [this.originCoords.lon, this.originCoords.lat],
+                                    [this.destinationCoords.lon, this.destinationCoords.lat]
+                                ]
+                            })
+                        }
                     );
 
                     const data = await response.json();
 
-                    if (data.features && data.features.length > 0) {
+                    if (data.routes && data.routes.length > 0) {
+                        this.displayRoute(data.routes[0]);
+                    } else if (data.features && data.features.length > 0) {
                         this.displayRoute(data.features[0]);
                     } else {
                         alert('No se pudo calcular la ruta');
                     }
                 } catch (error) {
                     console.error('Route error:', error);
-                    alert('Error al calcular la ruta');
+                    alert('Error al calcular la ruta. Por favor, intenta de nuevo.');
                 }
             },
 
-            displayRoute(feature) {
-                const props = feature.properties;
-                const coords = feature.geometry.coordinates;
+            displayRoute(route) {
+                // Handle both response formats
+                const props = route.properties || route.summary;
+                const coords = route.geometry ? route.geometry.coordinates : route.geometry;
 
                 // Clear previous route
                 if (this.routeLayer) app.map.removeLayer(this.routeLayer);
@@ -1299,18 +1315,21 @@
                 // Fit bounds
                 app.map.fitBounds(this.routeLayer.getBounds(), { padding: [50, 50] });
 
-                // Show results
-                const distance = (props.summary.distance / 1000).toFixed(2);
-                const duration = Math.round(props.summary.duration / 60);
+                // Show results - handle both formats
+                const summary = props.summary || props;
+                const distance = (summary.distance / 1000).toFixed(2);
+                const duration = Math.round(summary.duration / 60);
 
                 document.getElementById('route-distance').textContent = `${distance} km`;
                 document.getElementById('route-duration').textContent = `${duration} min`;
-                document.getElementById('route-elevation').textContent = props.ascent ? `${Math.round(props.ascent)}m` : '-';
+                document.getElementById('route-elevation').textContent = summary.ascent ? `${Math.round(summary.ascent)}m` : '-';
 
                 // Instructions
                 const instructionsList = document.getElementById('instructions-list');
-                if (props.segments && props.segments[0].steps) {
-                    instructionsList.innerHTML = props.segments[0].steps.map((step, i) => `
+                const segments = route.segments || (props.segments ? props.segments : null);
+
+                if (segments && segments[0] && segments[0].steps) {
+                    instructionsList.innerHTML = segments[0].steps.map((step, i) => `
                         <div class="instruction-item">
                             <div style="color: #6366f1; font-weight: bold; min-width: 20px;">${i + 1}</div>
                             <div class="instruction-text">${step.instruction}</div>
