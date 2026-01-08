@@ -258,6 +258,28 @@
         }
 
         /* View Panels */
+        .nav-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%) translateZ(0);
+            height: 50px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: -1;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            will-change: transform, width, left;
+        }
+
+        .bottom-nav:active .nav-indicator {
+            transform: translateY(-50%) scale(1.1);
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
         .view-panel {
             position: fixed;
             bottom: 0;
@@ -700,6 +722,7 @@
 
     <!-- Bottom Navigation Pill -->
     <div class="bottom-nav glass-effect">
+        <div class="nav-indicator" id="nav-indicator"></div>
         <button class="nav-btn active" data-view="map" onclick="app.switchView('map')">
             <i data-lucide="map"></i>
             <span>Mapa</span>
@@ -835,6 +858,16 @@
                     zoomControl: false,
                     attributionControl: false
                 }).setView([41.652, -4.724], 14);
+
+                // Initialize indicator position
+                setTimeout(() => {
+                    const activeBtn = document.querySelector('.nav-btn.active');
+                    const indicator = document.getElementById('nav-indicator');
+                    if (activeBtn && indicator) {
+                        indicator.style.width = `${activeBtn.offsetWidth}px`;
+                        indicator.style.left = `${activeBtn.offsetLeft}px`;
+                    }
+                }, 100);
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
@@ -991,11 +1024,17 @@
 
             switchView: function (view) {
                 this.currentView = view;
+                const indicator = document.getElementById('nav-indicator');
 
-                // Update nav buttons
+                // Update nav buttons and move indicator
                 document.querySelectorAll('.nav-btn').forEach(btn => {
                     if (btn.dataset.view === view) {
                         btn.classList.add('active');
+                        // Move indicator
+                        if (indicator) {
+                            indicator.style.width = `${btn.offsetWidth}px`;
+                            indicator.style.left = `${btn.offsetLeft}px`;
+                        }
                     } else {
                         btn.classList.remove('active');
                     }
