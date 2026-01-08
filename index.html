@@ -1373,7 +1373,16 @@
                 addSection(bike.properties, `Bici a ${dropoffSt.name} (Prioridad Bice)`, '#6366f1', '🚲');
                 addSection(walk2.properties, `Caminar a destino`, '#94a3b8', '🚶');
 
-                html += `<button onclick="app.switchView('map')" style="width:100%; padding:10px; background:rgba(255,255,255,0.1); border-radius:10px; margin-top:15px; font-weight:bold;">Ver en mapa</button>`;
+                const googleMapsUrl = `https://www.google.com/maps/dir/${this.originCoords.lat},${this.originCoords.lon}/${pickupSt.lat},${pickupSt.lon}/${dropoffSt.lat},${dropoffSt.lon}/${this.destinationCoords.lat},${this.destinationCoords.lon}/data=!4m2!4m1!3e3`;
+
+                html += `
+                    <a href="${googleMapsUrl}" target="_blank" style="display:block; text-decoration:none;">
+                        <button style="width:100%; padding:12px; background:#10b981; border:none; border-radius:12px; margin-top:15px; font-weight:bold; color:white; font-size:14px; box-shadow:0 4px 12px rgba(16, 185, 129, 0.3);">
+                            Comenzar Ruta (Google Maps)
+                        </button>
+                    </a>
+                    <button onclick="app.switchView('map')" style="width:100%; padding:10px; background:rgba(255,255,255,0.1); border-radius:10px; margin-top:10px; font-weight:bold; color: #cbd5e1;">Ver en mapa</button>
+                `;
 
                 list.innerHTML = html;
             },
@@ -1394,7 +1403,16 @@
                 document.getElementById('route-distance').textContent = `${(summary.distance / 1000).toFixed(2)} km`;
                 document.getElementById('route-duration').textContent = `${Math.round(summary.duration / 60)} min`;
 
-                document.getElementById('instructions-list').innerHTML = '<div class="instruction-text">Ruta directa a pie.</div>';
+                const googleMapsUrl = `https://www.google.com/maps/dir/${this.originCoords.lat},${this.originCoords.lon}/${this.destinationCoords.lat},${this.destinationCoords.lon}/data=!4m2!4m1!3e2`;
+
+                document.getElementById('instructions-list').innerHTML = `
+                    <div class="instruction-text" style="margin-bottom:15px;">Ruta directa a pie.</div>
+                    <a href="${googleMapsUrl}" target="_blank" style="display:block; text-decoration:none;">
+                        <button style="width:100%; padding:12px; background:#10b981; border:none; border-radius:12px; font-weight:bold; color:white; font-size:14px; box-shadow:0 4px 12px rgba(16, 185, 129, 0.3);">
+                            Comenzar Ruta (Google Maps)
+                        </button>
+                    </a>
+                `;
                 document.getElementById('route-results').classList.remove('hidden');
             },
 
