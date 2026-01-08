@@ -648,6 +648,9 @@
             // OpenRouteService API (usando clave pública demo - considera obtener una propia)
             ORS_API_KEY: '5b3ce3597851110001cf6248a94e06b0e9144dd4a21dc326a1a0a89b',
 
+            // Geoapify API - Tu API key personal
+            GEOAPIFY_API_KEY: 'baf05662a8cb4aaf945882e530b67d41',
+
             init: function () {
                 // Listeners para tipo de ruta
                 document.querySelectorAll('.route-type-btn').forEach(btn => {
@@ -969,46 +972,34 @@
 
             async fetchRoute(origin, destination, profile = 'bike') {
                 try {
-                    // Usar OpenRouteService a través de proxy CORS
-                    const orsProfile = profile === 'foot' ? 'foot-walking' : 'cycling-regular';
+                    // Usar Geoapify - API que SÍ funciona con CORS
+                    const mode = profile === 'foot' ? 'walk' : 'bicycle';
 
-                    // Proxy CORS público para evitar restricciones
-                    const proxyUrl = 'https://api.allorigins.win/raw?url=';
-                    const apiUrl = `https://api.openrouteservice.org/v2/directions/${orsProfile}?api_key=${this.ORS_API_KEY}`;
+                    const url = `https://api.geoapify.com/v1/routing?` +
+                        `waypoints=${origin.lat},${origin.lon}|${destination.lat},${destination.lon}` +
+                        `&mode=${mode}` +
+                        `&apiKey=${this.GEOAPIFY_API_KEY}`;
 
-                    const response = await fetch(proxyUrl + encodeURIComponent(apiUrl), {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            coordinates: [
-                                [origin.lon, origin.lat],
-                                [destination.lon, destination.lat]
-                            ],
-                            instructions: true,
-                            language: 'es'
-                        })
-                    });
-
+                    const response = await fetch(url);
                     const data = await response.json();
 
-                    if (data.routes && data.routes.length > 0) {
-                        const route = data.routes[0];
+                    if (data.features && data.features.length > 0) {
+                        const feature = data.features[0];
+                        const props = feature.properties;
 
                         return {
                             summary: {
-                                distance: route.summary.distance,
-                                duration: route.summary.duration
+                                distance: props.distance,
+                                duration: props.time / 1000
                             },
-                            geometry: this.decodePolyline(route.geometry),
-                            segments: route.segments.map(seg => ({
-                                steps: seg.steps.map(step => ({
-                                    instruction: step.instruction || 'Continuar',
+                            geometry: feature.geometry.coordinates[0],
+                            segments: [{
+                                steps: props.legs[0].steps.map(step => ({
+                                    instruction: step.instruction.text || 'Continuar',
                                     distance: step.distance,
-                                    type: step.type || 0
+                                    type: 0
                                 }))
-                            })),
+                            }],
                             profile: profile
                         };
                     }
