@@ -52,6 +52,12 @@
             filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
         }
 
+        /* Hide Leaflet attribution and controls */
+        .leaflet-control-attribution,
+        .leaflet-control-zoom {
+            display: none !important;
+        }
+
         /* Marker Styles - Liquid Glass */
         .custom-div-icon {
             background: transparent;
@@ -828,14 +834,13 @@
 
                 // Initialize map
                 this.map = L.map('map', {
-                    zoomControl: false
+                    zoomControl: false,
+                    attributionControl: false
                 }).setView([41.652, -4.724], 14);
-
-                L.control.zoom({ position: 'bottomright' }).addTo(this.map);
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
-                    attribution: '© OpenStreetMap'
+                    attribution: ''
                 }).addTo(this.map);
 
                 await this.fetchVehicleTypes();
