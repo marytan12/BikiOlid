@@ -810,20 +810,28 @@
             },
 
             async geocode(address) {
-                // Añadir "Valladolid, España" si no está incluido
+                // Añadir "Valladolid" si no está incluido
                 const searchText = address.toLowerCase().includes('valladolid') ?
-                    address : `${address}, Valladolid, España`;
+                    address : `${address}, Valladolid`;
 
                 try {
+                    // Usar Nominatim (OpenStreetMap)
                     const response = await fetch(
-                        `https://api.openrouteservice.org/geocode/search?api_key=${this.ORS_API_KEY}&text=${encodeURIComponent(searchText)}&boundary.rect.min_lon=-4.8&boundary.rect.min_lat=41.6&boundary.rect.max_lon=-4.6&boundary.rect.max_lat=41.7`
+                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchText)}&limit=1&viewbox=-4.8,41.6,-4.6,41.7&bounded=1`,
+                        {
+                            headers: {
+                                'User-Agent': 'BikiValladolid/1.0'
+                            }
+                        }
                     );
 
                     const data = await response.json();
 
-                    if (data.features && data.features.length > 0) {
-                        const coords = data.features[0].geometry.coordinates;
-                        return { lon: coords[0], lat: coords[1] };
+                    if (data && data.length > 0) {
+                        return {
+                            lon: parseFloat(data[0].lon),
+                            lat: parseFloat(data[0].lat)
+                        };
                     }
                     return null;
                 } catch (error) {
