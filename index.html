@@ -992,7 +992,7 @@
                         return {
                             summary: {
                                 distance: props.distance,
-                                duration: props.time / 1000
+                                duration: props.time // Geoapify devuelve segundos
                             },
                             geometry: feature.geometry.coordinates[0],
                             segments: [{
