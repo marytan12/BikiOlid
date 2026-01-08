@@ -60,13 +60,13 @@
 
         .glass-marker {
             position: relative;
-            width: 42px;
-            height: 42px;
+            width: 32px;
+            height: 32px;
         }
 
         .glass-marker-circle {
-            width: 42px;
-            height: 42px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px) saturate(180%);
@@ -76,12 +76,12 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
             transition: all 0.3s ease;
         }
 
         .glass-marker-number {
-            font-size: 16px;
+            font-size: 13px;
             font-weight: 700;
             color: #fff;
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
@@ -117,9 +117,9 @@
         .marker-fav .glass-marker-circle::before {
             content: '⭐';
             position: absolute;
-            top: -8px;
-            right: -8px;
-            font-size: 16px;
+            top: -6px;
+            right: -6px;
+            font-size: 14px;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
@@ -945,8 +945,8 @@
                                     <span class='glass-marker-number'>${st.bikes}</span>
                                 </div>
                             </div>`,
-                        iconSize: [42, 42],
-                        iconAnchor: [21, 21]
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16]
                     });
 
                     const marker = L.marker([st.lat, st.lon], { icon: icon });
