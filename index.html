@@ -249,7 +249,7 @@
 
         .nav-btn.active {
             color: #fff;
-            background: rgba(255, 255, 255, 0.15);
+            /* background removed for liquid indicator */
         }
 
         .nav-btn svg {
@@ -859,15 +859,7 @@
                     attributionControl: false
                 }).setView([41.652, -4.724], 14);
 
-                // Initialize indicator position
-                setTimeout(() => {
-                    const activeBtn = document.querySelector('.nav-btn.active');
-                    const indicator = document.getElementById('nav-indicator');
-                    if (activeBtn && indicator) {
-                        indicator.style.width = `${activeBtn.offsetWidth}px`;
-                        indicator.style.left = `${activeBtn.offsetLeft}px`;
-                    }
-                }, 100);
+                this.setupNavigation();
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
@@ -1101,6 +1093,74 @@
 
             closeAccount: function () {
                 document.getElementById('account-screen').classList.remove('active');
+            },
+
+            setupNavigation: function () {
+                const nav = document.querySelector('.bottom-nav');
+                const indicator = document.getElementById('nav-indicator');
+                const buttons = document.querySelectorAll('.nav-btn');
+
+                // Set initial position
+                setTimeout(() => {
+                    const activeBtn = document.querySelector('.nav-btn.active');
+                    if (activeBtn && indicator) {
+                        indicator.style.width = `${activeBtn.offsetWidth}px`;
+                        indicator.style.left = `${activeBtn.offsetLeft}px`;
+                    }
+                }, 100);
+
+                // Drag Logic
+                let startX = 0;
+                let currentLeft = 0;
+                let isDragging = false;
+
+                nav.addEventListener('touchstart', (e) => {
+                    isDragging = true;
+                    startX = e.touches[0].clientX;
+                    currentLeft = indicator.offsetLeft;
+                    indicator.style.transition = 'none'; // Disable transition for direct following
+                }, { passive: true });
+
+                nav.addEventListener('touchmove', (e) => {
+                    if (!isDragging) return;
+                    const deltaX = e.touches[0].clientX - startX;
+                    let newLeft = currentLeft + deltaX;
+
+                    // Constraints
+                    const maxLeft = nav.offsetWidth - indicator.offsetWidth;
+                    newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+
+                    indicator.style.left = `${newLeft}px`;
+                }, { passive: true });
+
+                nav.addEventListener('touchend', (e) => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    indicator.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'; // Restore transition
+
+                    // Snap to nearest button
+                    const currentCenter = indicator.offsetLeft + (indicator.offsetWidth / 2);
+                    let closestBtn = buttons[0];
+                    let minDiff = Infinity;
+
+                    buttons.forEach(btn => {
+                        const btnCenter = btn.offsetLeft + (btn.offsetWidth / 2);
+                        const diff = Math.abs(currentCenter - btnCenter);
+                        if (diff < minDiff) {
+                            minDiff = diff;
+                            closestBtn = btn;
+                        }
+                    });
+
+                    // Switch view if different
+                    const view = closestBtn.dataset.view;
+                    if (view !== this.currentView) {
+                        this.switchView(view);
+                    } else {
+                        // Just snap back if same
+                        indicator.style.left = `${closestBtn.offsetLeft}px`;
+                    }
+                });
             }
         };
 
