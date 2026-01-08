@@ -739,21 +739,7 @@
             <div id="destination-suggestions" class="autocomplete-dropdown hidden"></div>
         </div>
 
-        <div class="route-type-grid">
-            <button class="route-type-btn active" data-route-type="recommended"
-                onclick="routing.setRouteType('recommended')">
-                <i data-lucide="thumbs-up"></i>
-                <span>Recomend.</span>
-            </button>
-            <button class="route-type-btn" data-route-type="shortest" onclick="routing.setRouteType('shortest')">
-                <i data-lucide="minimize-2"></i>
-                <span>+ Corta</span>
-            </button>
-            <button class="route-type-btn" data-route-type="fastest" onclick="routing.setRouteType('fastest')">
-                <i data-lucide="zap"></i>
-                <span>+ Rápida</span>
-            </button>
-        </div>
+
 
         <button class="calculate-btn" onclick="routing.calculateRoute()">Calcular Ruta</button>
 
@@ -1081,7 +1067,7 @@
 
         // ==================== ROUTING SYSTEM ====================
         const routing = {
-            routeType: 'recommended',
+
             currentRoute: null,
             routeLayer: null,
             markersLayer: null,
@@ -1112,17 +1098,7 @@
                 });
             },
 
-            setRouteType: function (type) {
-                this.routeType = type;
-                document.querySelectorAll('.route-type-btn').forEach(btn => {
-                    if (btn.dataset.routeType === type) {
-                        btn.classList.add('active');
-                    } else {
-                        btn.classList.remove('active');
-                    }
-                });
-                lucide.createIcons();
-            },
+
 
             setupAutocomplete: function (inputId, suggestionsId) {
                 const input = document.getElementById(inputId);
@@ -1337,7 +1313,7 @@
             displayMultiModalRoute(walk1, bike, walk2, pickupSt, dropoffSt) {
                 if (this.routeLayer) app.map.removeLayer(this.routeLayer);
                 if (this.markersLayer) app.map.removeLayer(this.markersLayer);
-                
+
                 // --- GEOMETRY ---
                 const w1Coords = walk1.geometry.coordinates.map(c => [c[1], c[0]]);
                 const bCoords = bike.geometry.coordinates.map(c => [c[1], c[0]]);
@@ -1359,9 +1335,9 @@
                 });
 
                 const mStart = L.marker(w1Coords[0], { icon: createIcon('#94a3b8', '📍') });
-                const mPickup = L.marker(w1Coords[w1Coords.length-1], { icon: createIcon('#10b981', '🚲') }).bindPopup(`<b>Recoger Bici</b><br>${pickupSt.name}`);
-                const mDropoff = L.marker(bCoords[bCoords.length-1], { icon: createIcon('#f59e0b', '🅿️') }).bindPopup(`<b>Dejar Bici</b><br>${dropoffSt.name}`);
-                const mEnd = L.marker(w2Coords[w2Coords.length-1], { icon: createIcon('#ef4444', '🏁') });
+                const mPickup = L.marker(w1Coords[w1Coords.length - 1], { icon: createIcon('#10b981', '🚲') }).bindPopup(`<b>Recoger Bici</b><br>${pickupSt.name}`);
+                const mDropoff = L.marker(bCoords[bCoords.length - 1], { icon: createIcon('#f59e0b', '🅿️') }).bindPopup(`<b>Dejar Bici</b><br>${dropoffSt.name}`);
+                const mEnd = L.marker(w2Coords[w2Coords.length - 1], { icon: createIcon('#ef4444', '🏁') });
 
                 this.markersLayer = L.layerGroup([mStart, mPickup, mDropoff, mEnd]).addTo(app.map);
 
@@ -1372,10 +1348,10 @@
                 const elDist = document.getElementById('route-distance');
                 const elTime = document.getElementById('route-duration');
                 const elElev = document.getElementById('route-elevation');
-                
-                if(elDist) elDist.textContent = `${totalDist.toFixed(2)} km`;
-                if(elTime) elTime.textContent = `${Math.round(totalTime)} min`;
-                if(elElev) elElev.textContent = 'Multi';
+
+                if (elDist) elDist.textContent = `${totalDist.toFixed(2)} km`;
+                if (elTime) elTime.textContent = `${Math.round(totalTime)} min`;
+                if (elElev) elElev.textContent = 'Multi';
 
                 // --- INSTRUCTIONS ---
                 const list = document.getElementById('instructions-list');
@@ -1415,9 +1391,9 @@
                 app.map.fitBounds(this.routeLayer.getBounds(), { padding: [50, 50] });
 
                 const summary = props.summary || props;
-                document.getElementById('route-distance').textContent = `${(summary.distance/1000).toFixed(2)} km`;
-                document.getElementById('route-duration').textContent = `${Math.round(summary.duration/60)} min`;
-                
+                document.getElementById('route-distance').textContent = `${(summary.distance / 1000).toFixed(2)} km`;
+                document.getElementById('route-duration').textContent = `${Math.round(summary.duration / 60)} min`;
+
                 document.getElementById('instructions-list').innerHTML = '<div class="instruction-text">Ruta directa a pie.</div>';
                 document.getElementById('route-results').classList.remove('hidden');
             },
