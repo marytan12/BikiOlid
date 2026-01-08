@@ -987,6 +987,8 @@
                         const feature = data.features[0];
                         const props = feature.properties;
 
+                        console.log('Geoapify', profile, '- Time:', props.time, 'Distance:', props.distance);
+
                         return {
                             summary: {
                                 distance: props.distance,
