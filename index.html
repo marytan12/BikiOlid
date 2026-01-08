@@ -969,27 +969,27 @@
 
             async fetchRoute(origin, destination, profile = 'bike') {
                 try {
-                    // Usar OpenRouteService - API que SÍ funciona con foot/bike
+                    // Usar OpenRouteService a través de proxy CORS
                     const orsProfile = profile === 'foot' ? 'foot-walking' : 'cycling-regular';
 
-                    const response = await fetch(
-                        `https://api.openrouteservice.org/v2/directions/${orsProfile}?api_key=${this.ORS_API_KEY}`,
-                        {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                coordinates: [
-                                    [origin.lon, origin.lat],
-                                    [destination.lon, destination.lat]
-                                ],
-                                instructions: true,
-                                language: 'es'
-                            })
-                        }
-                    );
+                    // Proxy CORS público para evitar restricciones
+                    const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                    const apiUrl = `https://api.openrouteservice.org/v2/directions/${orsProfile}?api_key=${this.ORS_API_KEY}`;
+
+                    const response = await fetch(proxyUrl + encodeURIComponent(apiUrl), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            coordinates: [
+                                [origin.lon, origin.lat],
+                                [destination.lon, destination.lat]
+                            ],
+                            instructions: true,
+                            language: 'es'
+                        })
+                    });
 
                     const data = await response.json();
 
