@@ -871,15 +871,50 @@
                         return;
                     }
 
-                    // Calcular ruta según tipo
-                    const routeData = await this.fetchRoute(
+                    // NUEVA LÓGICA: Ruta multi-modal con estaciones Biki
+                    // 1. Encontrar estación más cercana al origen CON bicis
+                    const originStation = this.findNearestStation(this.originCoords, 'bikes');
+                    if (!originStation) {
+                        alert('No hay estaciones Biki con bicis disponibles cerca del origen. Intenta con otro punto de partida.');
+                        return;
+                    }
+
+                    // 2. Encontrar estación más cercana al destino CON anclajes
+                    const destStation = this.findNearestStation(this.destinationCoords, 'docks');
+                    if (!destStation) {
+                        alert('No hay estaciones Biki con anclajes disponibles cerca del destino. Intenta con otro destino.');
+                        return;
+                    }
+
+                    // 3. Calcular 3 rutas
+                    const route1 = await this.fetchRoute(
                         this.originCoords,
-                        this.destinationCoords,
-                        this.routeType
+                        { lat: originStation.lat, lon: originStation.lon },
+                        'foot' // a pie
                     );
 
-                    if (routeData) {
-                        this.displayRoute(routeData);
+                    const route2 = await this.fetchRoute(
+                        { lat: originStation.lat, lon: originStation.lon },
+                        { lat: destStation.lat, lon: destStation.lon },
+                        'bike' // en bici
+                    );
+
+                    const route3 = await this.fetchRoute(
+                        { lat: destStation.lat, lon: destStation.lon },
+                        this.destinationCoords,
+                        'foot' // a pie
+                    );
+
+                    if (route1 && route2 && route3) {
+                        this.displayMultiModalRoute({
+                            walkToStation: route1,
+                            bikeRoute: route2,
+                            walkFromStation: route3,
+                            originStation: originStation,
+                            destStation: destStation
+                        });
+                    } else {
+                        alert('No se pudo calcular la ruta completa.');
                     }
 
                 } catch (error) {
@@ -892,16 +927,53 @@
                 }
             },
 
-            async fetchRoute(origin, destination, type) {
+            findNearestStation(coords, type) {
+                // type: 'bikes' o 'docks'
+                const stations = app.data.filter(st => {
+                    if (type === 'bikes') {
+                        return st.bikes > 0 && st.is_renting;
+                    } else {
+                        return st.docks > 0 && st.is_renting;
+                    }
+                });
+
+                if (stations.length === 0) return null;
+
+                // Calcular distancia a cada estación
+                let nearest = null;
+                let minDist = Infinity;
+
+                stations.forEach(st => {
+                    const dist = this.calculateDistance(coords.lat, coords.lon, st.lat, st.lon);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        nearest = st;
+                    }
+                });
+
+                return nearest;
+            },
+
+            calculateDistance(lat1, lon1, lat2, lon2) {
+                // Fórmula de Haversine para calcular distancia en km
+                const R = 6371; // Radio de la Tierra en km
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a =
+                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return R * c;
+            },
+
+            async fetchRoute(origin, destination, profile = 'bike') {
                 try {
                     // Usar OSRM (Open Source Routing Machine) - soporta CORS
                     // Formato: lon,lat;lon,lat
                     const coords = `${origin.lon},${origin.lat};${destination.lon},${destination.lat}`;
 
-                    // OSRM no tiene "types" como OpenRouteService, pero podemos simular:
-                    // - Para "shortest": usar perfil bike (más directo)
-                    // - Para otros: usar bike también
-                    const profile = 'bike'; // opciones: bike, foot, car
+                    // profile puede ser: 'foot' (a pie) o 'bike' (en bici)
 
                     const response = await fetch(
                         `https://router.project-osrm.org/route/v1/${profile}/${coords}?overview=full&geometries=geojson&steps=true&alternatives=false`,
@@ -933,7 +1005,8 @@
                                     distance: step.distance,
                                     type: this.getManeuverType(step.maneuver.type, step.maneuver.modifier)
                                 }))
-                            }]
+                            }],
+                            profile: profile
                         };
                     }
                     return null;
@@ -954,6 +1027,115 @@
                     'roundabout': 0
                 };
                 return types[type] || 0;
+            },
+
+            displayMultiModalRoute(data) {
+                // L impiar ruta anterior
+                this.clearRoute();
+
+                const { walkToStation, bikeRoute, walkFromStation, originStation, destStation } = data;
+
+                // Combinar las 3 geometrías
+                const walk1Coords = walkToStation.geometry.map(coord => [coord[1], coord[0]]);
+                const bikeCoords = bikeRoute.geometry.map(coord => [coord[1], coord[0]]);
+                const walk2Coords = walkFromStation.geometry.map(coord => [coord[1], coord[0]]);
+
+                // Dibujar 3 segmentos con diferentes colores
+                const walk1Layer = L.polyline(walk1Coords, {
+                    color: '#10b981', // verde (a pie)
+                    weight: 4,
+                    opacity: 0.7,
+                    dashArray: '5, 10', // línea punteada
+                    lineCap: 'round'
+                });
+
+                const bikeLayer = L.polyline(bikeCoords, {
+                    color: '#6366f1', // azul (en bici)
+                    weight: 5,
+                    opacity: 0.9,
+                    lineCap: 'round',
+                    lineJoin: 'round'
+                });
+
+                const walk2Layer = L.polyline(walk2Coords, {
+                    color: '#10b981', // verde (a pie)
+                    weight: 4,
+                    opacity: 0.7,
+                    dashArray: '5, 10', // línea punteada
+                    lineCap: 'round'
+                });
+
+                this.routeLayer = L.layerGroup([walk1Layer, bikeLayer, walk2Layer]).addTo(app.map);
+
+                // Marcadores para origen, estaciones y destino
+                const originIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: '<div class="w-8 h-8 bg-green-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center text-white font-bold text-xs">🚶</div>',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+
+                const stationOriginIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: '<div class="w-10 h-10 bg-indigo-600 rounded-full border-4 border-white shadow-xl flex items-center justify-center text-white font-bold text-sm">🚴</div>',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                });
+
+                const stationDestIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: '<div class="w-10 h-10 bg-purple-600 rounded-full border-4 border-white shadow-xl flex items-center justify-center text-white font-bold text-sm">🅿️</div>',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                });
+
+                const destIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: '<div class="w-8 h-8 bg-red-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center text-white font-bold text-xs">🏁</div>',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+
+                this.markersLayer = L.layerGroup([
+                    L.marker([this.originCoords.lat, this.originCoords.lon], { icon: originIcon })
+                        .bindPopup(`<b>Inicio</b><br>Camina ${(walkToStation.summary.distance / 1000).toFixed(2)} km`),
+                    L.marker([originStation.lat, originStation.lon], { icon: stationOriginIcon })
+                        .bindPopup(`<b>${originStation.name}</b><br>🚴 ${originStation.bikes} bicis disponibles`),
+                    L.marker([destStation.lat, destStation.lon], { icon: stationDestIcon })
+                        .bindPopup(`<b>${destStation.name}</b><br>🅿️ ${destStation.docks} anclajes libres`),
+                    L.marker([this.destinationCoords.lat, this.destinationCoords.lon], { icon: destIcon })
+                        .bindPopup(`<b>Destino</b><br>Camina ${(walkFromStation.summary.distance / 1000).toFixed(2)} km`)
+                ]).addTo(app.map);
+
+                // Ajustar vista
+                const allCoords = [...walk1Coords, ...bikeCoords, ...walk2Coords];
+                const bounds = L.latLngBounds(allCoords);
+                app.map.fitBounds(bounds, { padding: [50, 50] });
+
+                // Calcular totales
+                const totalDistance = walkToStation.summary.distance + bikeRoute.summary.distance + walkFromStation.summary.distance;
+                const totalDuration = walkToStation.summary.duration + bikeRoute.summary.duration + walkFromStation.summary.duration;
+
+                // Mostrar información   
+                document.getElementById('route-distance').textContent = (totalDistance / 1000).toFixed(1) + ' km';
+                document.getElementById('route-duration').textContent = Math.round(totalDuration / 60) + ' min';
+                document.getElementById('route-elevation').textContent = 'N/A';
+
+                // Generar instrucciones combinadas
+                const allSteps = [
+                    { type: 'header', text: `🚶 Caminar a ${originStation.name}`, dist: walkToStation.summary.distance },
+                    ...walkToStation.segments[0].steps,
+                    { type: 'header', text: `🚴 Recoger bici y pedalear a ${destStation.name}`, dist: bikeRoute.summary.distance },
+                    ...bikeRoute.segments[0].steps,
+                    { type: 'header', text: `🅿️ Dejar bici y caminar a destino`, dist: walkFromStation.summary.distance },
+                    ...walkFromStation.segments[0].steps
+                ];
+
+                this.displayInstructions(allSteps);
+
+                // Mostrar panel
+                document.getElementById('route-results').classList.remove('hidden');
+                document.getElementById('clear-route-btn').classList.remove('hidden');
             },
 
             displayRoute(routeData) {
@@ -1021,6 +1203,19 @@
                 container.innerHTML = '';
 
                 steps.forEach((step, index) => {
+                    // Si es un header (separador de secciones)
+                    if (step.type === 'header') {
+                        const header = document.createElement('div');
+                        header.className = 'bg-indigo-600/20 p-2 rounded mt-2 mb-1 border-l-4 border-indigo-500';
+                        header.innerHTML = `
+                            <div class="font-bold text-indigo-200 text-sm">${step.text}</div>
+                            <div class="text-xs text-indigo-300 mt-0.5">${(step.dist / 1000).toFixed(2)} km</div>
+                        `;
+                        container.appendChild(header);
+                        return;
+                    }
+
+                    // Instrucción normal
                     const div = document.createElement('div');
                     div.className = 'flex items-start gap-2 p-2 bg-slate-800/50 rounded';
 
