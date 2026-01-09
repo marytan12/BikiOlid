@@ -1492,7 +1492,7 @@
 
         .route-stats {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: 1fr 1fr;
             gap: 12px;
             margin-bottom: 20px;
         }
@@ -2072,7 +2072,7 @@
     <div id="routes-panel" class="view-panel">
         <div class="view-panel-header">
             <h2 class="view-panel-title">Planificar Ruta</h2>
-            <button class="close-btn" onclick="app.switchView('map')">
+            <button class="close-btn" onclick="routing.clearRoute(); app.switchView('map')">
                 <i data-lucide="x"></i>
             </button>
         </div>
@@ -3041,7 +3041,12 @@
                 const totalMins = Math.round(totalDuration / 60);
                 const totalKm = (totalDistance / 1000).toFixed(2);
 
-                // Build stats section
+                // Hide all station markers when showing route
+                if (app.markerLayer) {
+                    app.map.removeLayer(app.markerLayer);
+                }
+
+                // Build stats section (only Duration and Distance)
                 let html = `
                     <div class="route-stats">
                         <div class="route-stat-card">
@@ -3053,11 +3058,6 @@
                             <span class="route-stat-icon">📍</span>
                             <span class="route-stat-label">Distancia</span>
                             <span class="route-stat-value">${totalKm} km</span>
-                        </div>
-                        <div class="route-stat-card">
-                            <span class="route-stat-icon">🚲</span>
-                            <span class="route-stat-label">Estaciones</span>
-                            <span class="route-stat-value">2</span>
                         </div>
                     </div>
                 `;
@@ -3099,7 +3099,7 @@
                                 Comenzar Ruta
                             </button>
                         </a>
-                        <button class="route-action-btn secondary" onclick="app.switchView('map')">
+                        <button class="route-action-btn secondary" onclick="routing.clearRoute(); app.switchView('map')">
                             <i data-lucide="map"></i>
                             Ver mapa
                         </button>
@@ -3117,6 +3117,11 @@
 
                 if (this.routeLayer) app.map.removeLayer(this.routeLayer);
                 if (this.markersLayer) app.map.removeLayer(this.markersLayer);
+
+                // Hide all station markers when showing route
+                if (app.markerLayer) {
+                    app.map.removeLayer(app.markerLayer);
+                }
 
                 const latlngs = coords.map(c => [c[1], c[0]]);
                 this.routeLayer = L.polyline(latlngs, { color: '#6366f1', weight: 4 }).addTo(app.map);
@@ -3140,11 +3145,6 @@
                             <span class="route-stat-label">Distancia</span>
                             <span class="route-stat-value">${km} km</span>
                         </div>
-                        <div class="route-stat-card">
-                            <span class="route-stat-icon">🚶</span>
-                            <span class="route-stat-label">Tipo</span>
-                            <span class="route-stat-value">A pie</span>
-                        </div>
                     </div>
 
                     <div class="route-segments">
@@ -3165,7 +3165,7 @@
                                 Comenzar Ruta
                             </button>
                         </a>
-                        <button class="route-action-btn secondary" onclick="app.switchView('map')">
+                        <button class="route-action-btn secondary" onclick="routing.clearRoute(); app.switchView('map')">
                             <i data-lucide="map"></i>
                             Ver mapa
                         </button>
@@ -3181,6 +3181,12 @@
             clearRoute: function () {
                 if (this.routeLayer) app.map.removeLayer(this.routeLayer);
                 if (this.markersLayer) app.map.removeLayer(this.markersLayer);
+
+                // Restore station markers
+                if (app.data && app.data.length > 0) {
+                    app.renderStations();
+                }
+
                 document.getElementById('route-results').classList.add('hidden');
                 document.getElementById('route-origin').value = '';
                 document.getElementById('route-destination').value = '';
