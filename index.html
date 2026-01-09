@@ -3415,7 +3415,7 @@
 
                 // Physics constants
                 const MAX_STRETCH = 35; // Pixels to expand when between buttons (Liquid effect)
-                const MAX_ICON_SCALE = 2.0; // Max magnification (adjusted to be visible but not crazy)
+                const MAX_ICON_SCALE = 1.5; // Max magnification (adjusted to be visible but not crazy)
                 const ICON_INFLUENCE_DIST = 50; // Distance where icon starts growing
 
                 nav.addEventListener('touchstart', (e) => {
@@ -3467,17 +3467,20 @@
                             // --- LENS EFFECT ---
                             // Check distance to this button for scaling
                             // IMPORTANT: Select SVG because Lucide replaces <i>
-                            const icon = btn.querySelector('svg');
-                            if (icon) {
-                                if (dist < ICON_INFLUENCE_DIST) {
-                                    // Scale based on proximity
-                                    const scaleRatio = 1 - (dist / ICON_INFLUENCE_DIST);
-                                    // Smooth easing
-                                    const smoothed = scaleRatio * scaleRatio * (3 - 2 * scaleRatio);
-                                    const scale = 1 + (MAX_ICON_SCALE - 1) * smoothed;
-                                    icon.style.transform = `scale(${scale})`;
-                                } else {
-                                    icon.style.transform = 'scale(1)';
+                            // Exclude the currently active button from zooming (User request)
+                            if (!btn.classList.contains('active')) {
+                                const icon = btn.querySelector('svg');
+                                if (icon) {
+                                    if (dist < ICON_INFLUENCE_DIST) {
+                                        // Scale based on proximity
+                                        const scaleRatio = 1 - (dist / ICON_INFLUENCE_DIST);
+                                        // Smooth easing
+                                        const smoothed = scaleRatio * scaleRatio * (3 - 2 * scaleRatio);
+                                        const scale = 1 + (MAX_ICON_SCALE - 1) * smoothed;
+                                        icon.style.transform = `scale(${scale})`;
+                                    } else {
+                                        icon.style.transform = 'scale(1)';
+                                    }
                                 }
                             }
                         });
