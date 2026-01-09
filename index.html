@@ -1063,6 +1063,86 @@
             height: 24px;
         }
 
+        /* Active Trip Card */
+        .active-trip-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+            border: 2px solid rgba(16, 185, 129, 0.4);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .active-trip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .active-trip-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 20px;
+            color: #10b981;
+            font-size: 12px;
+            font-weight: 600;
+            animation: pulse-badge 2s infinite;
+        }
+
+        @keyframes pulse-badge {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .active-trip-badge svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .active-trip-timer {
+            font-size: 48px;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+            letter-spacing: 2px;
+            margin: 20px 0;
+            text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+        }
+
+        .active-trip-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .active-trip-detail {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+        }
+
+        .active-trip-detail svg {
+            width: 16px;
+            height: 16px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
         .history-empty {
             text-align: center;
             padding: 40px;
@@ -3578,14 +3658,18 @@
         // ==================== TRIP HISTORY SYSTEM ====================
         const tripHistory = {
             trips: [],
+            activeTrip: null,
             isLoading: false,
+            timerInterval: null,
 
             loadTrips: async function () {
                 const listContainer = document.getElementById('history-list');
                 const countEl = document.getElementById('history-trip-count');
+                const summaryEl = document.getElementById('history-summary');
 
                 // Check if logged in
                 if (!auth.isLoggedIn()) {
+                    this.stopTimer();
                     listContainer.innerHTML = `
                         <div class="history-login-required">
                             <i data-lucide="user-x"></i>
@@ -3596,6 +3680,7 @@
                         </div>
                     `;
                     countEl.textContent = '-';
+                    summaryEl.querySelector('.history-summary-label').textContent = 'Viajes realizados';
                     lucide.createIcons();
                     return;
                 }
@@ -3607,32 +3692,44 @@
                 listContainer.innerHTML = `
                     <div class="history-loading">
                         <i data-lucide="loader-2" class="spin"></i>
-                        <span>Cargando historial...</span>
+                        <span>Cargando...</span>
                     </div>
                 `;
                 lucide.createIcons();
 
                 try {
-                    const response = await fetch(
-                        `/api/biki-proxy?base=customer&endpoint=/v3/profile/trips?open=false`,
-                        {
+                    // Fetch both open and closed trips
+                    const [closedRes, openRes] = await Promise.all([
+                        fetch(`/api/biki-proxy?base=customer&endpoint=/v3/profile/trips?open=false`, {
                             method: 'GET',
                             headers: auth.getProxyHeaders()
-                        }
-                    );
+                        }),
+                        fetch(`/api/biki-proxy?base=customer&endpoint=/v3/profile/trips?open=true`, {
+                            method: 'GET',
+                            headers: auth.getProxyHeaders()
+                        })
+                    ]);
 
-                    if (!response.ok) {
-                        throw new Error(`Error ${response.status}`);
+                    if (!closedRes.ok || !openRes.ok) {
+                        throw new Error('Error al cargar viajes');
                     }
 
-                    const data = await response.json();
-                    this.trips = data.trips || [];
+                    const closedData = await closedRes.json();
+                    const openData = await openRes.json();
 
-                    // Update count
-                    countEl.textContent = data.tripCount || this.trips.length;
+                    this.trips = closedData.trips || [];
 
-                    // Render trips
-                    this.renderTrips();
+                    // Check for active trip
+                    if (openData.tripCount > 0 && openData.trips && openData.trips.length > 0) {
+                        this.activeTrip = openData.trips[0];
+                        this.showActiveTrip();
+                    } else {
+                        this.activeTrip = null;
+                        this.stopTimer();
+                        countEl.textContent = closedData.tripCount || this.trips.length;
+                        summaryEl.querySelector('.history-summary-label').textContent = 'Viajes realizados';
+                        this.renderTrips();
+                    }
 
                 } catch (error) {
                     console.error('Trip history error:', error);
@@ -3645,6 +3742,95 @@
                     lucide.createIcons();
                 } finally {
                     this.isLoading = false;
+                }
+            },
+
+            showActiveTrip: function () {
+                const listContainer = document.getElementById('history-list');
+                const countEl = document.getElementById('history-trip-count');
+                const summaryEl = document.getElementById('history-summary');
+                const trip = this.activeTrip;
+
+                if (!trip) return;
+
+                const isElectric = trip.bike?.propulsionType === 'ELECTRIC_ASSIST';
+                const bikeTypeClass = isElectric ? 'electric' : 'mechanical';
+                const bikeTypeLabel = isElectric ? 'Eléctrica' : 'Mecánica';
+                const bikeIcon = isElectric ? 'zap' : 'bike';
+                const startStation = this.formatStationName(trip.startStationName);
+
+                // Update summary to show timer
+                summaryEl.querySelector('.history-summary-label').textContent = 'En viaje';
+
+                listContainer.innerHTML = `
+                    <div class="active-trip-card">
+                        <div class="active-trip-header">
+                            <span class="active-trip-badge">
+                                <i data-lucide="play-circle"></i>
+                                Viaje en curso
+                            </span>
+                            <span class="trip-bike-type ${bikeTypeClass}">
+                                <i data-lucide="${bikeIcon}"></i>
+                                ${bikeTypeLabel}
+                            </span>
+                        </div>
+
+                        <div class="active-trip-timer" id="active-trip-timer">
+                            00:00:00
+                        </div>
+
+                        <div class="active-trip-info">
+                            <div class="active-trip-detail">
+                                <i data-lucide="map-pin"></i>
+                                <span>Desde: ${startStation}</span>
+                            </div>
+                            <div class="active-trip-detail">
+                                <i data-lucide="hash"></i>
+                                <span>Bici: ${trip.bike?.obcn || trip.bikeId}</span>
+                            </div>
+                            <div class="active-trip-detail">
+                                <i data-lucide="clock"></i>
+                                <span>Inicio: ${this.formatTime(new Date(trip.startTime))}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                lucide.createIcons();
+                this.startTimer();
+            },
+
+            startTimer: function () {
+                this.stopTimer();
+
+                const updateTimer = () => {
+                    if (!this.activeTrip) return;
+
+                    const startTime = new Date(this.activeTrip.startTime);
+                    const now = new Date();
+                    const elapsed = Math.floor((now - startTime) / 1000);
+
+                    const hours = Math.floor(elapsed / 3600);
+                    const minutes = Math.floor((elapsed % 3600) / 60);
+                    const seconds = elapsed % 60;
+
+                    const timerStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                    const timerEl = document.getElementById('active-trip-timer');
+                    if (timerEl) timerEl.textContent = timerStr;
+
+                    const countEl = document.getElementById('history-trip-count');
+                    if (countEl) countEl.textContent = timerStr;
+                };
+
+                updateTimer();
+                this.timerInterval = setInterval(updateTimer, 1000);
+            },
+
+            stopTimer: function () {
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
                 }
             },
 
@@ -3662,7 +3848,6 @@
                     return;
                 }
 
-                // Sort trips by date (newest first)
                 const sortedTrips = [...this.trips].sort((a, b) =>
                     new Date(b.startTime) - new Date(a.startTime)
                 );
@@ -3685,7 +3870,6 @@
                 const priceClass = price > 0 ? 'paid' : 'free';
                 const priceText = price > 0 ? `${price.toFixed(2)}€` : 'Gratis';
 
-                // Format station names (remove leading numbers)
                 const startStation = this.formatStationName(trip.startStationName);
                 const endStation = this.formatStationName(trip.endStationName);
 
@@ -3740,7 +3924,6 @@
 
             formatStationName: function (name) {
                 if (!name) return '-';
-                // Remove leading numbers and spaces (e.g., "604 Espacio Joven" -> "Espacio Joven")
                 return name.replace(/^\d+\s+/, '').trim();
             },
 
@@ -3779,8 +3962,36 @@
                     hour: '2-digit',
                     minute: '2-digit'
                 });
+            },
+
+            // ===== CONSOLE TESTING COMMANDS =====
+            simulateActiveTrip: function () {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - 5); // Started 5 mins ago
+                this.activeTrip = {
+                    tripId: 9999999,
+                    bikeId: 1234,
+                    startTime: now.toISOString(),
+                    startStationName: "015 Plaza de la Libertad",
+                    bike: { obcn: "TEST", propulsionType: "HUMAN" }
+                };
+                this.showActiveTrip();
+                console.log('✓ Viaje activo simulado. Timer iniciado.');
+            },
+
+            simulateEndTrip: function () {
+                this.activeTrip = null;
+                this.stopTimer();
+                document.getElementById('history-trip-count').textContent = this.trips.length;
+                document.getElementById('history-summary').querySelector('.history-summary-label').textContent = 'Viajes realizados';
+                this.renderTrips();
+                console.log('✓ Viaje finalizado. Mostrando historial.');
             }
         };
+
+        // Console helper for testing
+        window.testActiveTrip = () => tripHistory.simulateActiveTrip();
+        window.testEndTrip = () => tripHistory.simulateEndTrip();
 
 
         // Initialize
