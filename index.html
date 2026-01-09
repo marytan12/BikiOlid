@@ -3685,6 +3685,11 @@
                     return;
                 }
 
+                // Don't overwrite simulated active trip
+                if (this.activeTrip && this.activeTrip._simulated) {
+                    return;
+                }
+
                 // Show loading
                 if (this.isLoading) return;
                 this.isLoading = true;
@@ -3973,17 +3978,22 @@
                     bikeId: 1234,
                     startTime: now.toISOString(),
                     startStationName: "015 Plaza de la Libertad",
-                    bike: { obcn: "TEST", propulsionType: "HUMAN" }
+                    bike: { obcn: "TEST", propulsionType: "HUMAN" },
+                    _simulated: true // Flag to prevent overwrite
                 };
+                this.isLoading = false; // Reset loading
                 this.showActiveTrip();
                 console.log('✓ Viaje activo simulado. Timer iniciado.');
+                console.log('  Ejecuta testEndTrip() para finalizar.');
             },
 
             simulateEndTrip: function () {
                 this.activeTrip = null;
                 this.stopTimer();
-                document.getElementById('history-trip-count').textContent = this.trips.length;
-                document.getElementById('history-summary').querySelector('.history-summary-label').textContent = 'Viajes realizados';
+                const countEl = document.getElementById('history-trip-count');
+                const summaryEl = document.getElementById('history-summary');
+                if (countEl) countEl.textContent = this.trips.length;
+                if (summaryEl) summaryEl.querySelector('.history-summary-label').textContent = 'Viajes realizados';
                 this.renderTrips();
                 console.log('✓ Viaje finalizado. Mostrando historial.');
             }
