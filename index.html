@@ -1843,9 +1843,8 @@
 
         // ==================== AUTHENTICATION SYSTEM ====================
         const auth = {
-            API_BASE: 'https://valladolid.publicbikesystem.net/ube/mobile',
-            API_KEY: 'QopJK73RwNkwj5hfFk1cInN8BDM0pcaVC9hWYXqU',
-            DEVICE_ID: 'ec968fbf0cb2ceef',
+            // Use local proxy to avoid CORS issues
+            PROXY_URL: '/api/biki-proxy',
 
             token: null,
             memberData: null,
@@ -1874,19 +1873,14 @@
                 });
             },
 
-            getHeaders: function (includeAuth = false) {
+            // Headers are now handled by the proxy
+            getProxyHeaders: function () {
                 const headers = {
-                    'accept': 'application/json',
-                    'device-id': this.DEVICE_ID,
-                    'x-api-key': this.API_KEY,
-                    'user-agent': 'biki/5.35.0.8 Mozilla/5.0 (Linux; Android 12; sdk_gphone64_x86_64 Build/SE1A.220826.008; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/91.0.4472.114 Mobile Safari/537.36'
+                    'Content-Type': 'application/json'
                 };
-
-                if (includeAuth && this.token) {
+                if (this.token) {
                     headers['x-auth-token'] = this.token;
-                    headers['accept-language'] = 'en';
                 }
-
                 return headers;
             },
 
@@ -1927,16 +1921,16 @@
                 this.setLoading(true);
 
                 try {
-                    // Step 1: Authenticate
+                    // Step 1: Authenticate via proxy
                     const credentials = btoa(`${email}:${password}`);
 
-                    const authResponse = await fetch(`${this.API_BASE}/v1/authenticate`, {
-                        method: 'GET',
-                        headers: {
-                            ...this.getHeaders(),
-                            'authorization': `Basic ${credentials}`
+                    const authResponse = await fetch(
+                        `${this.PROXY_URL}?endpoint=/v1/authenticate&auth=${encodeURIComponent(credentials)}`,
+                        {
+                            method: 'GET',
+                            headers: this.getProxyHeaders()
                         }
-                    });
+                    );
 
                     if (!authResponse.ok) {
                         if (authResponse.status === 401) {
@@ -1976,10 +1970,13 @@
                 if (!this.token) return;
 
                 try {
-                    const memberResponse = await fetch(`${this.API_BASE}/v2/member`, {
-                        method: 'GET',
-                        headers: this.getHeaders(true)
-                    });
+                    const memberResponse = await fetch(
+                        `${this.PROXY_URL}?endpoint=/v2/member`,
+                        {
+                            method: 'GET',
+                            headers: this.getProxyHeaders()
+                        }
+                    );
 
                     if (!memberResponse.ok) {
                         throw new Error(`Error obteniendo datos del usuario (${memberResponse.status})`);
