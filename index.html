@@ -502,6 +502,31 @@
         .account-content {
             flex: 1;
             overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        /* Custom scrollbar for account section */
+        .account-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .account-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .account-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 3px;
+        }
+
+        .account-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Firefox scrollbar */
+        .account-content {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
         }
 
         .account-section {
@@ -2150,7 +2175,7 @@
 
                 // Subscription/Plan info
                 if (data.plan) {
-                    document.getElementById('profile-plan-name').textContent = data.plan.planName || '-';
+                    document.getElementById('profile-plan-name').textContent = this.translatePlanName(data.plan.planName) || '-';
 
                     const statusEl = document.getElementById('profile-plan-status');
                     statusEl.textContent = this.translatePlanStatus(data.plan.status);
@@ -2228,6 +2253,57 @@
                     'pending': 'Pendiente'
                 };
                 return translations[status] || status;
+            },
+
+            translatePlanName: function (planName) {
+                if (!planName) return null;
+
+                // Dictionary for common terms
+                const termTranslations = {
+                    'monthly': 'Mensual',
+                    'yearly': 'Anual',
+                    'annual': 'Anual',
+                    'weekly': 'Semanal',
+                    'daily': 'Diario',
+                    'pass': 'Pase',
+                    'electric': 'Eléctrica',
+                    'electrical': 'Eléctrica',
+                    'bicycle': 'Bicicleta',
+                    'bike': 'Bici',
+                    'subscription': 'Suscripción',
+                    'plan': 'Plan',
+                    'premium': 'Premium',
+                    'basic': 'Básico',
+                    'standard': 'Estándar'
+                };
+
+                // Full plan name translations
+                const fullTranslations = {
+                    'Monthly pass Electric bicycle': 'Pase Mensual Bicicleta Eléctrica',
+                    'Monthly pass Mechanical bicycle': 'Pase Mensual Bicicleta Mecánica',
+                    'Annual pass Electric bicycle': 'Pase Anual Bicicleta Eléctrica',
+                    'Annual pass Mechanical bicycle': 'Pase Anual Bicicleta Mecánica',
+                    'Weekly pass Electric bicycle': 'Pase Semanal Bicicleta Eléctrica',
+                    'Weekly pass Mechanical bicycle': 'Pase Semanal Bicicleta Mecánica',
+                    'Daily pass': 'Pase Diario'
+                };
+
+                // Check for exact match first
+                if (fullTranslations[planName]) {
+                    return fullTranslations[planName];
+                }
+
+                // Otherwise, translate word by word and capitalize
+                let translated = planName.toLowerCase();
+                for (const [eng, esp] of Object.entries(termTranslations)) {
+                    const regex = new RegExp(eng, 'gi');
+                    translated = translated.replace(regex, esp);
+                }
+
+                // Capitalize first letter of each word
+                return translated.split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
             },
 
             logout: function () {
