@@ -1146,6 +1146,135 @@
             text-align: right;
         }
 
+        /* Map Personalization Styles */
+        .personalize-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 16px;
+            color: #60a5fa;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
+            /* Space between modernize and logout */
+        }
+
+        .personalize-btn:hover {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.2));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .map-style-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .map-style-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .map-style-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .map-style-card.active {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 1px #3b82f6, 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .map-style-preview {
+            height: 80px;
+            width: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .map-style-card:hover .map-style-preview {
+            opacity: 1;
+        }
+
+        /* Mockup backgrounds/colors for previews since we can't easily fetch map images dynamically without valid coords */
+        .map-style-preview.standard {
+            background-color: #aad3df;
+        }
+
+        /* Standard OSM color */
+        .map-style-preview.dark {
+            background-color: #242424;
+        }
+
+        .map-style-preview.light {
+            background-color: #f2f2f2;
+        }
+
+        .map-style-preview.satellite {
+            background-color: #3f4e38;
+        }
+
+        .map-style-info {
+            padding: 12px;
+        }
+
+        .map-style-name {
+            display: block;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .map-style-desc {
+            display: block;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 11px;
+        }
+
+        .map-style-check {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #3b82f6;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        .map-style-check svg {
+            width: 12px;
+            height: 12px;
+            color: #fff;
+        }
+
+        .map-style-card.active .map-style-check {
+            opacity: 1;
+            transform: scale(1);
+        }
+
         /* Rent Status Alert */
         .rent-alert {
             background: rgba(239, 68, 68, 0.1) !important;
@@ -2782,6 +2911,11 @@
                     </div>
                 </div>
 
+                <button class="personalize-btn" onclick="app.showMapPersonalization()">
+                    <i data-lucide="map"></i>
+                    Personalizar Mapa
+                </button>
+
                 <button class="logout-btn" onclick="auth.logout()">
                     <i data-lucide="log-out"></i>
                     Cerrar sesión
@@ -2824,6 +2958,56 @@
         </div>
     </div>
 
+    <!-- Map Personalization Modal -->
+    <div id="map-personalization-modal" class="personal-info-modal">
+        <div class="personal-info-content">
+            <div class="personal-info-header"
+                style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));">
+                <h3 style="color: #fff;">Estilo del Mapa</h3>
+                <button class="personal-info-close" onclick="app.hideMapPersonalization()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="personal-info-body">
+                <div class="map-style-grid">
+                    <div class="map-style-card active" onclick="app.changeMapStyle('standard', this)"
+                        data-style="standard">
+                        <div class="map-style-preview standard"></div>
+                        <div class="map-style-info">
+                            <span class="map-style-name">Estándar</span>
+                            <span class="map-style-desc">OpenStreetMap</span>
+                        </div>
+                        <div class="map-style-check"><i data-lucide="check"></i></div>
+                    </div>
+                    <div class="map-style-card" onclick="app.changeMapStyle('dark', this)" data-style="dark">
+                        <div class="map-style-preview dark"></div>
+                        <div class="map-style-info">
+                            <span class="map-style-name">Modo Oscuro</span>
+                            <span class="map-style-desc">Ideal para la noche</span>
+                        </div>
+                        <div class="map-style-check"><i data-lucide="check"></i></div>
+                    </div>
+                    <div class="map-style-card" onclick="app.changeMapStyle('light', this)" data-style="light">
+                        <div class="map-style-preview light"></div>
+                        <div class="map-style-info">
+                            <span class="map-style-name">Modo Claro</span>
+                            <span class="map-style-desc">Alto contraste</span>
+                        </div>
+                        <div class="map-style-check"><i data-lucide="check"></i></div>
+                    </div>
+                    <div class="map-style-card" onclick="app.changeMapStyle('satellite', this)" data-style="satellite">
+                        <div class="map-style-preview satellite"></div>
+                        <div class="map-style-info">
+                            <span class="map-style-name">Satélite</span>
+                            <span class="map-style-desc">Vista aérea</span>
+                        </div>
+                        <div class="map-style-check"><i data-lucide="check"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -2842,6 +3026,56 @@
                 types: "https://valladolid.publicbikesystem.net/customer/gbfs/v2/es/vehicle_types"
             },
 
+            mapLayers: {
+                standard: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+                light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+                satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+            },
+            currentLayer: null,
+            currentStyle: 'standard',
+
+            showMapPersonalization: function () {
+                document.getElementById('map-personalization-modal').classList.add('show');
+                // Sync UI
+                document.querySelectorAll('.map-style-card').forEach(el => {
+                    if (el.dataset.style === this.currentStyle) el.classList.add('active');
+                    else el.classList.remove('active');
+                });
+            },
+
+            hideMapPersonalization: function () {
+                document.getElementById('map-personalization-modal').classList.remove('show');
+            },
+
+            changeMapStyle: function (style, element) {
+                if (!this.mapLayers[style]) return;
+
+                // Update UI selection if triggered by click
+                if (element) {
+                    document.querySelectorAll('.map-style-card').forEach(el => el.classList.remove('active'));
+                    element.classList.add('active');
+                }
+
+                // Update Map Layer
+                if (this.currentLayer) {
+                    this.map.removeLayer(this.currentLayer);
+                }
+
+                this.currentLayer = L.tileLayer(this.mapLayers[style], {
+                    maxZoom: 19,
+                    attribution: ''
+                }).addTo(this.map);
+
+                this.currentStyle = style;
+                localStorage.setItem('biki_map_style', style);
+
+                // Close modal if triggered by user interaction
+                if (element) {
+                    setTimeout(() => this.hideMapPersonalization(), 300);
+                }
+            },
+
             init: async function () {
                 try {
                     const savedFavs = JSON.parse(localStorage.getItem('biki_favorites') || '[]');
@@ -2858,10 +3092,9 @@
 
                 this.setupNavigation();
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: ''
-                }).addTo(this.map);
+                // Load saved map style
+                const savedStyle = localStorage.getItem('biki_map_style') || 'standard';
+                this.changeMapStyle(savedStyle);
 
                 await this.fetchVehicleTypes();
                 this.fetchData();
