@@ -3415,7 +3415,7 @@
 
                 // Physics constants
                 const MAX_STRETCH = 35; // Pixels to expand when between buttons (Liquid effect)
-                const MAX_ICON_SCALE = 5; // Max magnification
+                const MAX_ICON_SCALE = 2.0; // Max magnification (adjusted to be visible but not crazy)
                 const ICON_INFLUENCE_DIST = 50; // Distance where icon starts growing
 
                 nav.addEventListener('touchstart', (e) => {
@@ -3428,7 +3428,7 @@
                     // Kill transition for instant tracking
                     indicator.style.transition = 'none';
                     // Remove transition from icons for instant feedback during drag
-                    document.querySelectorAll('.nav-btn i').forEach(icon => {
+                    document.querySelectorAll('.nav-btn svg').forEach(icon => {
                         icon.style.transition = 'none';
                     });
                 }, { passive: true });
@@ -3466,7 +3466,8 @@
 
                             // --- LENS EFFECT ---
                             // Check distance to this button for scaling
-                            const icon = btn.querySelector('i');
+                            // IMPORTANT: Select SVG because Lucide replaces <i>
+                            const icon = btn.querySelector('svg');
                             if (icon) {
                                 if (dist < ICON_INFLUENCE_DIST) {
                                     // Scale based on proximity
