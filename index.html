@@ -1871,7 +1871,7 @@
     <!-- Trip History Panel -->
     <div id="history-panel" class="view-panel">
         <div class="view-panel-header">
-            <h2 class="view-panel-title">Historial de Viajes</h2>
+            <h2 id="history-panel-title" class="view-panel-title">Historial de Viajes</h2>
             <button class="close-btn" onclick="app.switchView('map')">
                 <i data-lucide="x"></i>
             </button>
@@ -3731,6 +3731,11 @@
                     } else {
                         this.activeTrip = null;
                         this.stopTimer();
+
+                        // Restore normal state
+                        const titleEl = document.getElementById('history-panel-title');
+                        if (titleEl) titleEl.textContent = 'Historial de Viajes';
+                        if (summaryEl) summaryEl.style.display = '';
                         countEl.textContent = closedData.tripCount || this.trips.length;
                         summaryEl.querySelector('.history-summary-label').textContent = 'Viajes realizados';
                         this.renderTrips();
@@ -3752,8 +3757,8 @@
 
             showActiveTrip: function () {
                 const listContainer = document.getElementById('history-list');
-                const countEl = document.getElementById('history-trip-count');
                 const summaryEl = document.getElementById('history-summary');
+                const titleEl = document.getElementById('history-panel-title');
                 const trip = this.activeTrip;
 
                 if (!trip) return;
@@ -3764,8 +3769,9 @@
                 const bikeIcon = isElectric ? 'zap' : 'bike';
                 const startStation = this.formatStationName(trip.startStationName);
 
-                // Update summary to show timer
-                summaryEl.querySelector('.history-summary-label').textContent = 'En viaje';
+                // Update title and hide summary
+                if (titleEl) titleEl.textContent = 'Viaje actual';
+                if (summaryEl) summaryEl.style.display = 'none';
 
                 listContainer.innerHTML = `
                     <div class="active-trip-card">
@@ -3992,8 +3998,14 @@
                 this.stopTimer();
                 const countEl = document.getElementById('history-trip-count');
                 const summaryEl = document.getElementById('history-summary');
+                const titleEl = document.getElementById('history-panel-title');
+
+                // Restore title and show summary
+                if (titleEl) titleEl.textContent = 'Historial de Viajes';
+                if (summaryEl) summaryEl.style.display = '';
                 if (countEl) countEl.textContent = this.trips.length;
                 if (summaryEl) summaryEl.querySelector('.history-summary-label').textContent = 'Viajes realizados';
+
                 this.renderTrips();
                 console.log('✓ Viaje finalizado. Mostrando historial.');
             }
