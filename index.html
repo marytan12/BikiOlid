@@ -4890,7 +4890,7 @@
                         this.activeTrip = null;
                         this.stopTimer();
 
-                        console.log('Total closed trips:', closedData.tripCount);
+                        // Header format: (X totales)
                         countEl.textContent = `(${closedData.tripCount || 0} totales)`;
 
                         this.renderTrips();
@@ -4912,8 +4912,8 @@
             },
 
             showActiveTrip: function () {
+                // ... active trip logic remains mostly same but ensure correct container ...
                 const listContainer = document.getElementById('history-list');
-                const summaryEl = document.getElementById('history-summary');
                 const titleEl = document.getElementById('history-panel-title');
                 const trip = this.activeTrip;
 
@@ -4925,96 +4925,56 @@
                 const bikeIcon = isElectric ? 'zap' : 'bike';
                 const startStation = this.formatStationName(trip.startStationName);
 
-                // Update title and hide summary
-                if (titleEl) titleEl.textContent = 'Viaje actual';
-                if (summaryEl) summaryEl.style.display = 'none';
+                if (titleEl) titleEl.textContent = 'Historial'; // Keep title consistent
 
+                // Reuse the new card style even for active trip if possible, or keep custom
+                // For now keeping custom active card structure but ensuring it doesn't break
                 listContainer.innerHTML = `
-                    <div class="active-trip-card">
-                        <div class="active-trip-header">
-                            <span class="active-trip-badge">
-                                <i data-lucide="play-circle"></i>
-                                Viaje en curso
-                            </span>
-                            <span class="trip-bike-type ${bikeTypeClass}">
-                                <i data-lucide="${bikeIcon}"></i>
-                                ${bikeTypeLabel}
-                            </span>
-                        </div>
-
-                        <div class="active-trip-timer" id="active-trip-timer">
-                            00:00:00
-                        </div>
-
-                        <div class="active-trip-info">
-                            <div class="active-trip-detail">
-                                <i data-lucide="map-pin"></i>
-                                <span>Desde: ${startStation}</span>
+                    <div class="history-trip-card active-mode" style="border-color: #10b981;">
+                        <div class="history-trip-header">
+                            <div class="trip-date-group">
+                                <span class="trip-date-day">Viaje en curso</span>
+                                <span class="trip-date-time" id="active-trip-timer">00:00:00</span>
                             </div>
-                            <div class="active-trip-detail">
-                                <i data-lucide="hash"></i>
-                                <span>Bici: ${trip.bike?.obcn || trip.bikeId}</span>
-                            </div>
-                            <div class="active-trip-detail">
-                                <i data-lucide="clock"></i>
-                                <span>Inicio: ${this.formatTime(new Date(trip.startTime))}</span>
+                             <span class="trip-cost" style="color: #fff; background: #10b981;">ACTIVO</span>
+                        </div>
+                         <div class="trip-route-info">
+                            <div class="trip-point">
+                                <div class="trip-point-dot start"></div>
+                                <div class="trip-point-details">
+                                    <div class="trip-station-name">${startStation}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 `;
-
                 lucide.createIcons();
                 this.startTimer();
             },
 
+            // Timer functions...
             startTimer: function () {
                 this.stopTimer();
-
                 const updateTimer = () => {
                     if (!this.activeTrip) return;
-
                     const startTime = new Date(this.activeTrip.startTime);
                     const now = new Date();
                     const elapsed = Math.floor((now - startTime) / 1000);
-
                     const hours = Math.floor(elapsed / 3600);
                     const minutes = Math.floor((elapsed % 3600) / 60);
                     const seconds = elapsed % 60;
-
                     const timerStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
                     const timerEl = document.getElementById('active-trip-timer');
                     if (timerEl) timerEl.textContent = timerStr;
-
-                    const countEl = document.getElementById('history-trip-count');
-                    if (countEl) countEl.textContent = timerStr;
-
-                    // Update overlay timer
-                    const overlayTimerEl = document.getElementById('overlay-trip-timer');
-                    if (overlayTimerEl) overlayTimerEl.textContent = timerStr;
                 };
-
-                // Show overlay
-                const overlay = document.getElementById('active-trip-overlay');
-                if (overlay) {
-                    overlay.classList.add('visible');
-                    lucide.createIcons();
-                }
-
                 updateTimer();
                 this.timerInterval = setInterval(updateTimer, 1000);
             },
-
             stopTimer: function () {
                 if (this.timerInterval) {
                     clearInterval(this.timerInterval);
                     this.timerInterval = null;
-                }
-
-                // Hide overlay
-                const overlay = document.getElementById('active-trip-overlay');
-                if (overlay) {
-                    overlay.classList.remove('visible');
                 }
             },
 
@@ -5025,120 +4985,136 @@
                     listContainer.innerHTML = `
                         <div class="history-empty">
                             <i data-lucide="bike"></i>
-                            <p>No tienes viajes registrados aún</p>
+                            <p>Aún no has realizado ningún viaje.</p>
                         </div>
                     `;
                     lucide.createIcons();
                     return;
                 }
 
-                const sortedTrips = [...this.trips].sort((a, b) =>
-                    new Date(b.startTime) - new Date(a.startTime)
-                );
+                // Render latest trip
+                const latestTrip = this.trips[0];
+                let html = this.createTripCardHTML(latestTrip);
 
-                listContainer.innerHTML = sortedTrips.map(trip => this.renderTripCard(trip)).join('');
+                // Render older trips if any
+                if (this.trips.length > 1) {
+                    html += `<div id="history-older-trips">`;
+                    for (let i = 1; i < this.trips.length; i++) {
+                        html += this.createTripCardHTML(this.trips[i]);
+                    }
+                    html += `</div>`;
+
+                    // Add expand button with Plus icon
+                    html += `
+                        <div class="history-expand-btn" onclick="tripHistory.toggleOlderTrips(this)">
+                            <i data-lucide="plus"></i>
+                        </div>
+                    `;
+                }
+
+                listContainer.innerHTML = html;
                 lucide.createIcons();
             },
 
-            renderTripCard: function (trip) {
+            createTripCardHTML: function (trip) {
                 const startDate = new Date(trip.startTime);
-                const endDate = new Date(trip.endTime);
+                const endDate = trip.endTime ? new Date(trip.endTime) : new Date();
 
                 const isElectric = trip.bike?.propulsionType === 'ELECTRIC_ASSIST';
                 const bikeTypeClass = isElectric ? 'electric' : 'mechanical';
                 const bikeTypeLabel = isElectric ? 'Eléctrica' : 'Mecánica';
                 const bikeIcon = isElectric ? 'zap' : 'bike';
 
-                const duration = this.formatDuration(trip.duration);
-                const price = trip.price || 0;
-                const priceClass = price > 0 ? 'paid' : 'free';
-                const priceText = price > 0 ? `${price.toFixed(2)}€` : 'Gratis';
+                const durationMs = endDate - startDate;
+                const durationMin = Math.round(durationMs / 60000);
+                const durationStr = this.formatDuration(durationMin * 60);
+
+                const cost = trip.cost ? (trip.cost / 100).toFixed(2) : '0.00';
+
+                // Capitalize first letter of day
+                let dayName = startDate.toLocaleDateString('es-ES', { weekday: 'long' });
+                dayName = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+
+                const dayDate = startDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
+                const timeStr = this.formatTime(startDate);
 
                 const startStation = this.formatStationName(trip.startStationName);
                 const endStation = this.formatStationName(trip.endStationName);
 
-                const dateStr = this.formatDate(startDate);
-                const startTimeStr = this.formatTime(startDate);
-                const endTimeStr = this.formatTime(endDate);
-
                 return `
-                    <div class="trip-card">
-                        <div class="trip-card-header">
-                            <span class="trip-date">${dateStr}</span>
-                            <span class="trip-bike-type ${bikeTypeClass}">
+                    <div class="history-trip-card">
+                        <div class="history-trip-header">
+                            <div class="trip-date-group">
+                                <span class="trip-date-day">${dayName}, ${dayDate}</span>
+                                <span class="trip-date-time">${timeStr}</span>
+                            </div>
+                            <span class="trip-cost">${cost}€</span>
+                        </div>
+                        
+                        <div class="trip-route-info">
+                            <div class="trip-timeline-line"></div>
+                            
+                            <div class="trip-point">
+                                <div class="trip-point-dot start"></div>
+                                <div class="trip-point-details">
+                                    <div class="trip-station-name">${startStation}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="trip-point">
+                                <div class="trip-point-dot end"></div>
+                                <div class="trip-point-details">
+                                    <div class="trip-station-name">${endStation}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="trip-stats-row">
+                            <div class="trip-stat-pill">
+                                <i data-lucide="clock"></i>
+                                <span>${durationStr}</span>
+                            </div>
+                            <div class="trip-stat-pill">
+                                <i data-lucide="bike"></i>
+                                <span>${trip.bikeCode || trip.bikeId || 'Bici'}</span>
+                            </div>
+                             <div class="trip-stat-pill">
                                 <i data-lucide="${bikeIcon}"></i>
-                                ${bikeTypeLabel}
-                            </span>
-                        </div>
-                        
-                        <div class="trip-route">
-                            <div class="trip-route-line">
-                                <div class="trip-route-dot start"></div>
-                                <div class="trip-route-connector"></div>
-                                <div class="trip-route-dot end"></div>
+                                <span>${bikeTypeLabel}</span>
                             </div>
-                            <div class="trip-stations">
-                                <div class="trip-station">
-                                    <span class="trip-station-name">${startStation}</span>
-                                    <span class="trip-station-time">${startTimeStr}</span>
-                                </div>
-                                <div class="trip-station">
-                                    <span class="trip-station-name">${endStation}</span>
-                                    <span class="trip-station-time">${endTimeStr}</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="trip-card-footer">
-                            <div class="trip-stats">
-                                <div class="trip-stat">
-                                    <i data-lucide="clock"></i>
-                                    <span>${duration}</span>
-                                </div>
-                                <div class="trip-stat">
-                                    <i data-lucide="hash"></i>
-                                    <span>${trip.bike?.obcn || '-'}</span>
-                                </div>
-                            </div>
-                            <span class="trip-price ${priceClass}">${priceText}</span>
                         </div>
                     </div>
                 `;
             },
 
+            toggleOlderTrips: function (btn) {
+                const container = document.getElementById('history-older-trips');
+                if (container.classList.contains('show')) {
+                    container.classList.remove('show');
+                    btn.classList.remove('expanded');
+                } else {
+                    container.classList.add('show');
+                    btn.classList.add('expanded');
+                }
+            },
+
             formatStationName: function (name) {
                 if (!name) return '-';
-                return name.replace(/^\d+\s+/, '').trim();
+                // Remove leading numbers if present "001 - Station" -> "Station"
+                return name.replace(/^\d+[\s-]*\s+/, '').trim();
             },
 
             formatDuration: function (seconds) {
                 if (!seconds || seconds < 60) return `${seconds || 0}s`;
-
-                const hours = Math.floor(seconds / 3600);
-                const minutes = Math.floor((seconds % 3600) / 60);
-
-                if (hours > 0) {
-                    return `${hours}h ${minutes}m`;
-                }
-                return `${minutes}m`;
+                const minutes = Math.floor(seconds / 60);
+                const h = Math.floor(minutes / 60);
+                const m = minutes % 60;
+                if (h > 0) return `${h}h ${m}min`;
+                return `${m} min`;
             },
 
             formatDate: function (date) {
-                const today = new Date();
-                const yesterday = new Date(today);
-                yesterday.setDate(yesterday.getDate() - 1);
-
-                if (date.toDateString() === today.toDateString()) {
-                    return 'Hoy';
-                } else if (date.toDateString() === yesterday.toDateString()) {
-                    return 'Ayer';
-                }
-
-                return date.toLocaleDateString('es-ES', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
-                });
+                return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
             },
 
             formatTime: function (date) {
@@ -5151,36 +5127,31 @@
             // ===== CONSOLE TESTING COMMANDS =====
             simulateActiveTrip: function () {
                 const now = new Date();
-                now.setMinutes(now.getMinutes() - 5); // Started 5 mins ago
+                now.setMinutes(now.getMinutes() - 5);
                 this.activeTrip = {
                     tripId: 9999999,
                     bikeId: 1234,
                     startTime: now.toISOString(),
                     startStationName: "015 Plaza de la Libertad",
                     bike: { obcn: "TEST", propulsionType: "HUMAN" },
-                    _simulated: true // Flag to prevent overwrite
+                    _simulated: true
                 };
-                this.isLoading = false; // Reset loading
+                this.isLoading = false;
                 this.showActiveTrip();
-                console.log('✓ Viaje activo simulado. Timer iniciado.');
-                console.log('  Ejecuta testEndTrip() para finalizar.');
+                console.log('✓ Viaje activo simulado.');
             },
 
             simulateEndTrip: function () {
                 this.activeTrip = null;
                 this.stopTimer();
                 const countEl = document.getElementById('history-trip-count');
-                const summaryEl = document.getElementById('history-summary');
                 const titleEl = document.getElementById('history-panel-title');
 
-                // Restore title and show summary
-                if (titleEl) titleEl.textContent = 'Historial de Viajes';
-                if (summaryEl) summaryEl.style.display = '';
-                if (countEl) countEl.textContent = this.trips.length;
-                if (summaryEl) summaryEl.querySelector('.history-summary-label').textContent = 'Viajes realizados';
+                if (titleEl) titleEl.textContent = 'Historial';
+                if (countEl) countEl.textContent = `(${this.trips.length} totales)`;
 
                 this.renderTrips();
-                console.log('✓ Viaje finalizado. Mostrando historial.');
+                console.log('✓ Viaje finalizado.');
             }
         };
 
