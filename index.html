@@ -1836,7 +1836,8 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            padding-bottom: 20px;
+            padding-bottom: 180px;
+            /* Massive padding to ensure scroll */
         }
 
         .history-trip-card {
@@ -1982,6 +1983,8 @@
             align-items: center;
             justify-content: center;
             margin: 20px auto;
+            flex-shrink: 0;
+            /* IMPORANT: Prevent flattening */
             color: rgba(255, 255, 255, 0.8);
             cursor: pointer;
             transition: all 0.3s ease;
@@ -4882,7 +4885,11 @@
                     const closedData = await closedRes.json();
                     const openData = await openRes.json();
 
+
                     this.trips = closedData.trips || [];
+
+                    // Sort by newest first
+                    this.trips.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
 
                     if (openData.tripCount > 0 && openData.trips && openData.trips.length > 0) {
                         this.activeTrip = openData.trips[0];
