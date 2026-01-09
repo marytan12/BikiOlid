@@ -2528,25 +2528,27 @@
                 const markers = [];
 
                 this.data.forEach(st => {
-                    let colorClass = 'marker-green';
-                    if (st.bikes === 0) colorClass = 'marker-red';
-                    else if (st.bikes < 3) colorClass = 'marker-orange';
+                    // Determine color based on bike availability
+                    let color = '#10b981'; // green
+                    let fillOpacity = 0.8;
+
+                    if (st.bikes === 0) {
+                        color = '#ef4444'; // red
+                    } else if (st.bikes < 3) {
+                        color = '#f59e0b'; // orange
+                    }
 
                     const isFav = this.favorites.has(st.station_id);
-                    const extraClass = isFav ? 'marker-fav' : '';
 
-                    const icon = L.divIcon({
-                        className: 'custom-div-icon',
-                        html: `<div class='glass-marker ${colorClass} ${extraClass}'>
-                                <div class='glass-marker-circle'>
-                                    <span class='glass-marker-number'>${st.bikes}</span>
-                                </div>
-                            </div>`,
-                        iconSize: [32, 32],
-                        iconAnchor: [16, 16]
+                    // Use CircleMarker instead of divIcon - much more performant!
+                    const marker = L.circleMarker([st.lat, st.lon], {
+                        radius: isFav ? 9 : 7,
+                        fillColor: color,
+                        color: isFav ? '#fbbf24' : '#fff',
+                        weight: isFav ? 3 : 2,
+                        opacity: 1,
+                        fillOpacity: fillOpacity
                     });
-
-                    const marker = L.marker([st.lat, st.lon], { icon: icon });
 
                     marker.bindPopup(`
                         <div style="padding: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
@@ -2577,6 +2579,7 @@
                         maxWidth: 280,
                         className: 'custom-popup'
                     });
+
                     markers.push(marker);
                 });
 
