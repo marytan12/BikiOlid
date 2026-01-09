@@ -1,14 +1,13 @@
-# netlify.toml
+# netlify.toml CORREGIDO PARA PROYECTOS SIN PACKAGE.JSON
 
 [build]
-  # Ajusta esto si tu comando es diferente (ej. "npm run build")
-  command = "npm run build"
-  # Ajusta esto según tu framework (ej. "dist", "build", "out")
-  publish = "dist" 
+  # IMPORTANTE: Dejamos el comando vacío para que no busque package.json
+  command = "" 
+  # Publicamos el directorio actual (la raíz) donde está tu index.html
+  publish = "." 
 
-# 1. Configuración de Headers (CORS) - Equivalente a tu vercel.json
+# Configuración de Headers (CORS) - Igual que antes
 [[headers]]
-  # Aplica estos headers a todas las rutas que empiecen por /api/
   for = "/api/*"
   [headers.values]
     Access-Control-Allow-Credentials = "true"
@@ -16,13 +15,14 @@
     Access-Control-Allow-Methods = "GET,OPTIONS,POST"
     Access-Control-Allow-Headers = "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, x-auth-token"
 
-# 2. Redirección para que tus funciones sigan funcionando en /api/
+# Redirección para las funciones
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
-# 3. (OPCIONAL) Si tu web es React/Vue/Vite (SPA), necesitas esto para que no de 404 al recargar
+# OPCIONAL: Si es una SPA (React compilado sin build step) deja esto. 
+# Si es HTML simple, puedes borrar este bloque de abajo.
 [[redirects]]
   from = "/*"
   to = "/index.html"
