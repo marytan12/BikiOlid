@@ -4434,7 +4434,7 @@
                 try {
                     const videoInputDevices = await this.codeReader.listVideoInputDevices();
 
-                    if (videoInputDevices.length >= 1) {
+                    if (videoInputDevices && videoInputDevices.length >= 1) {
                         // Priority: Environment/Back camera
                         const backCamera = videoInputDevices.find(device =>
                             device.label.toLowerCase().includes('back') ||
@@ -4449,14 +4449,18 @@
                             this.selectedDeviceId = videoInputDevices[0].deviceId;
                             console.log('Selected Default Camera:', videoInputDevices[0].label);
                         }
-
-                        this.startDecoding();
                     } else {
-                        this.showStatus('No se detectaron cámaras en el dispositivo.', 'error');
+                        console.warn('No cameras detected strictly, trying default...');
+                        this.selectedDeviceId = undefined;
                     }
+
+                    this.startDecoding();
                 } catch (err) {
                     console.error('Error listing cameras:', err);
-                    this.showStatus('Error al listar cámaras.', 'error');
+                    // Fallback: try to start anyway with default device
+                    console.log('Fallback: Starting with default camera...');
+                    this.selectedDeviceId = undefined;
+                    this.startDecoding();
                 }
             },
 
