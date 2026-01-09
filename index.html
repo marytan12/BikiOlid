@@ -1831,6 +1831,21 @@
             opacity: 0.5;
         }
 
+        /* Collapsible History Section */
+        #history-older-trips {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #history-older-trips.show {
+            max-height: 20000px;
+            /* Large limit for safety */
+            opacity: 1;
+            overflow: visible;
+        }
+
         /* Refined History Trip Card */
         .history-list {
             display: flex;
