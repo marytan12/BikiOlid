@@ -555,10 +555,10 @@
                     rgba(30, 41, 59, 0.95) 100%);
             backdrop-filter: blur(40px) saturate(180%);
             -webkit-backdrop-filter: blur(40px) saturate(180%);
-            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.6),
-                inset 1px 0 1px rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+            /* Hide shadow when closed */
             z-index: 2000;
-            transition: right 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: right 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
             display: flex;
             flex-direction: column;
             border-left: 1px solid rgba(255, 255, 255, 0.1);
@@ -566,6 +566,8 @@
 
         #account-screen.show {
             right: 0;
+            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.6),
+                inset 1px 0 1px rgba(255, 255, 255, 0.1);
         }
 
         .account-header {
@@ -1235,9 +1237,11 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            padding: 16px 18px 12px 18px;
+            padding: 0;
+            margin-bottom: 12px;
             justify-items: stretch;
-            /* Ensure cards stretch to fill grid */
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .station-bike-card {
@@ -1328,13 +1332,19 @@
             border: 1px solid rgba(99, 102, 241, 0.25);
             border-radius: 14px;
             padding: 14px 16px;
-            margin: 0 18px 16px 18px;
+            margin: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            /* Center content */
             gap: 14px;
             backdrop-filter: blur(10px);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .station-popup-body {
+            padding: 16px 18px 18px 18px;
+            box-sizing: border-box;
         }
 
         .docks-card-icon {
@@ -2981,34 +2991,36 @@
                                 </button>
                             </div>
                             
-                            <div class="station-bikes-grid">
-                                <div class="station-bike-card electric">
-                                    <div class="bike-card-icon">
-                                        <i data-lucide="zap"></i>
+                            <div class="station-popup-body">
+                                <div class="station-bikes-grid">
+                                    <div class="station-bike-card electric">
+                                        <div class="bike-card-icon">
+                                            <i data-lucide="zap"></i>
+                                        </div>
+                                        <div class="bike-card-content">
+                                            <div class="bike-card-value">${st.elec_bikes}</div>
+                                            <div class="bike-card-label">Eléctricas</div>
+                                        </div>
                                     </div>
-                                    <div class="bike-card-content">
-                                        <div class="bike-card-value">${st.elec_bikes}</div>
-                                        <div class="bike-card-label">Eléctricas</div>
+                                    <div class="station-bike-card mechanical">
+                                        <div class="bike-card-icon">
+                                            <i data-lucide="bike"></i>
+                                        </div>
+                                        <div class="bike-card-content">
+                                            <div class="bike-card-value">${st.mech_bikes}</div>
+                                            <div class="bike-card-label">Mecánicas</div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="station-bike-card mechanical">
-                                    <div class="bike-card-icon">
-                                        <i data-lucide="bike"></i>
+                                
+                                <div class="station-docks-card">
+                                    <div class="docks-card-icon">
+                                        <i data-lucide="circle-parking"></i>
                                     </div>
-                                    <div class="bike-card-content">
-                                        <div class="bike-card-value">${st.mech_bikes}</div>
-                                        <div class="bike-card-label">Mecánicas</div>
+                                    <div class="docks-card-content">
+                                        <div class="docks-card-label">Anclajes libres</div>
+                                        <div class="docks-card-value">${st.docks}</div>
                                     </div>
-                                </div>
-                            </div>
-                            
-                            <div class="station-docks-card">
-                                <div class="docks-card-icon">
-                                    <i data-lucide="circle-parking"></i>
-                                </div>
-                                <div class="docks-card-content">
-                                    <div class="docks-card-label">Anclajes libres</div>
-                                    <div class="docks-card-value">${st.docks}</div>
                                 </div>
                             </div>
                         </div>
