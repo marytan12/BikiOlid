@@ -609,6 +609,222 @@
             display: none !important;
         }
 
+        /* Login Form Styles */
+        .login-input-group {
+            margin-bottom: 15px;
+        }
+
+        .login-input-group label {
+            display: block;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .login-input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .login-input-group input:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .login-input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .login-submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .login-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .login-submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            color: #fca5a5;
+            font-size: 13px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Profile Styles */
+        .profile-header-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar svg {
+            width: 30px;
+            height: 30px;
+            color: #fff;
+        }
+
+        .profile-info h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .profile-info p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .profile-stat {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .profile-stat-label {
+            display: block;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .profile-stat-value {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .profile-details {
+            margin-top: 10px;
+        }
+
+        .profile-detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .profile-detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .profile-detail-label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .profile-detail-value {
+            font-size: 13px;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 14px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            color: #fca5a5;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        .logout-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
         /* Swap button */
         .swap-btn {
             width: 40px;
@@ -812,19 +1028,94 @@
             </button>
         </div>
         <div class="account-content">
-            <div class="account-section">
-                <h3>Perfil</h3>
-                <p>Usuario de Biki Valladolid</p>
+            <!-- Login Form (shown when not logged in) -->
+            <div id="login-form-container">
+                <div class="account-section">
+                    <h3>Iniciar sesión</h3>
+                    <p style="margin-bottom: 20px;">Inicia sesión con tu cuenta de Biki Valladolid</p>
+
+                    <div class="login-input-group">
+                        <label for="login-email">Correo electrónico</label>
+                        <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="email">
+                    </div>
+
+                    <div class="login-input-group">
+                        <label for="login-password">Contraseña</label>
+                        <input type="password" id="login-password" placeholder="••••••••"
+                            autocomplete="current-password">
+                    </div>
+
+                    <div id="login-error" class="login-error hidden"></div>
+
+                    <button id="login-btn" class="login-submit-btn" onclick="auth.login()">
+                        <span id="login-btn-text">Iniciar sesión</span>
+                        <span id="login-btn-loading" class="hidden">
+                            <i data-lucide="loader-2" class="spin"></i> Conectando...
+                        </span>
+                    </button>
+                </div>
             </div>
+
+            <!-- Profile View (shown when logged in) -->
+            <div id="profile-container" class="hidden">
+                <div class="account-section profile-header-section">
+                    <div class="profile-avatar">
+                        <i data-lucide="user"></i>
+                    </div>
+                    <div class="profile-info">
+                        <h3 id="profile-name">-</h3>
+                        <p id="profile-email">-</p>
+                    </div>
+                </div>
+
+                <div class="account-section">
+                    <h3>Estado de la cuenta</h3>
+                    <div class="profile-stats">
+                        <div class="profile-stat">
+                            <span class="profile-stat-label">Estado</span>
+                            <span class="profile-stat-value" id="profile-status">-</span>
+                        </div>
+                        <div class="profile-stat">
+                            <span class="profile-stat-label">Saldo</span>
+                            <span class="profile-stat-value" id="profile-balance">-</span>
+                        </div>
+                        <div class="profile-stat">
+                            <span class="profile-stat-label">Suscripción</span>
+                            <span class="profile-stat-value" id="profile-subscription">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="account-section">
+                    <h3>Información del usuario</h3>
+                    <div class="profile-details">
+                        <div class="profile-detail-row">
+                            <span class="profile-detail-label">ID de miembro</span>
+                            <span class="profile-detail-value" id="profile-member-id">-</span>
+                        </div>
+                        <div class="profile-detail-row">
+                            <span class="profile-detail-label">Teléfono</span>
+                            <span class="profile-detail-value" id="profile-phone">-</span>
+                        </div>
+                        <div class="profile-detail-row">
+                            <span class="profile-detail-label">Fecha de registro</span>
+                            <span class="profile-detail-value" id="profile-registered">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="logout-btn" onclick="auth.logout()">
+                    <i data-lucide="log-out"></i>
+                    Cerrar sesión
+                </button>
+            </div>
+
+            <!-- About Section (always visible) -->
             <div class="account-section">
                 <h3>Acerca de</h3>
                 <p>Aplicación de consulta del estado de las estaciones del sistema de bicicletas públicas Biki
                     Valladolid.</p>
                 <p style="margin-top: 10px;">Versión 2.0 - Liquid Glass UI</p>
-            </div>
-            <div class="account-section">
-                <h3>Preferencias</h3>
-                <p>Configuración y ajustes de la aplicación.</p>
             </div>
         </div>
     </div>
@@ -1550,10 +1841,248 @@
             }
         };
 
+        // ==================== AUTHENTICATION SYSTEM ====================
+        const auth = {
+            API_BASE: 'https://valladolid.publicbikesystem.net/ube/mobile',
+            API_KEY: 'QopJK73RwNkwj5hfFk1cInN8BDM0pcaVC9hWYXqU',
+            DEVICE_ID: 'ec968fbf0cb2ceef',
+
+            token: null,
+            memberData: null,
+
+            init: function () {
+                // Check for existing session
+                const savedToken = localStorage.getItem('biki_auth_token');
+                const savedMember = localStorage.getItem('biki_member_data');
+
+                if (savedToken && savedMember) {
+                    this.token = savedToken;
+                    try {
+                        this.memberData = JSON.parse(savedMember);
+                        this.showProfile();
+                    } catch (e) {
+                        this.logout();
+                    }
+                }
+
+                // Add Enter key listener for login
+                document.getElementById('login-password').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.login();
+                });
+                document.getElementById('login-email').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') document.getElementById('login-password').focus();
+                });
+            },
+
+            getHeaders: function (includeAuth = false) {
+                const headers = {
+                    'accept': 'application/json',
+                    'device-id': this.DEVICE_ID,
+                    'x-api-key': this.API_KEY,
+                    'user-agent': 'biki/5.35.0.8 Mozilla/5.0 (Linux; Android 12; sdk_gphone64_x86_64 Build/SE1A.220826.008; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/91.0.4472.114 Mobile Safari/537.36'
+                };
+
+                if (includeAuth && this.token) {
+                    headers['x-auth-token'] = this.token;
+                    headers['accept-language'] = 'en';
+                }
+
+                return headers;
+            },
+
+            setLoading: function (loading) {
+                const btn = document.getElementById('login-btn');
+                const btnText = document.getElementById('login-btn-text');
+                const btnLoading = document.getElementById('login-btn-loading');
+
+                btn.disabled = loading;
+                btnText.classList.toggle('hidden', loading);
+                btnLoading.classList.toggle('hidden', !loading);
+
+                if (loading) {
+                    lucide.createIcons();
+                }
+            },
+
+            showError: function (message) {
+                const errorEl = document.getElementById('login-error');
+                errorEl.textContent = message;
+                errorEl.classList.remove('hidden');
+            },
+
+            hideError: function () {
+                document.getElementById('login-error').classList.add('hidden');
+            },
+
+            login: async function () {
+                const email = document.getElementById('login-email').value.trim();
+                const password = document.getElementById('login-password').value;
+
+                if (!email || !password) {
+                    this.showError('Por favor, introduce tu correo y contraseña');
+                    return;
+                }
+
+                this.hideError();
+                this.setLoading(true);
+
+                try {
+                    // Step 1: Authenticate
+                    const credentials = btoa(`${email}:${password}`);
+
+                    const authResponse = await fetch(`${this.API_BASE}/v1/authenticate`, {
+                        method: 'GET',
+                        headers: {
+                            ...this.getHeaders(),
+                            'authorization': `Basic ${credentials}`
+                        }
+                    });
+
+                    if (!authResponse.ok) {
+                        if (authResponse.status === 401) {
+                            throw new Error('Credenciales incorrectas');
+                        }
+                        throw new Error(`Error de autenticación (${authResponse.status})`);
+                    }
+
+                    const authData = await authResponse.json();
+
+                    if (!authData.token) {
+                        throw new Error('No se recibió token de autenticación');
+                    }
+
+                    this.token = authData.token;
+                    localStorage.setItem('biki_auth_token', this.token);
+
+                    // Step 2: Get member data
+                    await this.fetchMemberData();
+
+                    // Show profile
+                    this.showProfile();
+
+                    // Clear form
+                    document.getElementById('login-email').value = '';
+                    document.getElementById('login-password').value = '';
+
+                } catch (error) {
+                    console.error('Login error:', error);
+                    this.showError(error.message || 'Error al iniciar sesión');
+                } finally {
+                    this.setLoading(false);
+                }
+            },
+
+            fetchMemberData: async function () {
+                if (!this.token) return;
+
+                try {
+                    const memberResponse = await fetch(`${this.API_BASE}/v2/member`, {
+                        method: 'GET',
+                        headers: this.getHeaders(true)
+                    });
+
+                    if (!memberResponse.ok) {
+                        throw new Error(`Error obteniendo datos del usuario (${memberResponse.status})`);
+                    }
+
+                    this.memberData = await memberResponse.json();
+                    localStorage.setItem('biki_member_data', JSON.stringify(this.memberData));
+
+                } catch (error) {
+                    console.error('Member data error:', error);
+                    throw error;
+                }
+            },
+
+            showProfile: function () {
+                if (!this.memberData) return;
+
+                const data = this.memberData;
+
+                // Hide login form, show profile
+                document.getElementById('login-form-container').classList.add('hidden');
+                document.getElementById('profile-container').classList.remove('hidden');
+
+                // Update profile info
+                const firstName = data.firstName || data.first_name || '';
+                const lastName = data.lastName || data.last_name || '';
+                const fullName = `${firstName} ${lastName}`.trim() || 'Usuario';
+
+                document.getElementById('profile-name').textContent = fullName;
+                document.getElementById('profile-email').textContent = data.email || data.emailAddress || '-';
+
+                // Status
+                const status = data.status || data.memberStatus || '-';
+                const statusEl = document.getElementById('profile-status');
+                statusEl.textContent = this.translateStatus(status);
+                statusEl.style.color = status === 'ACTIVE' || status === 'active' ? '#10b981' : '#f59e0b';
+
+                // Balance
+                const balance = data.balance || data.accountBalance || 0;
+                const currency = data.currency || '€';
+                document.getElementById('profile-balance').textContent = `${balance.toFixed ? balance.toFixed(2) : balance} ${currency}`;
+
+                // Subscription
+                const subscription = data.subscription?.name || data.subscriptionType || data.membershipType || '-';
+                document.getElementById('profile-subscription').textContent = subscription;
+
+                // Details
+                document.getElementById('profile-member-id').textContent = data.memberId || data.id || data.member_id || '-';
+                document.getElementById('profile-phone').textContent = data.phone || data.phoneNumber || data.mobile || '-';
+
+                // Registration date
+                const regDate = data.registrationDate || data.createdAt || data.created_at;
+                if (regDate) {
+                    const date = new Date(regDate);
+                    document.getElementById('profile-registered').textContent = date.toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                } else {
+                    document.getElementById('profile-registered').textContent = '-';
+                }
+
+                lucide.createIcons();
+            },
+
+            translateStatus: function (status) {
+                const translations = {
+                    'ACTIVE': 'Activo',
+                    'active': 'Activo',
+                    'INACTIVE': 'Inactivo',
+                    'inactive': 'Inactivo',
+                    'SUSPENDED': 'Suspendido',
+                    'suspended': 'Suspendido',
+                    'PENDING': 'Pendiente',
+                    'pending': 'Pendiente'
+                };
+                return translations[status] || status;
+            },
+
+            logout: function () {
+                this.token = null;
+                this.memberData = null;
+                localStorage.removeItem('biki_auth_token');
+                localStorage.removeItem('biki_member_data');
+
+                // Show login form, hide profile
+                document.getElementById('login-form-container').classList.remove('hidden');
+                document.getElementById('profile-container').classList.add('hidden');
+
+                lucide.createIcons();
+            },
+
+            isLoggedIn: function () {
+                return !!this.token;
+            }
+        };
+
         // Initialize
         window.addEventListener('DOMContentLoaded', () => {
             app.init();
             routing.init();
+            auth.init();
         });
     </script>
 
