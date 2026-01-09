@@ -2719,26 +2719,16 @@
     </div>
 
     <!-- Trip History Panel -->
-    <div id="history-panel" class="view-panel">
-        <div class="view-panel-header">
-            <h2 id="history-panel-title" class="view-panel-title">Historial de Viajes</h2>
-            <button class="close-btn" onclick="app.switchView('map')">
+    <div id="history-panel" class="view-panel glass-panel">
+        <div class="panel-header">
+            <h2 id="history-panel-title">Historial <span id="history-trip-count"
+                    style="font-size: 0.8em; opacity: 0.6; font-weight: 400;"></span></h2>
+            <button class="close-panel-btn" onclick="app.switchView('map')">
                 <i data-lucide="x"></i>
             </button>
         </div>
-
-        <div id="history-summary" class="history-summary">
-            <div class="history-summary-item">
-                <span class="history-summary-value" id="history-trip-count">-</span>
-                <span class="history-summary-label">Viajes realizados</span>
-            </div>
-        </div>
-
         <div id="history-list" class="history-list">
-            <div class="history-loading">
-                <i data-lucide="loader-2" class="spin"></i>
-                <span>Cargando historial...</span>
-            </div>
+            <!-- Trips will be loaded here -->
         </div>
     </div>
 
@@ -4837,7 +4827,7 @@
             loadTrips: async function () {
                 const listContainer = document.getElementById('history-list');
                 const countEl = document.getElementById('history-trip-count');
-                const summaryEl = document.getElementById('history-summary');
+                const titleEl = document.getElementById('history-panel-title');
 
                 // Check if logged in
                 if (!auth.isLoggedIn()) {
@@ -4851,18 +4841,13 @@
                             </button>
                         </div>
                     `;
-                    countEl.textContent = '-';
-                    summaryEl.querySelector('.history-summary-label').textContent = 'Viajes realizados';
+                    countEl.textContent = '';
                     lucide.createIcons();
                     return;
                 }
 
-                // Don't overwrite simulated active trip
-                if (this.activeTrip && this.activeTrip._simulated) {
-                    return;
-                }
+                if (this.activeTrip && this.activeTrip._simulated) return;
 
-                // Show loading
                 if (this.isLoading) return;
                 this.isLoading = true;
 
@@ -4875,7 +4860,6 @@
                 lucide.createIcons();
 
                 try {
-                    // Fetch both open and closed trips
                     const [closedRes, openRes] = await Promise.all([
                         fetch(`/api/biki-proxy?base=customer&endpoint=/v3/profile/trips?open=false`, {
                             method: 'GET',
@@ -4887,16 +4871,13 @@
                         })
                     ]);
 
-                    if (!closedRes.ok || !openRes.ok) {
-                        throw new Error('Error al cargar viajes');
-                    }
+                    if (!closedRes.ok || !openRes.ok) throw new Error('Error al cargar viajes');
 
                     const closedData = await closedRes.json();
                     const openData = await openRes.json();
 
                     this.trips = closedData.trips || [];
 
-                    // Check for active trip
                     if (openData.tripCount > 0 && openData.trips && openData.trips.length > 0) {
                         this.activeTrip = openData.trips[0];
                         this.showActiveTrip();
@@ -4904,12 +4885,9 @@
                         this.activeTrip = null;
                         this.stopTimer();
 
-                        // Restore normal state
-                        const titleEl = document.getElementById('history-panel-title');
-                        if (titleEl) titleEl.textContent = 'Historial de Viajes';
-                        if (summaryEl) summaryEl.style.display = '';
-                        countEl.textContent = closedData.tripCount || this.trips.length;
-                        summaryEl.querySelector('.history-summary-label').textContent = 'Viajes realizados';
+                        console.log('Total closed trips:', closedData.tripCount);
+                        countEl.textContent = `(${closedData.tripCount || 0} totales)`;
+
                         this.renderTrips();
                     }
 
@@ -4921,6 +4899,7 @@
                             <p>Error al cargar el historial</p>
                         </div>
                     `;
+                    countEl.textContent = '';
                     lucide.createIcons();
                 } finally {
                     this.isLoading = false;
