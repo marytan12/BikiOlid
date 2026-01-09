@@ -16,6 +16,9 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- jsQR Library for QR Code Scanning -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
     <style>
         /* Reset and Base */
         * {
@@ -1011,6 +1014,197 @@
             color: rgba(255, 255, 255, 0.9);
             line-height: 1.5;
         }
+
+        /* QR Scanner Styles */
+        #qr-video-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        #qr-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #qr-canvas {
+            display: none;
+        }
+
+        .qr-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            border: 3px solid rgba(99, 102, 241, 0.8);
+            border-radius: 20px;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5),
+                0 0 30px rgba(99, 102, 241, 0.5),
+                inset 0 0 30px rgba(99, 102, 241, 0.2);
+            pointer-events: none;
+            animation: qr-pulse 2s infinite;
+        }
+
+        @keyframes qr-pulse {
+
+            0%,
+            100% {
+                border-color: rgba(99, 102, 241, 0.8);
+                box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5),
+                    0 0 30px rgba(99, 102, 241, 0.5),
+                    inset 0 0 30px rgba(99, 102, 241, 0.2);
+            }
+
+            50% {
+                border-color: rgba(139, 92, 246, 0.8);
+                box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5),
+                    0 0 40px rgba(139, 92, 246, 0.6),
+                    inset 0 0 40px rgba(139, 92, 246, 0.3);
+            }
+        }
+
+        .qr-corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 4px solid #fff;
+        }
+
+        .qr-corner.top-left {
+            top: -2px;
+            left: -2px;
+            border-right: none;
+            border-bottom: none;
+            border-top-left-radius: 20px;
+        }
+
+        .qr-corner.top-right {
+            top: -2px;
+            right: -2px;
+            border-left: none;
+            border-bottom: none;
+            border-top-right-radius: 20px;
+        }
+
+        .qr-corner.bottom-left {
+            bottom: -2px;
+            left: -2px;
+            border-right: none;
+            border-top: none;
+            border-bottom-left-radius: 20px;
+        }
+
+        .qr-corner.bottom-right {
+            bottom: -2px;
+            right: -2px;
+            border-left: none;
+            border-top: none;
+            border-bottom-right-radius: 20px;
+        }
+
+        .flashlight-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #fff;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .flashlight-btn:active {
+            transform: scale(0.95);
+        }
+
+        .flashlight-btn.active {
+            background: rgba(251, 191, 36, 0.4);
+            border-color: rgba(251, 191, 36, 0.6);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+        }
+
+        .flashlight-btn svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .qr-status {
+            padding: 15px 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .qr-status.show {
+            display: block;
+        }
+
+        .qr-status.success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        .qr-status.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+
+        .qr-status.info {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #818cf8;
+        }
+
+        .qr-instructions {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            line-height: 1.6;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            margin-top: 15px;
+        }
+
+        .qr-instructions strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 
@@ -1054,6 +1248,10 @@
         <button class="nav-btn" data-view="favorites" onclick="app.switchView('favorites')">
             <i data-lucide="heart"></i>
             <span>Favoritos</span>
+        </button>
+        <button class="nav-btn" data-view="qr" onclick="app.switchView('qr')">
+            <i data-lucide="scan"></i>
+            <span>QR</span>
         </button>
     </div>
 
@@ -1118,6 +1316,38 @@
 
         <div id="favorites-list" class="favorites-list">
             <!-- Will be populated dynamically -->
+        </div>
+    </div>
+
+    <!-- QR Scanner Panel -->
+    <div id="qr-panel" class="view-panel">
+        <div class="view-panel-header">
+            <h2 class="view-panel-title">Escanear QR</h2>
+            <button class="close-btn" onclick="app.switchView('map')">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+
+        <div id="qr-status" class="qr-status"></div>
+
+        <div id="qr-video-container">
+            <video id="qr-video" autoplay playsinline></video>
+            <canvas id="qr-canvas"></canvas>
+            <div class="qr-overlay">
+                <div class="qr-corner top-left"></div>
+                <div class="qr-corner top-right"></div>
+                <div class="qr-corner bottom-left"></div>
+                <div class="qr-corner bottom-right"></div>
+            </div>
+            <button id="flashlight-btn" class="flashlight-btn" onclick="qrScanner.toggleFlashlight()">
+                <i data-lucide="flashlight"></i>
+            </button>
+        </div>
+
+        <div class="qr-instructions">
+            <strong>Cómo escanear</strong>
+            Apunta la cámara al código QR de la bicicleta. El escaneo se realizará automáticamente cuando el código sea
+            detectado.
         </div>
     </div>
 
@@ -1470,12 +1700,22 @@
                 // Show/hide panels
                 document.getElementById('routes-panel').classList.remove('active');
                 document.getElementById('favorites-panel').classList.remove('active');
+                document.getElementById('qr-panel').classList.remove('active');
+
+                // Stop QR scanner when leaving QR view
+                if (this.currentView !== 'qr' && qrScanner.isScanning) {
+                    qrScanner.stopScanner();
+                }
 
                 if (view === 'routes') {
                     document.getElementById('routes-panel').classList.add('active');
                 } else if (view === 'favorites') {
                     document.getElementById('favorites-panel').classList.add('active');
                     this.updateFavoritesList();
+                } else if (view === 'qr') {
+                    document.getElementById('qr-panel').classList.add('active');
+                    // Start QR scanner when entering QR view
+                    setTimeout(() => qrScanner.startScanner(), 100);
                 }
 
                 lucide.createIcons();
@@ -2324,11 +2564,271 @@
             }
         };
 
+        // ==================== QR SCANNER SYSTEM ====================
+        const qrScanner = {
+            video: null,
+            canvas: null,
+            canvasContext: null,
+            stream: null,
+            scanningInterval: null,
+            isScanning: false,
+            flashlightOn: false,
+            lastScannedCode: null,
+            lastScannedTime: 0,
+
+            init: function () {
+                this.video = document.getElementById('qr-video');
+                this.canvas = document.getElementById('qr-canvas');
+                this.canvasContext = this.canvas.getContext('2d');
+            },
+
+            startScanner: async function () {
+                if (this.isScanning) return;
+
+                try {
+                    this.showStatus('Solicitando acceso a la cámara...', 'info');
+
+                    // Request camera access with ideal constraints
+                    const constraints = {
+                        video: {
+                            facingMode: { ideal: 'environment' }, // Rear camera preferred
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        }
+                    };
+
+                    this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    this.video.srcObject = this.stream;
+
+                    // Wait for video to be ready
+                    await new Promise((resolve) => {
+                        this.video.onloadedmetadata = () => {
+                            this.video.play();
+                            resolve();
+                        };
+                    });
+
+                    this.isScanning = true;
+                    this.hideStatus();
+
+                    // Start scanning loop
+                    this.scanningInterval = setInterval(() => this.scanFrame(), 300);
+
+                    console.log('QR Scanner started successfully');
+
+                } catch (error) {
+                    console.error('Camera access error:', error);
+
+                    let errorMessage = 'No se pudo acceder a la cámara.';
+                    if (error.name === 'NotAllowedError') {
+                        errorMessage = 'Permiso denegado. Por favor, permite el acceso a la cámara.';
+                    } else if (error.name === 'NotFoundError') {
+                        errorMessage = 'No se encontró ninguna cámara en el dispositivo.';
+                    } else if (error.name === 'NotReadableError') {
+                        errorMessage = 'La cámara está siendo usada por otra aplicación.';
+                    }
+
+                    this.showStatus(errorMessage, 'error');
+                }
+            },
+
+            stopScanner: function () {
+                if (!this.isScanning) return;
+
+                // Clear scanning interval
+                if (this.scanningInterval) {
+                    clearInterval(this.scanningInterval);
+                    this.scanningInterval = null;
+                }
+
+                // Stop video stream
+                if (this.stream) {
+                    this.stream.getTracks().forEach(track => track.stop());
+                    this.stream = null;
+                }
+
+                // Clear video source
+                if (this.video) {
+                    this.video.srcObject = null;
+                }
+
+                this.isScanning = false;
+                this.flashlightOn = false;
+                this.lastScannedCode = null;
+
+                // Remove flashlight active state
+                const flashlightBtn = document.getElementById('flashlight-btn');
+                if (flashlightBtn) {
+                    flashlightBtn.classList.remove('active');
+                }
+
+                this.hideStatus();
+                console.log('QR Scanner stopped');
+            },
+
+            scanFrame: function () {
+                if (!this.isScanning || !this.video || this.video.readyState !== this.video.HAVE_ENOUGH_DATA) {
+                    return;
+                }
+
+                // Set canvas size to match video
+                this.canvas.width = this.video.videoWidth;
+                this.canvas.height = this.video.videoHeight;
+
+                // Draw current video frame to canvas
+                this.canvasContext.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+
+                // Get image data from canvas
+                const imageData = this.canvasContext.getImageData(0, 0, this.canvas.width, this.canvas.height);
+
+                // Scan for QR code using jsQR library
+                if (typeof jsQR !== 'undefined') {
+                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: 'dontInvert'
+                    });
+
+                    if (code && code.data) {
+                        // Prevent duplicate scans within 3 seconds
+                        const now = Date.now();
+                        if (code.data !== this.lastScannedCode || now - this.lastScannedTime > 3000) {
+                            this.lastScannedCode = code.data;
+                            this.lastScannedTime = now;
+                            this.onQRCodeDetected(code.data);
+                        }
+                    }
+                }
+            },
+
+            onQRCodeDetected: function (qrData) {
+                console.log('QR Code detected:', qrData);
+
+                // Show success status
+                this.showStatus(`✓ QR detectado: ${qrData.substring(0, 20)}${qrData.length > 20 ? '...' : ''}`, 'success');
+
+                // Vibrate if available
+                if (navigator.vibrate) {
+                    navigator.vibrate(200);
+                }
+
+                // Call bike retrieval API
+                this.retrieveBike(qrData);
+            },
+
+            retrieveBike: async function (qrData) {
+                // PLACEHOLDER: This will be replaced with actual API integration
+                // when the user provides the API endpoint details
+
+                console.log('Retrieving bike with QR:', qrData);
+
+                try {
+                    // Check if user is logged in
+                    if (!auth.isLoggedIn()) {
+                        this.showStatus('Debes iniciar sesión para desbloquear una bicicleta', 'error');
+                        setTimeout(() => {
+                            app.closeAccount();
+                            app.openAccount();
+                        }, 2000);
+                        return;
+                    }
+
+                    this.showStatus('Procesando solicitud...', 'info');
+
+                    // PLACEHOLDER API CALL
+                    // Replace this section when API endpoint is provided
+                    /*
+                    const response = await fetch('API_ENDPOINT_HERE', {
+                        method: 'POST', // or GET, depending on API
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${auth.token}` // if needed
+                        },
+                        body: JSON.stringify({
+                            qrCode: qrData,
+                            // other required parameters
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Error ${response.status}: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    */
+
+                    // SIMULATED SUCCESS (remove when implementing real API)
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+
+                    this.showStatus('✓ Bicicleta desbloqueada exitosamente!', 'success');
+
+                    // Stop scanner after successful unlock
+                    setTimeout(() => {
+                        this.stopScanner();
+                        app.switchView('map');
+                    }, 2500);
+
+                } catch (error) {
+                    console.error('Bike retrieval error:', error);
+                    this.showStatus(`Error: ${error.message}`, 'error');
+                }
+            },
+
+            toggleFlashlight: async function () {
+                if (!this.stream) return;
+
+                try {
+                    const track = this.stream.getVideoTracks()[0];
+                    const capabilities = track.getCapabilities();
+
+                    if (!capabilities.torch) {
+                        this.showStatus('Este dispositivo no tiene linterna', 'error');
+                        setTimeout(() => this.hideStatus(), 2000);
+                        return;
+                    }
+
+                    this.flashlightOn = !this.flashlightOn;
+
+                    await track.applyConstraints({
+                        advanced: [{ torch: this.flashlightOn }]
+                    });
+
+                    // Update button visual state
+                    const flashlightBtn = document.getElementById('flashlight-btn');
+                    if (flashlightBtn) {
+                        flashlightBtn.classList.toggle('active', this.flashlightOn);
+                    }
+
+                    console.log('Flashlight:', this.flashlightOn ? 'ON' : 'OFF');
+
+                } catch (error) {
+                    console.error('Flashlight error:', error);
+                    this.showStatus('Error al controlar la linterna', 'error');
+                    setTimeout(() => this.hideStatus(), 2000);
+                }
+            },
+
+            showStatus: function (message, type = 'info') {
+                const statusEl = document.getElementById('qr-status');
+                if (!statusEl) return;
+
+                statusEl.textContent = message;
+                statusEl.className = `qr-status show ${type}`;
+            },
+
+            hideStatus: function () {
+                const statusEl = document.getElementById('qr-status');
+                if (!statusEl) return;
+
+                statusEl.classList.remove('show');
+            }
+        };
+
+
         // Initialize
         window.addEventListener('DOMContentLoaded', () => {
             app.init();
             routing.init();
             auth.init();
+            qrScanner.init();
         });
     </script>
 
