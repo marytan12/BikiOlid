@@ -825,6 +825,83 @@
             height: 18px;
         }
 
+        /* Rent Status Alert */
+        .rent-alert {
+            background: rgba(239, 68, 68, 0.1) !important;
+            border-color: rgba(239, 68, 68, 0.3) !important;
+        }
+
+        .rent-alert-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .rent-alert-content>svg {
+            width: 24px;
+            height: 24px;
+            color: #f87171;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .rent-alert-content strong {
+            display: block;
+            color: #fca5a5;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .rent-alert-content p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* Subscription Card */
+        .subscription-card {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .subscription-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #a5b4fc;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .subscription-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .subscription-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .subscription-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .subscription-value {
+            font-size: 13px;
+            color: #fff;
+            font-weight: 500;
+        }
+
         /* Swap button */
         .swap-btn {
             width: 40px;
@@ -1068,26 +1145,62 @@
                     </div>
                 </div>
 
-                <div class="account-section">
-                    <h3>Estado de la cuenta</h3>
-                    <div class="profile-stats">
-                        <div class="profile-stat">
-                            <span class="profile-stat-label">Estado</span>
-                            <span class="profile-stat-value" id="profile-status">-</span>
-                        </div>
-                        <div class="profile-stat">
-                            <span class="profile-stat-label">Saldo</span>
-                            <span class="profile-stat-value" id="profile-balance">-</span>
-                        </div>
-                        <div class="profile-stat">
-                            <span class="profile-stat-label">Suscripción</span>
-                            <span class="profile-stat-value" id="profile-subscription">-</span>
+                <!-- Rent Status Alert -->
+                <div id="rent-status-alert" class="account-section rent-alert hidden">
+                    <div class="rent-alert-content">
+                        <i data-lucide="alert-circle"></i>
+                        <div>
+                            <strong id="rent-status-title">-</strong>
+                            <p id="rent-status-description">-</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="account-section">
-                    <h3>Información del usuario</h3>
+                    <h3>Estado de la cuenta</h3>
+                    <div class="profile-stats">
+                        <div class="profile-stat">
+                            <span class="profile-stat-label">Puede alquilar</span>
+                            <span class="profile-stat-value" id="profile-can-rent">-</span>
+                        </div>
+                        <div class="profile-stat">
+                            <span class="profile-stat-label">Bici eléctrica</span>
+                            <span class="profile-stat-value" id="profile-can-rent-electric">-</span>
+                        </div>
+                        <div class="profile-stat">
+                            <span class="profile-stat-label">Suspendido</span>
+                            <span class="profile-stat-value" id="profile-suspended">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="account-section">
+                    <h3>Suscripción</h3>
+                    <div class="subscription-card">
+                        <div class="subscription-name" id="profile-plan-name">-</div>
+                        <div class="subscription-details">
+                            <div class="subscription-detail">
+                                <span class="subscription-label">Estado</span>
+                                <span class="subscription-value" id="profile-plan-status">-</span>
+                            </div>
+                            <div class="subscription-detail">
+                                <span class="subscription-label">Precio</span>
+                                <span class="subscription-value" id="profile-plan-price">-</span>
+                            </div>
+                            <div class="subscription-detail">
+                                <span class="subscription-label">Válido hasta</span>
+                                <span class="subscription-value" id="profile-plan-end">-</span>
+                            </div>
+                            <div class="subscription-detail">
+                                <span class="subscription-label">Renovación auto.</span>
+                                <span class="subscription-value" id="profile-auto-renew">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="account-section">
+                    <h3>Información personal</h3>
                     <div class="profile-details">
                         <div class="profile-detail-row">
                             <span class="profile-detail-label">ID de miembro</span>
@@ -1098,8 +1211,12 @@
                             <span class="profile-detail-value" id="profile-phone">-</span>
                         </div>
                         <div class="profile-detail-row">
-                            <span class="profile-detail-label">Fecha de registro</span>
-                            <span class="profile-detail-value" id="profile-registered">-</span>
+                            <span class="profile-detail-label">Ciudad</span>
+                            <span class="profile-detail-value" id="profile-city">-</span>
+                        </div>
+                        <div class="profile-detail-row">
+                            <span class="profile-detail-label">Tarjeta</span>
+                            <span class="profile-detail-value" id="profile-card">-</span>
                         </div>
                     </div>
                 </div>
@@ -2000,47 +2117,103 @@
                 document.getElementById('login-form-container').classList.add('hidden');
                 document.getElementById('profile-container').classList.remove('hidden');
 
-                // Update profile info
-                const firstName = data.firstName || data.first_name || '';
-                const lastName = data.lastName || data.last_name || '';
+                // Name and email from details
+                const firstName = data.details?.firstname || '';
+                const lastName = data.details?.lastname || '';
                 const fullName = `${firstName} ${lastName}`.trim() || 'Usuario';
 
                 document.getElementById('profile-name').textContent = fullName;
-                document.getElementById('profile-email').textContent = data.email || data.emailAddress || '-';
+                document.getElementById('profile-email').textContent = data.email || data.username || '-';
 
-                // Status
-                const status = data.status || data.memberStatus || '-';
-                const statusEl = document.getElementById('profile-status');
-                statusEl.textContent = this.translateStatus(status);
-                statusEl.style.color = status === 'ACTIVE' || status === 'active' ? '#10b981' : '#f59e0b';
-
-                // Balance
-                const balance = data.balance || data.accountBalance || 0;
-                const currency = data.currency || '€';
-                document.getElementById('profile-balance').textContent = `${balance.toFixed ? balance.toFixed(2) : balance} ${currency}`;
-
-                // Subscription
-                const subscription = data.subscription?.name || data.subscriptionType || data.membershipType || '-';
-                document.getElementById('profile-subscription').textContent = subscription;
-
-                // Details
-                document.getElementById('profile-member-id').textContent = data.memberId || data.id || data.member_id || '-';
-                document.getElementById('profile-phone').textContent = data.phone || data.phoneNumber || data.mobile || '-';
-
-                // Registration date
-                const regDate = data.registrationDate || data.createdAt || data.created_at;
-                if (regDate) {
-                    const date = new Date(regDate);
-                    document.getElementById('profile-registered').textContent = date.toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    });
+                // Rent status alert (show if can't rent)
+                const rentAlert = document.getElementById('rent-status-alert');
+                if (!data.canRent && data.cantRentReason) {
+                    document.getElementById('rent-status-title').textContent = this.translateRentReason(data.cantRentReason);
+                    document.getElementById('rent-status-description').textContent = data.cantRentReasonDescription || '';
+                    rentAlert.classList.remove('hidden');
                 } else {
-                    document.getElementById('profile-registered').textContent = '-';
+                    rentAlert.classList.add('hidden');
+                }
+
+                // Account status
+                const canRentEl = document.getElementById('profile-can-rent');
+                canRentEl.textContent = data.canRent ? 'Sí' : 'No';
+                canRentEl.style.color = data.canRent ? '#10b981' : '#f87171';
+
+                const canRentElectricEl = document.getElementById('profile-can-rent-electric');
+                canRentElectricEl.textContent = data.canRentElectrical ? 'Sí' : 'No';
+                canRentElectricEl.style.color = data.canRentElectrical ? '#10b981' : '#f87171';
+
+                const suspendedEl = document.getElementById('profile-suspended');
+                suspendedEl.textContent = data.suspended ? 'Sí' : 'No';
+                suspendedEl.style.color = data.suspended ? '#f87171' : '#10b981';
+
+                // Subscription/Plan info
+                if (data.plan) {
+                    document.getElementById('profile-plan-name').textContent = data.plan.planName || '-';
+
+                    const statusEl = document.getElementById('profile-plan-status');
+                    statusEl.textContent = this.translatePlanStatus(data.plan.status);
+                    statusEl.style.color = data.plan.status === 'Completed' ? '#f59e0b' :
+                        data.plan.status === 'Active' ? '#10b981' : '#94a3b8';
+
+                    document.getElementById('profile-plan-price').textContent = data.plan.total ? `${data.plan.total}€` : '-';
+
+                    // End date
+                    if (data.plan.endTime) {
+                        const endDate = new Date(data.plan.endTime);
+                        document.getElementById('profile-plan-end').textContent = endDate.toLocaleDateString('es-ES', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        });
+                    } else {
+                        document.getElementById('profile-plan-end').textContent = '-';
+                    }
+
+                    document.getElementById('profile-auto-renew').textContent = data.plan.autoRenew ? 'Sí' : 'No';
+                } else {
+                    document.getElementById('profile-plan-name').textContent = 'Sin suscripción';
+                    document.getElementById('profile-plan-status').textContent = '-';
+                    document.getElementById('profile-plan-price').textContent = '-';
+                    document.getElementById('profile-plan-end').textContent = '-';
+                    document.getElementById('profile-auto-renew').textContent = '-';
+                }
+
+                // Personal info
+                document.getElementById('profile-member-id').textContent = data.id || '-';
+                document.getElementById('profile-phone').textContent = data.phoneNumber || data.details?.phone1 || '-';
+                document.getElementById('profile-city').textContent = data.details?.city?.trim() || '-';
+
+                // Card info
+                if (data.card && data.card.cardNumberFourDigits) {
+                    document.getElementById('profile-card').textContent = `•••• ${data.card.cardNumberFourDigits}`;
+                } else {
+                    document.getElementById('profile-card').textContent = 'No registrada';
                 }
 
                 lucide.createIcons();
+            },
+
+            translateRentReason: function (reason) {
+                const translations = {
+                    'NO_SUB': 'Sin suscripción activa',
+                    'SUSPENDED': 'Cuenta suspendida',
+                    'NO_CARD': 'Tarjeta no registrada',
+                    'CARD_EXPIRED': 'Tarjeta expirada',
+                    'BALANCE_LOW': 'Saldo insuficiente'
+                };
+                return translations[reason] || reason;
+            },
+
+            translatePlanStatus: function (status) {
+                const translations = {
+                    'Completed': 'Expirado',
+                    'Active': 'Activo',
+                    'Cancelled': 'Cancelado',
+                    'Pending': 'Pendiente'
+                };
+                return translations[status] || status;
             },
 
             translateStatus: function (status) {
