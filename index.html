@@ -985,6 +985,266 @@
             letter-spacing: 0.3px;
         }
 
+        /* Trip History Styles */
+        .history-summary {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .history-summary-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #a5b4fc;
+            display: block;
+        }
+
+        .history-summary-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: calc(100vh - 280px);
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 3px;
+        }
+
+        .history-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 40px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .history-loading svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .history-empty {
+            text-align: center;
+            padding: 40px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .history-empty svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .trip-card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .trip-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .trip-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .trip-date {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .trip-bike-type {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .trip-bike-type.electric {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .trip-bike-type.mechanical {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .trip-bike-type svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .trip-route {
+            display: flex;
+            align-items: stretch;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .trip-route-line {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2px 0;
+        }
+
+        .trip-route-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .trip-route-dot.start {
+            background: #10b981;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+        }
+
+        .trip-route-dot.end {
+            background: #ef4444;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+        }
+
+        .trip-route-connector {
+            flex: 1;
+            width: 2px;
+            background: linear-gradient(to bottom, #10b981, #ef4444);
+            margin: 4px 0;
+            min-height: 30px;
+        }
+
+        .trip-stations {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .trip-station {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .trip-station-name {
+            font-size: 13px;
+            color: #fff;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        .trip-station-time {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .trip-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .trip-stats {
+            display: flex;
+            gap: 15px;
+        }
+
+        .trip-stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .trip-stat svg {
+            width: 14px;
+            height: 14px;
+            opacity: 0.6;
+        }
+
+        .trip-price {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .trip-price.free {
+            color: #10b981;
+        }
+
+        .trip-price.paid {
+            color: #f59e0b;
+        }
+
+        .history-login-required {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .history-login-required svg {
+            width: 48px;
+            height: 48px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 15px;
+        }
+
+        .history-login-required p {
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 15px;
+        }
+
+        .history-login-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
         /* Swap button */
         .swap-btn {
             width: 40px;
@@ -1432,6 +1692,10 @@
             <i data-lucide="heart"></i>
             <span>Favoritos</span>
         </button>
+        <button class="nav-btn" data-view="history" onclick="app.switchView('history')">
+            <i data-lucide="history"></i>
+            <span>Historial</span>
+        </button>
         <button class="nav-btn" data-view="qr" onclick="app.switchView('qr')">
             <i data-lucide="scan"></i>
             <span>QR</span>
@@ -1499,6 +1763,30 @@
 
         <div id="favorites-list" class="favorites-list">
             <!-- Will be populated dynamically -->
+        </div>
+    </div>
+
+    <!-- Trip History Panel -->
+    <div id="history-panel" class="view-panel">
+        <div class="view-panel-header">
+            <h2 class="view-panel-title">Historial de Viajes</h2>
+            <button class="close-btn" onclick="app.switchView('map')">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+
+        <div id="history-summary" class="history-summary">
+            <div class="history-summary-item">
+                <span class="history-summary-value" id="history-trip-count">-</span>
+                <span class="history-summary-label">Viajes realizados</span>
+            </div>
+        </div>
+
+        <div id="history-list" class="history-list">
+            <div class="history-loading">
+                <i data-lucide="loader-2" class="spin"></i>
+                <span>Cargando historial...</span>
+            </div>
         </div>
     </div>
 
@@ -1940,6 +2228,7 @@
                 // Show/hide panels
                 document.getElementById('routes-panel').classList.remove('active');
                 document.getElementById('favorites-panel').classList.remove('active');
+                document.getElementById('history-panel').classList.remove('active');
                 document.getElementById('qr-panel').classList.remove('active');
 
                 // Stop QR scanner when leaving QR view
@@ -1952,6 +2241,9 @@
                 } else if (view === 'favorites') {
                     document.getElementById('favorites-panel').classList.add('active');
                     this.updateFavoritesList();
+                } else if (view === 'history') {
+                    document.getElementById('history-panel').classList.add('active');
+                    tripHistory.loadTrips();
                 } else if (view === 'qr') {
                     document.getElementById('qr-panel').classList.add('active');
                     // Start QR scanner when entering QR view
@@ -3193,6 +3485,213 @@
                 }
 
                 this.pendingQRCode = null;
+            }
+        };
+
+        // ==================== TRIP HISTORY SYSTEM ====================
+        const tripHistory = {
+            trips: [],
+            isLoading: false,
+
+            loadTrips: async function () {
+                const listContainer = document.getElementById('history-list');
+                const countEl = document.getElementById('history-trip-count');
+
+                // Check if logged in
+                if (!auth.isLoggedIn()) {
+                    listContainer.innerHTML = `
+                        <div class="history-login-required">
+                            <i data-lucide="user-x"></i>
+                            <p>Inicia sesión para ver tu historial de viajes</p>
+                            <button class="history-login-btn" onclick="app.openAccount()">
+                                Iniciar Sesión
+                            </button>
+                        </div>
+                    `;
+                    countEl.textContent = '-';
+                    lucide.createIcons();
+                    return;
+                }
+
+                // Show loading
+                if (this.isLoading) return;
+                this.isLoading = true;
+
+                listContainer.innerHTML = `
+                    <div class="history-loading">
+                        <i data-lucide="loader-2" class="spin"></i>
+                        <span>Cargando historial...</span>
+                    </div>
+                `;
+                lucide.createIcons();
+
+                try {
+                    const response = await fetch(
+                        `/api/biki-proxy?base=customer&endpoint=/v3/profile/trips?open=false`,
+                        {
+                            method: 'GET',
+                            headers: auth.getProxyHeaders()
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(`Error ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    this.trips = data.trips || [];
+
+                    // Update count
+                    countEl.textContent = data.tripCount || this.trips.length;
+
+                    // Render trips
+                    this.renderTrips();
+
+                } catch (error) {
+                    console.error('Trip history error:', error);
+                    listContainer.innerHTML = `
+                        <div class="history-empty">
+                            <i data-lucide="alert-circle"></i>
+                            <p>Error al cargar el historial</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+
+            renderTrips: function () {
+                const listContainer = document.getElementById('history-list');
+
+                if (this.trips.length === 0) {
+                    listContainer.innerHTML = `
+                        <div class="history-empty">
+                            <i data-lucide="bike"></i>
+                            <p>No tienes viajes registrados aún</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                // Sort trips by date (newest first)
+                const sortedTrips = [...this.trips].sort((a, b) =>
+                    new Date(b.startTime) - new Date(a.startTime)
+                );
+
+                listContainer.innerHTML = sortedTrips.map(trip => this.renderTripCard(trip)).join('');
+                lucide.createIcons();
+            },
+
+            renderTripCard: function (trip) {
+                const startDate = new Date(trip.startTime);
+                const endDate = new Date(trip.endTime);
+
+                const isElectric = trip.bike?.propulsionType === 'ELECTRIC_ASSIST';
+                const bikeTypeClass = isElectric ? 'electric' : 'mechanical';
+                const bikeTypeLabel = isElectric ? 'Eléctrica' : 'Mecánica';
+                const bikeIcon = isElectric ? 'zap' : 'bike';
+
+                const duration = this.formatDuration(trip.duration);
+                const price = trip.price || 0;
+                const priceClass = price > 0 ? 'paid' : 'free';
+                const priceText = price > 0 ? `${price.toFixed(2)}€` : 'Gratis';
+
+                // Format station names (remove leading numbers)
+                const startStation = this.formatStationName(trip.startStationName);
+                const endStation = this.formatStationName(trip.endStationName);
+
+                const dateStr = this.formatDate(startDate);
+                const startTimeStr = this.formatTime(startDate);
+                const endTimeStr = this.formatTime(endDate);
+
+                return `
+                    <div class="trip-card">
+                        <div class="trip-card-header">
+                            <span class="trip-date">${dateStr}</span>
+                            <span class="trip-bike-type ${bikeTypeClass}">
+                                <i data-lucide="${bikeIcon}"></i>
+                                ${bikeTypeLabel}
+                            </span>
+                        </div>
+                        
+                        <div class="trip-route">
+                            <div class="trip-route-line">
+                                <div class="trip-route-dot start"></div>
+                                <div class="trip-route-connector"></div>
+                                <div class="trip-route-dot end"></div>
+                            </div>
+                            <div class="trip-stations">
+                                <div class="trip-station">
+                                    <span class="trip-station-name">${startStation}</span>
+                                    <span class="trip-station-time">${startTimeStr}</span>
+                                </div>
+                                <div class="trip-station">
+                                    <span class="trip-station-name">${endStation}</span>
+                                    <span class="trip-station-time">${endTimeStr}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="trip-card-footer">
+                            <div class="trip-stats">
+                                <div class="trip-stat">
+                                    <i data-lucide="clock"></i>
+                                    <span>${duration}</span>
+                                </div>
+                                <div class="trip-stat">
+                                    <i data-lucide="hash"></i>
+                                    <span>${trip.bike?.obcn || '-'}</span>
+                                </div>
+                            </div>
+                            <span class="trip-price ${priceClass}">${priceText}</span>
+                        </div>
+                    </div>
+                `;
+            },
+
+            formatStationName: function (name) {
+                if (!name) return '-';
+                // Remove leading numbers and spaces (e.g., "604 Espacio Joven" -> "Espacio Joven")
+                return name.replace(/^\d+\s+/, '').trim();
+            },
+
+            formatDuration: function (seconds) {
+                if (!seconds || seconds < 60) return `${seconds || 0}s`;
+
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+
+                if (hours > 0) {
+                    return `${hours}h ${minutes}m`;
+                }
+                return `${minutes}m`;
+            },
+
+            formatDate: function (date) {
+                const today = new Date();
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+
+                if (date.toDateString() === today.toDateString()) {
+                    return 'Hoy';
+                } else if (date.toDateString() === yesterday.toDateString()) {
+                    return 'Ayer';
+                }
+
+                return date.toLocaleDateString('es-ES', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+                });
+            },
+
+            formatTime: function (date) {
+                return date.toLocaleTimeString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
             }
         };
 
