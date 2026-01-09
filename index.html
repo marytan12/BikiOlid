@@ -66,12 +66,13 @@
         }
 
         /* Dark mode map tiles */
-        .leaflet-layer,
+        /* Dark mode map tiles removed by request */
+        /* .leaflet-layer,
         .leaflet-control-zoom-in,
         .leaflet-control-zoom-out,
         .leaflet-control-attribution {
             filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
-        }
+        } */
 
         /* Hide Leaflet attribution and controls */
         .leaflet-control-attribution,
@@ -3527,6 +3528,12 @@
                         cancelAnimationFrame(rafId);
                         rafId = null;
                     }
+
+                    // Reset all icons immediately
+                    document.querySelectorAll('.nav-btn i, .nav-btn svg').forEach(icon => {
+                        icon.style.transition = 'transform 0.3s ease';
+                        icon.style.transform = 'scale(1)';
+                    });
 
                     // Determine drop target (nearest button)
                     const currentCenter = indicator.offsetLeft + (indicator.offsetWidth / 2);
