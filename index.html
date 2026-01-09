@@ -193,10 +193,10 @@
         /* Account Button */
         .account-btn {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             z-index: 1000;
             display: flex;
@@ -205,6 +205,11 @@
             cursor: pointer;
             transition: transform 0.2s ease;
             will-change: transform;
+        }
+
+        .account-btn svg {
+            width: 20px;
+            height: 20px;
         }
 
         .account-btn:active {
@@ -1679,7 +1684,7 @@
 
     <!-- Top Stats Overlay (Optional) -->
     <div class="stats-overlay">
-        <div class="stat-item">
+        <!-- <div class="stat-item">
             <i data-lucide="zap" class="text-amber-400"></i>
             <span class="stat-value" id="stat-ebikes">-</span>
         </div>
@@ -1690,7 +1695,7 @@
         <div class="stat-item">
             <i data-lucide="map-pin" class="text-indigo-400"></i>
             <span class="stat-value" id="stat-stations">-</span>
-        </div>
+        </div> -->
     </div>
 
     <!-- Account Button -->
@@ -1703,23 +1708,18 @@
         <div class="nav-indicator" id="nav-indicator"></div>
         <button class="nav-btn active" data-view="map" onclick="app.switchView('map')">
             <i data-lucide="map"></i>
-            <span>Mapa</span>
         </button>
         <button class="nav-btn" data-view="routes" onclick="app.switchView('routes')">
             <i data-lucide="navigation"></i>
-            <span>Rutas</span>
         </button>
         <button class="nav-btn" data-view="favorites" onclick="app.switchView('favorites')">
             <i data-lucide="heart"></i>
-            <span>Favoritos</span>
         </button>
         <button class="nav-btn" data-view="history" onclick="app.switchView('history')">
             <i data-lucide="history"></i>
-            <span>Historial</span>
         </button>
         <button class="nav-btn" data-view="qr" onclick="app.switchView('qr')">
             <i data-lucide="scan"></i>
-            <span>QR</span>
         </button>
     </div>
 
@@ -2029,14 +2029,6 @@
                     <i data-lucide="log-out"></i>
                     Cerrar sesión
                 </button>
-            </div>
-
-            <!-- About Section (always visible) -->
-            <div class="account-section">
-                <h3>Acerca de</h3>
-                <p>Aplicación de consulta del estado de las estaciones del sistema de bicicletas públicas Biki
-                    Valladolid.</p>
-                <p style="margin-top: 10px;">Versión 2.0 - Liquid Glass UI</p>
             </div>
         </div>
     </div>
