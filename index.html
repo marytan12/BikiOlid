@@ -2773,33 +2773,53 @@
                     });
 
                     marker.bindPopup(`
-                        <div style="padding: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                                <h3 style="font-size: 15px; font-weight: 700; color: #fff; margin: 0; flex: 1; line-height: 1.3;">${st.name}</h3>
-                                <button onclick="app.toggleFavorite('${st.station_id}')" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-left: 8px; font-size: 18px; transition: all 0.2s;">
-                                    ${isFav ? '❤️' : '🤍'}
+                        <div class="station-popup-content">
+                            <div class="station-popup-header">
+                                <h3 class="station-popup-title">${st.name}</h3>
+                                <button onclick="app.toggleFavorite('${st.station_id}')" class="station-fav-btn" title="${isFav ? 'Quitar de favoritos' : 'Añadir a favoritos'}">
+                                    <i data-lucide="${isFav ? 'heart' : 'heart'}" style="${isFav ? 'fill: #ef4444; color: #ef4444;' : 'color: rgba(255,255,255,0.5);'}"></i>
                                 </button>
                             </div>
                             
-                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px;">
-                                <div style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(217, 119, 6, 0.1)); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 12px; padding: 10px; text-align: center;">
-                                    <div style="font-size: 22px; font-weight: 700; color: #fbbf24; margin-bottom: 2px;">${st.elec_bikes}</div>
-                                    <div style="font-size: 10px; color: rgba(251, 191, 36, 0.8); text-transform: uppercase; letter-spacing: 0.5px;">⚡ Eléctricas</div>
+                            <div class="station-bikes-grid">
+                                <div class="station-bike-card electric">
+                                    <div class="bike-card-icon">
+                                        <i data-lucide="zap"></i>
+                                    </div>
+                                    <div class="bike-card-content">
+                                        <div class="bike-card-value">${st.elec_bikes}</div>
+                                        <div class="bike-card-label">Eléctricas</div>
+                                    </div>
                                 </div>
-                                <div style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 10px; text-align: center;">
-                                    <div style="font-size: 22px; font-weight: 700; color: #e2e8f0; margin-bottom: 2px;">${st.mech_bikes}</div>
-                                    <div style="font-size: 10px; color: rgba(226, 232, 240, 0.7); text-transform: uppercase; letter-spacing: 0.5px;">🚲 Mecánicas</div>
+                                <div class="station-bike-card mechanical">
+                                    <div class="bike-card-icon">
+                                        <i data-lucide="bike"></i>
+                                    </div>
+                                    <div class="bike-card-content">
+                                        <div class="bike-card-value">${st.mech_bikes}</div>
+                                        <div class="bike-card-label">Mecánicas</div>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div style="background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 12px; padding: 10px; text-align: center;">
-                                <div style="font-size: 11px; color: rgba(156, 163, 175, 0.9); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.5px;">Anclajes Libres</div>
-                                <div style="font-size: 20px; font-weight: 700; color: #818cf8;">🅿️ ${st.docks}</div>
+                            <div class="station-docks-card">
+                                <div class="docks-card-icon">
+                                    <i data-lucide="circle-parking"></i>
+                                </div>
+                                <div class="docks-card-content">
+                                    <div class="docks-card-label">Anclajes libres</div>
+                                    <div class="docks-card-value">${st.docks}</div>
+                                </div>
                             </div>
                         </div>
                     `, {
-                        maxWidth: 280,
+                        maxWidth: 320,
                         className: 'custom-popup'
+                    });
+
+                    // Initialize Lucide icons in popup after it opens
+                    marker.on('popupopen', () => {
+                        setTimeout(() => lucide.createIcons(), 50);
                     });
 
                     markers.push(marker);
