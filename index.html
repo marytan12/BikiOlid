@@ -1178,6 +1178,190 @@
             line-height: 1.4;
         }
 
+        /* Station Popup - Liquid Glass */
+        .station-popup-content {
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(36, 50, 68, 0.95));
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .station-popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 18px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .station-popup-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin: 0;
+            flex: 1;
+            line-height: 1.3;
+        }
+
+        .station-fav-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-left: 12px;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .station-fav-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+        }
+
+        .station-fav-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .station-bikes-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 16px 18px 12px 18px;
+        }
+
+        .station-bike-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 14px 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .station-bike-card:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+            transform: translateY(-2px);
+        }
+
+        .station-bike-card.electric {
+            border-color: rgba(251, 191, 36, 0.3);
+        }
+
+        .station-bike-card.mechanical {
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .bike-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .station-bike-card.electric .bike-card-icon {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(217, 119, 6, 0.15));
+        }
+
+        .station-bike-card.mechanical .bike-card-icon {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.15));
+        }
+
+        .bike-card-icon svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .station-bike-card.electric .bike-card-icon svg {
+            color: #fbbf24;
+        }
+
+        .station-bike-card.mechanical .bike-card-icon svg {
+            color: #10b981;
+        }
+
+        .bike-card-content {
+            flex: 1;
+        }
+
+        .bike-card-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .bike-card-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .station-docks-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(79, 70, 229, 0.1));
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin: 0 18px 16px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            backdrop-filter: blur(10px);
+        }
+
+        .docks-card-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(79, 70, 229, 0.2));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .docks-card-icon svg {
+            width: 24px;
+            height: 24px;
+            color: #818cf8;
+        }
+
+        .docks-card-content {
+            flex: 1;
+        }
+
+        .docks-card-label {
+            font-size: 11px;
+            color: rgba(156, 163, 175, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .docks-card-value {
+            font-size: 26px;
+            font-weight: 700;
+            color: #818cf8;
+            line-height: 1;
+        }
+
         /* Subscription Section - New Design */
         .subscription-section {
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.08));
