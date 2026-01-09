@@ -1036,12 +1036,12 @@
         }
 
         .history-list::-webkit-scrollbar {
-            width: 6px;
+            display: none;
         }
 
-        .history-list::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 3px;
+        .history-list {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
 
         .history-loading {
@@ -1348,14 +1348,18 @@
         }
 
         /* QR Scanner Styles */
+        #qr-panel {
+            overflow-y: hidden;
+        }
+
         #qr-video-container {
             position: relative;
             width: 100%;
-            height: 400px;
+            height: 280px;
             background: #000;
             border-radius: 20px;
             overflow: hidden;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         #qr-video {
@@ -1373,8 +1377,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 250px;
-            height: 250px;
+            width: 200px;
+            height: 200px;
             border: 3px solid rgba(99, 102, 241, 0.8);
             border-radius: 20px;
             box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5),
