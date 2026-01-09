@@ -1,22 +1,37 @@
-// Vercel Serverless Function - Proxy for Biki API to bypass CORS
-export default async function handler(req, res) {
-    // Set CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token');
+// Netlify Function - Proxy for Biki API
+// No uses "export default", usa "export const handler"
 
-    // Handle preflight
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+export const handler = async (event, context) => {
+    // 1. Preparamos los headers de respuesta (CORS)
+    const responseHeaders = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-auth-token',
+        'Content-Type': 'application/json'
+    };
+
+    // 2. Manejo de Preflight (OPTIONS)
+    if (event.httpMethod === 'OPTIONS') {
+        return {
+            statusCode: 200,
+            headers: responseHeaders,
+            body: ''
+        };
     }
 
-    const { endpoint, auth, base } = req.query;
+    // 3. Obtener Query Parameters (Nota el cambio de req.query a event.queryStringParameters)
+    const params = event.queryStringParameters || {};
+    const { endpoint, auth, base } = params;
 
     if (!endpoint) {
-        return res.status(400).json({ error: 'Missing endpoint parameter' });
+        return {
+            statusCode: 400,
+            headers: responseHeaders,
+            body: JSON.stringify({ error: 'Missing endpoint parameter' })
+        };
     }
 
-    // Support different API bases
+    // Configuración de la API externa
     const API_BASES = {
         'mobile': 'https://valladolid.publicbikesystem.net/ube/mobile',
         'customer': 'https://valladolid.publicbikesystem.net/customer'
@@ -26,7 +41,7 @@ export default async function handler(req, res) {
     const API_KEY = 'QopJK73RwNkwj5hfFk1cInN8BDM0pcaVC9hWYXqU';
     const DEVICE_ID = 'ec968fbf0cb2ceef';
 
-    const headers = {
+    const reqHeaders = {
         'accept': 'application/json',
         'Accept-Encoding': 'gzip',
         'accept-language': 'en',
@@ -34,31 +49,36 @@ export default async function handler(req, res) {
         'device-id': DEVICE_ID,
         'Host': 'valladolid.publicbikesystem.net',
         'x-api-key': API_KEY,
-        'user-agent': 'biki/5.35.0.8 Mozilla/5.0 (Linux; Android 12; sdk_gphone64_x86_64 Build/SE1A.220826.008; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/91.0.4472.114 Mobile Safari/537.36'
+        'user-agent': 'biki/5.35.0.8 Mozilla/5.0 (Linux; Android 12; sdk_gphone64_x86_64)'
     };
 
-    // Add authorization header if provided (for authenticate endpoint)
-    if (auth) {
-        headers['authorization'] = `Basic ${auth}`;
-    }
-
-    // Add auth token if provided (for authenticated requests)
-    const authToken = req.headers['x-auth-token'];
-    if (authToken) {
-        headers['x-auth-token'] = authToken;
-    }
+    // Auth headers
+    if (auth) reqHeaders['authorization'] = `Basic ${auth}`;
+    
+    // Auth token (Nota el cambio de req.headers a event.headers)
+    // Netlify pone los headers en minúsculas a veces, buscamos con cuidado
+    const incomingToken = event.headers['x-auth-token'] || event.headers['X-Auth-Token'];
+    if (incomingToken) reqHeaders['x-auth-token'] = incomingToken;
 
     try {
         const fullUrl = `${API_BASE}${endpoint}`;
         console.log('Proxying request to:', fullUrl);
 
+        // Preparar el body para la petición externa
+        let bodyPayload = undefined;
+        if (event.httpMethod === 'POST' && event.body) {
+            // En Netlify, event.body es un STRING, no un objeto JSON. Hay que parsearlo si lo necesitas
+            // pero si lo vas a reenviar tal cual, puedes mandarlo directo o parsearlo para asegurar validez.
+            bodyPayload = event.body; 
+        }
+
         const response = await fetch(fullUrl, {
-            method: req.method === 'POST' ? 'POST' : 'GET',
-            headers: headers,
-            body: req.method === 'POST' ? JSON.stringify(req.body) : undefined
+            method: event.httpMethod,
+            headers: reqHeaders,
+            body: bodyPayload
         });
 
-        // Try to parse as JSON, fallback to text
+        // Parsear respuesta
         const contentType = response.headers.get('content-type');
         let data;
 
@@ -66,13 +86,23 @@ export default async function handler(req, res) {
             data = await response.json();
         } else {
             data = await response.text();
+            // Si es texto, intentamos envolverlo en JSON o devolverlo como string
+            try { data = JSON.parse(data) } catch(e) {}
         }
 
-        // Forward the status code
-        res.status(response.status).json(data);
+        // RETORNO FINAL (Sintaxis Netlify)
+        return {
+            statusCode: response.status,
+            headers: responseHeaders,
+            body: JSON.stringify(data)
+        };
 
     } catch (error) {
         console.error('Proxy error:', error);
-        res.status(500).json({ error: 'Proxy request failed', message: error.message });
+        return {
+            statusCode: 500,
+            headers: responseHeaders,
+            body: JSON.stringify({ error: 'Proxy request failed', message: error.message })
+        };
     }
-}
+};
