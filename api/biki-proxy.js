@@ -52,6 +52,11 @@ export default async function handler(req, res) {
         const fullUrl = `${API_BASE}${endpoint}`;
         console.log('Proxying request to:', fullUrl);
 
+        // Add Content-Type for POST requests
+        if (req.method === 'POST') {
+            headers['Content-Type'] = 'application/json';
+        }
+
         const response = await fetch(fullUrl, {
             method: req.method === 'POST' ? 'POST' : 'GET',
             headers: headers,

@@ -2965,7 +2965,7 @@
             token: null,
             memberData: null,
 
-            init: function () {
+            init: async function () {
                 // Check for existing session
                 const savedToken = localStorage.getItem('biki_auth_token');
                 const savedMember = localStorage.getItem('biki_member_data');
@@ -2975,6 +2975,9 @@
                     try {
                         this.memberData = JSON.parse(savedMember);
                         this.showProfile();
+
+                        // Validate token in background - refresh member data to ensure token is still valid
+                        this.validateAndRefreshToken();
                     } catch (e) {
                         this.logout();
                     }
@@ -2987,6 +2990,38 @@
                 document.getElementById('login-email').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') document.getElementById('login-password').focus();
                 });
+            },
+
+            // Validate token by making a test request
+            validateAndRefreshToken: async function () {
+                if (!this.token) return false;
+
+                try {
+                    // Use the customer API base since that's what bike unlock uses
+                    const response = await fetch(
+                        `${this.PROXY_URL}?base=customer&endpoint=/v3/profile/stats`,
+                        {
+                            method: 'GET',
+                            headers: this.getProxyHeaders()
+                        }
+                    );
+
+                    if (response.status === 401) {
+                        console.warn('Token expired or invalid, logging out...');
+                        this.logout();
+                        return false;
+                    }
+
+                    if (response.ok) {
+                        console.log('Token validated successfully');
+                        return true;
+                    }
+
+                    return true; // Other errors don't necessarily mean token is invalid
+                } catch (error) {
+                    console.error('Token validation error:', error);
+                    return true; // Network errors don't mean token is invalid
+                }
             },
 
             // Headers are now handled by the proxy
@@ -3572,7 +3607,15 @@
 
                     if (!checkResponse.ok) {
                         if (checkResponse.status === 401) {
-                            throw new Error('No autorizado. Inicia sesión nuevamente.');
+                            // Token is invalid/expired - logout and redirect to login
+                            auth.logout();
+                            this.showStatus('Sesión expirada. Por favor, inicia sesión nuevamente.', 'error');
+                            setTimeout(() => {
+                                this.stopScanner();
+                                app.switchView('map');
+                                app.openAccount();
+                            }, 2000);
+                            return;
                         } else if (checkResponse.status === 404) {
                             throw new Error('Bicicleta no encontrada. Verifica el código.');
                         } else if (checkResponse.status === 400) {
