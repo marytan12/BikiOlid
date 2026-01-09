@@ -2726,10 +2726,10 @@
 
     <!-- Trip History Panel -->
     <div id="history-panel" class="view-panel glass-panel">
-        <div class="panel-header">
-            <h2 id="history-panel-title">Historial <span id="history-trip-count"
-                    style="font-size: 0.8em; opacity: 0.6; font-weight: 400;"></span></h2>
-            <button class="close-panel-btn" onclick="app.switchView('map')">
+        <div class="view-panel-header">
+            <h2 id="history-panel-title" class="view-panel-title">Historial <span id="history-trip-count"
+                    style="font-size: 0.6em; opacity: 0.6; font-weight: 400; vertical-align: middle;"></span></h2>
+            <button class="close-btn" onclick="app.switchView('map')">
                 <i data-lucide="x"></i>
             </button>
         </div>
@@ -5007,7 +5007,7 @@
 
                     // Add expand button with Plus icon
                     html += `
-                        <div class="history-expand-btn" onclick="tripHistory.toggleOlderTrips(this)">
+                        <div class="history-expand-btn" onclick="tripHistory.toggleOlderTrips(this)" style="margin-bottom: 150px;">
                             <i data-lucide="plus"></i>
                         </div>
                     `;
