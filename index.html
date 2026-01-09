@@ -299,7 +299,7 @@
             z-index: 900;
             transform: translateY(100%) translateZ(0);
             transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 20px 20px 110px 20px;
+            padding: 20px 20px 140px 20px;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -1205,6 +1205,134 @@
             display: block;
             margin-bottom: 8px;
         }
+
+        /* Custom Confirmation Modal */
+        .qr-confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .qr-confirmation-modal.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .qr-confirmation-content {
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 25px;
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .qr-confirmation-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .qr-confirmation-message {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .qr-confirmation-code {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: 600;
+            color: #818cf8;
+            word-break: break-all;
+        }
+
+        .qr-confirmation-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .qr-confirmation-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .qr-confirmation-btn:active {
+            transform: scale(0.98);
+        }
+
+        .qr-confirmation-btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .qr-confirmation-btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .qr-confirmation-btn-confirm {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .qr-confirmation-btn-confirm:hover {
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
     </style>
 </head>
 
@@ -1352,6 +1480,25 @@
         <button class="calculate-btn" onclick="qrScanner.submitManualCode()" style="margin-top: 15px;">
             Desbloquear Bicicleta
         </button>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="qr-confirmation-modal" class="qr-confirmation-modal">
+        <div class="qr-confirmation-content">
+            <h3 class="qr-confirmation-title">🚲 Desbloquear Bicicleta</h3>
+            <p class="qr-confirmation-message">¿Deseas desbloquear la bicicleta con este código?</p>
+            <div id="qr-confirmation-code" class="qr-confirmation-code"></div>
+            <div class="qr-confirmation-buttons">
+                <button class="qr-confirmation-btn qr-confirmation-btn-cancel"
+                    onclick="qrScanner.hideConfirmation(false)">
+                    Cancelar
+                </button>
+                <button class="qr-confirmation-btn qr-confirmation-btn-confirm"
+                    onclick="qrScanner.hideConfirmation(true)">
+                    Confirmar
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Account Screen -->
@@ -2714,15 +2861,8 @@
                     navigator.vibrate(200);
                 }
 
-                // Ask for confirmation before proceeding
-                const confirmed = confirm(`¿Desbloquear bicicleta con el código:\n\n${qrData}\n\n¿Continuar?`);
-
-                if (confirmed) {
-                    // Call bike retrieval API
-                    this.retrieveBike(qrData);
-                } else {
-                    this.showStatus('Operación cancelada', 'info');
-                }
+                // Show custom confirmation modal
+                this.showConfirmation(qrData);
             },
 
 
@@ -2848,6 +2988,33 @@
 
                 console.log('Manual code submitted:', code);
                 this.onQRCodeDetected(code);
+            },
+
+            showConfirmation: function (qrData) {
+                this.pendingQRCode = qrData;
+                const modal = document.getElementById('qr-confirmation-modal');
+                const codeDisplay = document.getElementById('qr-confirmation-code');
+
+                if (modal && codeDisplay) {
+                    codeDisplay.textContent = qrData;
+                    modal.classList.add('show');
+                }
+            },
+
+            hideConfirmation: function (confirmed) {
+                const modal = document.getElementById('qr-confirmation-modal');
+                if (modal) {
+                    modal.classList.remove('show');
+                }
+
+                if (confirmed && this.pendingQRCode) {
+                    // Call bike retrieval API
+                    this.retrieveBike(this.pendingQRCode);
+                } else {
+                    this.showStatus('Operación cancelada', 'info');
+                }
+
+                this.pendingQRCode = null;
             }
         };
 
