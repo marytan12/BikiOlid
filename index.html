@@ -190,6 +190,58 @@
             transform: translateZ(0);
         }
 
+        /* Active Trip Overlay */
+        .active-trip-overlay {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            padding: 10px 16px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.15));
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            opacity: 0;
+            transform: translateY(-20px);
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .active-trip-overlay.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .active-trip-overlay svg {
+            width: 18px;
+            height: 18px;
+            color: #10b981;
+            animation: pulse-icon 2s infinite;
+        }
+
+        @keyframes pulse-icon {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        .active-trip-overlay span {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+            letter-spacing: 1px;
+        }
+
         /* Account Button */
         .account-btn {
             position: fixed;
@@ -1763,20 +1815,10 @@
     <!-- Fullscreen Map -->
     <div id="map"></div>
 
-    <!-- Top Stats Overlay (Optional) -->
-    <div class="stats-overlay">
-        <!-- <div class="stat-item">
-            <i data-lucide="zap" class="text-amber-400"></i>
-            <span class="stat-value" id="stat-ebikes">-</span>
-        </div>
-        <div class="stat-item">
-            <i data-lucide="bike"></i>
-            <span class="stat-value" id="stat-mechanical">-</span>
-        </div>
-        <div class="stat-item">
-            <i data-lucide="map-pin" class="text-indigo-400"></i>
-            <span class="stat-value" id="stat-stations">-</span>
-        </div> -->
+    <!-- Active Trip Overlay -->
+    <div id="active-trip-overlay" class="active-trip-overlay glass-effect">
+        <i data-lucide="bike"></i>
+        <span id="overlay-trip-timer">00:00:00</span>
     </div>
 
     <!-- Account Button -->
@@ -3832,7 +3874,18 @@
 
                     const countEl = document.getElementById('history-trip-count');
                     if (countEl) countEl.textContent = timerStr;
+
+                    // Update overlay timer
+                    const overlayTimerEl = document.getElementById('overlay-trip-timer');
+                    if (overlayTimerEl) overlayTimerEl.textContent = timerStr;
                 };
+
+                // Show overlay
+                const overlay = document.getElementById('active-trip-overlay');
+                if (overlay) {
+                    overlay.classList.add('visible');
+                    lucide.createIcons();
+                }
 
                 updateTimer();
                 this.timerInterval = setInterval(updateTimer, 1000);
@@ -3842,6 +3895,12 @@
                 if (this.timerInterval) {
                     clearInterval(this.timerInterval);
                     this.timerInterval = null;
+                }
+
+                // Hide overlay
+                const overlay = document.getElementById('active-trip-overlay');
+                if (overlay) {
+                    overlay.classList.remove('visible');
                 }
             },
 
