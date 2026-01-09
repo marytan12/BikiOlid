@@ -3394,6 +3394,22 @@
                     const bikeInfo = await checkResponse.json();
                     console.log('Bike info:', bikeInfo);
 
+                    // ===== TESTING MODE: Skip unlock steps =====
+                    this.showStatus(`✓ Bicicleta verificada! (Modelo: ${bikeInfo.model || 'N/A'})`, 'success');
+
+                    // Clear manual input
+                    const manualInput = document.getElementById('manual-qr-code');
+                    if (manualInput) manualInput.value = '';
+
+                    setTimeout(() => {
+                        this.stopScanner();
+                        app.switchView('map');
+                    }, 2500);
+
+                    return; // Skip unlock for testing
+                    // ===== END TESTING MODE =====
+
+                    /* COMMENTED FOR TESTING - Uncomment to enable unlock
                     // Step 2: Get user's location
                     this.showStatus('Obteniendo ubicación...', 'info');
 
@@ -3452,6 +3468,7 @@
                         this.stopScanner();
                         app.switchView('map');
                     }, 3000);
+                    END COMMENTED FOR TESTING */
 
                 } catch (error) {
                     console.error('Bike unlock error:', error);
