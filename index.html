@@ -2143,9 +2143,13 @@
                 const totalElec = this.data.reduce((acc, st) => acc + st.elec_bikes, 0);
                 const activeSt = this.data.filter(st => st.status_code === 'IN_SERVICE').length;
 
-                document.getElementById('stat-mechanical').textContent = totalMech;
-                document.getElementById('stat-ebikes').textContent = totalElec;
-                document.getElementById('stat-stations').textContent = activeSt;
+                const mechEl = document.getElementById('stat-mechanical');
+                const elecEl = document.getElementById('stat-ebikes');
+                const stationsEl = document.getElementById('stat-stations');
+
+                if (mechEl) mechEl.textContent = totalMech;
+                if (elecEl) elecEl.textContent = totalElec;
+                if (stationsEl) stationsEl.textContent = activeSt;
             },
 
             toggleFavorite: function (id) {
