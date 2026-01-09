@@ -2866,31 +2866,31 @@
             },
 
 
-            retrieveBike: async function (qrData) {
-                console.log('Retrieving bike with QR:', qrData);
+            retrieveBike: async function (bikeCode) {
+                console.log('Retrieving bike with code:', bikeCode);
 
                 try {
                     // Check if user is logged in
                     if (!auth.isLoggedIn()) {
                         this.showStatus('Debes iniciar sesión para desbloquear una bicicleta', 'error');
                         setTimeout(() => {
-                            app.closeAccount();
+                            app.switchView('map');
                             app.openAccount();
                         }, 2000);
                         return;
                     }
 
-                    this.showStatus('Procesando solicitud...', 'info');
+                    this.showStatus('Consultando bicicleta...', 'info');
 
-                    // Use the same proxy as auth with CODIGAZO header
+                    // Use the proxy with customer base
+                    // Endpoint: /customer/v3/bikes/<codigo_bici>
                     const response = await fetch(
-                        `https://biki.google.es?endpoint=/v1/lasbuenasbikis`,
+                        `/api/biki-proxy?base=customer&endpoint=/v3/bikes/${encodeURIComponent(bikeCode)}`,
                         {
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'x-auth-token': auth.token,
-                                'CODIGAZO': qrData
+                                'x-auth-token': auth.token
                             }
                         }
                     );
@@ -2899,23 +2899,27 @@
                         if (response.status === 401) {
                             throw new Error('No autorizado. Inicia sesión nuevamente.');
                         } else if (response.status === 404) {
-                            throw new Error('Bicicleta no encontrada.');
+                            throw new Error('Bicicleta no encontrada. Verifica el código.');
                         } else if (response.status === 400) {
-                            throw new Error('Código QR inválido.');
+                            throw new Error('Código inválido.');
+                        } else if (response.status === 403) {
+                            throw new Error('No tienes permiso para alquilar. Verifica tu suscripción.');
                         }
                         throw new Error(`Error ${response.status}: ${response.statusText}`);
                     }
 
                     const result = await response.json();
-                    console.log('Bike unlock response:', result);
+                    console.log('Bike info response:', result);
 
-                    this.showStatus('✓ Bicicleta desbloqueada exitosamente!', 'success');
+                    // Show success with bike info
+                    this.showStatus(`✓ Bicicleta encontrada!`, 'success');
 
                     // Clear manual input
                     const manualInput = document.getElementById('manual-qr-code');
                     if (manualInput) manualInput.value = '';
 
-                    // Stop scanner after successful unlock
+                    // Optionally show bike details or proceed to unlock
+                    // For now, we just show success
                     setTimeout(() => {
                         this.stopScanner();
                         app.switchView('map');
