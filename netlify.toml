@@ -1,0 +1,29 @@
+# netlify.toml CORREGIDO PARA PROYECTOS SIN PACKAGE.JSON
+
+[build]
+  # IMPORTANTE: Dejamos el comando vacío para que no busque package.json
+  command = "" 
+  # Publicamos el directorio actual (la raíz) donde está tu index.html
+  publish = "." 
+
+# Configuración de Headers (CORS) - Igual que antes
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Credentials = "true"
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET,OPTIONS,POST"
+    Access-Control-Allow-Headers = "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, x-auth-token"
+
+# Redirección para las funciones
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# OPCIONAL: Si es una SPA (React compilado sin build step) deja esto. 
+# Si es HTML simple, puedes borrar este bloque de abajo.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

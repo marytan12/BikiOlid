@@ -415,24 +415,25 @@
         /* Route Input Styles */
         .route-input {
             position: relative;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .route-input input {
             width: 100%;
-            padding: 15px 15px 15px 45px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 15px;
+            padding: 18px 18px 18px 52px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
             color: #fff;
-            font-size: 14px;
+            font-size: 15px;
             outline: none;
             transition: all 0.3s ease;
         }
 
         .route-input input:focus {
-            background: rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.1);
             border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
         }
 
         .route-input input::placeholder {
@@ -441,11 +442,11 @@
 
         .route-input i {
             position: absolute;
-            left: 15px;
+            left: 18px;
             top: 50%;
             transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
         }
 
         /* Route Type Buttons */
@@ -544,63 +545,101 @@
         #account-screen {
             position: fixed;
             top: 0;
-            left: 0;
-            width: 100vw;
+            right: -100%;
+            width: 100%;
+            max-width: 480px;
             height: 100vh;
-            background: rgba(15, 23, 42, 0.98);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: linear-gradient(155deg,
+                    rgba(20, 30, 48, 0.95) 0%,
+                    rgba(36, 59, 85, 0.92) 50%,
+                    rgba(30, 41, 59, 0.95) 100%);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            box-shadow: none;
+            /* Hide shadow when closed */
             z-index: 2000;
-            display: none;
-            padding: 20px;
-        }
-
-        #account-screen.active {
+            transition: right 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
             display: flex;
             flex-direction: column;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #account-screen.show {
+            right: 0;
+            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.6),
+                inset 1px 0 1px rgba(255, 255, 255, 0.1);
         }
 
         .account-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
+            flex-shrink: 0;
+            padding: 30px 25px 25px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            background: linear-gradient(135deg,
+                    rgba(16, 185, 129, 0.12),
+                    rgba(5, 150, 105, 0.08));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .account-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.2),
+                    transparent);
         }
 
         .account-title {
             font-size: 28px;
-            font-weight: bold;
-            color: #fff;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        #account-screen .close-btn {
+            position: absolute;
+            top: 30px;
+            right: 25px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        #account-screen .close-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .account-content {
             flex: 1;
             overflow-y: auto;
-            padding-right: 5px;
+            padding: 25px;
+            padding-bottom: 40px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
 
-        /* Custom scrollbar for account section */
         .account-content::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .account-content::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .account-content::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 3px;
-        }
-
-        .account-content::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.25);
-        }
-
-        /* Firefox scrollbar */
-        .account-content {
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+            display: none;
         }
 
         .account-section {
@@ -608,14 +647,16 @@
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 15px;
             padding: 20px;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
         }
 
         .account-section h3 {
-            font-size: 16px;
+            font-size: 13px;
             font-weight: 600;
-            color: #fff;
-            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            margin: 0 0 12px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
         }
 
         .account-section p {
@@ -815,7 +856,7 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            background: linear-gradient(135deg, #10b981, #059669);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -832,12 +873,39 @@
             font-size: 18px;
             font-weight: 700;
             color: #fff;
-            margin-bottom: 4px;
+            margin: 0 0 4px 0;
         }
 
         .profile-info p {
             font-size: 13px;
             color: rgba(255, 255, 255, 0.6);
+            margin: 0 0 12px 0;
+        }
+
+        .profile-info-btn {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 10px;
+            color: #10b981;
+            padding: 8px 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .profile-info-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .profile-info-btn:hover {
+            background: rgba(16, 185, 129, 0.25);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
         }
 
         .profile-stats {
@@ -887,28 +955,28 @@
         }
 
         .profile-detail-label {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .profile-detail-value {
             font-size: 13px;
             color: #fff;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .logout-btn {
             width: 100%;
-            padding: 14px;
-            background: rgba(239, 68, 68, 0.15);
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.1));
             border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 12px;
+            border-radius: 14px;
             color: #fca5a5;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 15px;
+            margin-top: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -916,12 +984,295 @@
         }
 
         .logout-btn:hover {
-            background: rgba(239, 68, 68, 0.25);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.15));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
 
         .logout-btn svg {
             width: 18px;
             height: 18px;
+        }
+
+        /* Personal Info Modal - Liquid Glass */
+        .personal-info-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .personal-info-modal.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .personal-info-content {
+            background: linear-gradient(155deg,
+                    rgba(30, 41, 59, 0.95) 0%,
+                    rgba(45, 62, 80, 0.92) 50%,
+                    rgba(36, 50, 68, 0.95) 100%);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 0;
+            width: 100%;
+            max-width: 420px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                inset 0 1px 1px rgba(255, 255, 255, 0.15);
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .personal-info-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.2),
+                    transparent);
+        }
+
+        .personal-info-header {
+            padding: 24px 24px 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: linear-gradient(135deg,
+                    rgba(16, 185, 129, 0.12),
+                    rgba(5, 150, 105, 0.08));
+            position: relative;
+        }
+
+        .personal-info-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin: 0;
+        }
+
+        .personal-info-close {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .personal-info-close:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+        }
+
+        .personal-info-body {
+            padding: 20px 24px 24px 24px;
+            max-height: calc(80vh - 100px);
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .personal-info-body::-webkit-scrollbar {
+            display: none;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #fff;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        /* Map Personalization Styles */
+        .personalize-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 16px;
+            color: #60a5fa;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
+            /* Space between modernize and logout */
+        }
+
+        .personalize-btn:hover {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.2));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .map-style-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .map-style-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .map-style-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .map-style-card.active {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 1px #3b82f6, 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .map-style-preview {
+            height: 80px;
+            width: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .map-style-card:hover .map-style-preview {
+            opacity: 1;
+        }
+
+        /* Mockup backgrounds/colors for previews since we can't easily fetch map images dynamically without valid coords */
+        .map-style-preview.standard {
+            background-color: #aad3df;
+        }
+
+        /* Standard OSM color */
+        .map-style-preview.dark {
+            background-color: #242424;
+        }
+
+        .map-style-preview.light {
+            background-color: #f2f2f2;
+        }
+
+        .map-style-preview.satellite {
+            background-color: #3f4e38;
+        }
+
+        .map-style-info {
+            padding: 12px;
+        }
+
+        .map-style-name {
+            display: block;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .map-style-desc {
+            display: block;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 11px;
+        }
+
+        .map-style-check {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #3b82f6;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        .map-style-check svg {
+            width: 12px;
+            height: 12px;
+            color: #fff;
+        }
+
+        .map-style-card.active .map-style-check {
+            opacity: 1;
+            transform: scale(1);
         }
 
         /* Rent Status Alert */
@@ -956,6 +1307,214 @@
             font-size: 12px;
             margin: 0;
             line-height: 1.4;
+        }
+
+        /* Station Popup - Liquid Glass */
+        .station-popup-content {
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(36, 50, 68, 0.95));
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .station-popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 40px 16px 18px;
+            /* Extra right padding for Leaflet close button */
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .station-popup-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin: 0;
+            flex: 1;
+            line-height: 1.3;
+        }
+
+        .station-fav-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-left: 12px;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .station-fav-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+        }
+
+        .station-fav-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .station-bikes-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 0;
+            margin-bottom: 12px;
+            justify-items: stretch;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .station-bike-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 14px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Center content horizontally */
+            gap: 12px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .station-bike-card:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+            transform: translateY(-2px);
+        }
+
+        .station-bike-card.electric {
+            border-color: rgba(251, 191, 36, 0.3);
+        }
+
+        .station-bike-card.mechanical {
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .bike-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .station-bike-card.electric .bike-card-icon {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(217, 119, 6, 0.15));
+        }
+
+        .station-bike-card.mechanical .bike-card-icon {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.15));
+        }
+
+        .bike-card-icon svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .station-bike-card.electric .bike-card-icon svg {
+            color: #fbbf24;
+        }
+
+        .station-bike-card.mechanical .bike-card-icon svg {
+            color: #10b981;
+        }
+
+        .bike-card-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            /* Align text to start */
+            justify-content: center;
+        }
+
+        .bike-card-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .bike-card-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .station-docks-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(79, 70, 229, 0.1));
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            backdrop-filter: blur(10px);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .station-popup-body {
+            padding: 16px 18px 18px 18px;
+            box-sizing: border-box;
+        }
+
+        .docks-card-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(79, 70, 229, 0.2));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .docks-card-icon svg {
+            width: 24px;
+            height: 24px;
+            color: #818cf8;
+        }
+
+        .docks-card-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .docks-card-label {
+            font-size: 11px;
+            color: rgba(156, 163, 175, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .docks-card-value {
+            font-size: 26px;
+            font-weight: 700;
+            color: #818cf8;
+            line-height: 1;
         }
 
         /* Subscription Section - New Design */
@@ -1484,55 +2043,153 @@
             transform: scale(0.95);
         }
 
-        /* Route Results */
+        /* Route Results - Redesigned */
         .route-results {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 25px;
         }
 
         .route-stats {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
         .route-stat-card {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            padding: 12px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 16px;
             text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .route-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
+
+        .route-stat-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
         }
 
         .route-stat-label {
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.6);
-            margin-bottom: 5px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
         }
 
         .route-stat-value {
-            font-size: 16px;
+            font-size: 20px;
             font-weight: 700;
             color: #fff;
+            display: block;
+        }
+
+        /* Route Segments */
+        .route-segments {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .route-segment {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid;
+            border-radius: 14px;
+            padding: 16px;
+        }
+
+        .route-segment.walk {
+            border-color: #94a3b8;
+            background: linear-gradient(90deg, rgba(148, 163, 184, 0.1), transparent);
+        }
+
+        .route-segment.bike {
+            border-color: #6366f1;
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.15), transparent);
+        }
+
+        .route-segment-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .route-segment-icon {
+            font-size: 20px;
+        }
+
+        .route-segment-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            flex: 1;
+        }
+
+        .route-segment-meta {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .route-segment-details {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.5;
+            padding-left: 30px;
         }
 
         /* Instructions */
         .instructions-container {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 15px;
-            max-height: 200px;
-            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 0;
+            max-height: none;
+            overflow: visible;
+        }
+
+        .instructions-header {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .instructions-header svg {
+            width: 18px;
+            height: 18px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .instructions-header h4 {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .instructions-list {
+            padding: 16px;
         }
 
         .instruction-item {
             display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }
 
         .instruction-item:last-child {
@@ -1541,10 +2198,71 @@
             padding-bottom: 0;
         }
 
+        .instruction-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(99, 102, 241, 0.15);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 16px;
+        }
+
         .instruction-text {
-            font-size: 12px;
+            flex: 1;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.6;
+        }
+
+        /* Route Action Buttons */
+        .route-action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .route-action-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+        }
+
+        .route-action-btn.primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .route-action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .route-action-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: rgba(255, 255, 255, 0.9);
-            line-height: 1.5;
+        }
+
+        .route-action-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .route-action-btn svg {
+            width: 18px;
+            height: 18px;
         }
 
         /* QR Scanner Styles */
@@ -1912,7 +2630,7 @@
     <div id="routes-panel" class="view-panel">
         <div class="view-panel-header">
             <h2 class="view-panel-title">Planificar Ruta</h2>
-            <button class="close-btn" onclick="app.switchView('map')">
+            <button class="close-btn" onclick="routing.clearRoute(); app.switchView('map')">
                 <i data-lucide="x"></i>
             </button>
         </div>
@@ -2096,6 +2814,11 @@
                     <div class="profile-info">
                         <h3 id="profile-name">-</h3>
                         <p id="profile-email">-</p>
+                        <button class="profile-info-btn" onclick="app.showPersonalInfo()"
+                            title="Ver información personal">
+                            <i data-lucide="info"></i>
+                            <span>Info personal</span>
+                        </button>
                     </div>
                 </div>
 
@@ -2188,32 +2911,99 @@
                     </div>
                 </div>
 
-                <div class="account-section">
-                    <h3>Información personal</h3>
-                    <div class="profile-details">
-                        <div class="profile-detail-row">
-                            <span class="profile-detail-label">ID de miembro</span>
-                            <span class="profile-detail-value" id="profile-member-id">-</span>
-                        </div>
-                        <div class="profile-detail-row">
-                            <span class="profile-detail-label">Teléfono</span>
-                            <span class="profile-detail-value" id="profile-phone">-</span>
-                        </div>
-                        <div class="profile-detail-row">
-                            <span class="profile-detail-label">Ciudad</span>
-                            <span class="profile-detail-value" id="profile-city">-</span>
-                        </div>
-                        <div class="profile-detail-row">
-                            <span class="profile-detail-label">Tarjeta</span>
-                            <span class="profile-detail-value" id="profile-card">-</span>
-                        </div>
-                    </div>
-                </div>
+                <button class="personalize-btn" onclick="app.showMapPersonalization()">
+                    <i data-lucide="map"></i>
+                    Personalizar Mapa
+                </button>
 
                 <button class="logout-btn" onclick="auth.logout()">
                     <i data-lucide="log-out"></i>
                     Cerrar sesión
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Personal Info Modal -->
+    <div id="personal-info-modal" class="personal-info-modal">
+        <div class="personal-info-content">
+            <div class="personal-info-header">
+                <h3>Información Personal</h3>
+                <button class="personal-info-close" onclick="app.hidePersonalInfo()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="personal-info-body">
+                <div class="info-row">
+                    <span class="info-label">ID de miembro</span>
+                    <span class="info-value" id="modal-member-id">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Correo electrónico</span>
+                    <span class="info-value" id="modal-email">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Teléfono</span>
+                    <span class="info-value" id="modal-phone">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Ciudad</span>
+                    <span class="info-value" id="modal-city">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Tarjeta</span>
+                    <span class="info-value" id="modal-card">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Personalization Modal -->
+    <div id="map-personalization-modal" class="personal-info-modal">
+        <div class="personal-info-content">
+            <div class="personal-info-header"
+                style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));">
+                <h3 style="color: #fff;">Estilo del Mapa</h3>
+                <button class="personal-info-close" onclick="app.hideMapPersonalization()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="personal-info-body">
+                <div class="map-style-grid">
+                    <div class="map-style-card active" onclick="app.changeMapStyle('standard', this)"
+                        data-style="standard">
+                        <div class="map-style-preview standard"></div>
+                        <div class="map-style-info">
+                            <span class="map-style-name">Estándar</span>
+                            <span class="map-style-desc">OpenStreetMap</span>
+                        </div>
+                        <div class="map-style-check"><i data-lucide="check"></i></div>
+                    </div>
+                    <div class="map-style-card" onclick="app.changeMapStyle('dark', this)" data-style="dark">
+                        <div class="map-style-preview dark"></div>
+                        <div class="map-style-info">
+                            <span class="map-style-name">Modo Oscuro</span>
+                            <span class="map-style-desc">Ideal para la noche</span>
+                        </div>
+                        <div class="map-style-check"><i data-lucide="check"></i></div>
+                    </div>
+                    <div class="map-style-card" onclick="app.changeMapStyle('light', this)" data-style="light">
+                        <div class="map-style-preview light"></div>
+                        <div class="map-style-info">
+                            <span class="map-style-name">Modo Claro</span>
+                            <span class="map-style-desc">Alto contraste</span>
+                        </div>
+                        <div class="map-style-check"><i data-lucide="check"></i></div>
+                    </div>
+                    <div class="map-style-card" onclick="app.changeMapStyle('satellite', this)" data-style="satellite">
+                        <div class="map-style-preview satellite"></div>
+                        <div class="map-style-info">
+                            <span class="map-style-name">Satélite</span>
+                            <span class="map-style-desc">Vista aérea</span>
+                        </div>
+                        <div class="map-style-check"><i data-lucide="check"></i></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -2236,6 +3026,56 @@
                 types: "https://valladolid.publicbikesystem.net/customer/gbfs/v2/es/vehicle_types"
             },
 
+            mapLayers: {
+                standard: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+                light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+                satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+            },
+            currentLayer: null,
+            currentStyle: 'standard',
+
+            showMapPersonalization: function () {
+                document.getElementById('map-personalization-modal').classList.add('show');
+                // Sync UI
+                document.querySelectorAll('.map-style-card').forEach(el => {
+                    if (el.dataset.style === this.currentStyle) el.classList.add('active');
+                    else el.classList.remove('active');
+                });
+            },
+
+            hideMapPersonalization: function () {
+                document.getElementById('map-personalization-modal').classList.remove('show');
+            },
+
+            changeMapStyle: function (style, element) {
+                if (!this.mapLayers[style]) return;
+
+                // Update UI selection if triggered by click
+                if (element) {
+                    document.querySelectorAll('.map-style-card').forEach(el => el.classList.remove('active'));
+                    element.classList.add('active');
+                }
+
+                // Update Map Layer
+                if (this.currentLayer) {
+                    this.map.removeLayer(this.currentLayer);
+                }
+
+                this.currentLayer = L.tileLayer(this.mapLayers[style], {
+                    maxZoom: 19,
+                    attribution: ''
+                }).addTo(this.map);
+
+                this.currentStyle = style;
+                localStorage.setItem('biki_map_style', style);
+
+                // Close modal if triggered by user interaction
+                if (element) {
+                    setTimeout(() => this.hideMapPersonalization(), 300);
+                }
+            },
+
             init: async function () {
                 try {
                     const savedFavs = JSON.parse(localStorage.getItem('biki_favorites') || '[]');
@@ -2252,10 +3092,9 @@
 
                 this.setupNavigation();
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: ''
-                }).addTo(this.map);
+                // Load saved map style
+                const savedStyle = localStorage.getItem('biki_map_style') || 'standard';
+                this.changeMapStyle(savedStyle);
 
                 await this.fetchVehicleTypes();
                 this.fetchData();
@@ -2354,55 +3193,80 @@
                 const markers = [];
 
                 this.data.forEach(st => {
-                    let colorClass = 'marker-green';
-                    if (st.bikes === 0) colorClass = 'marker-red';
-                    else if (st.bikes < 3) colorClass = 'marker-orange';
+                    // Determine color based on bike availability
+                    let color = '#10b981'; // green
+                    let fillOpacity = 0.8;
+
+                    if (st.bikes === 0) {
+                        color = '#ef4444'; // red
+                    } else if (st.bikes < 3) {
+                        color = '#f59e0b'; // orange
+                    }
 
                     const isFav = this.favorites.has(st.station_id);
-                    const extraClass = isFav ? 'marker-fav' : '';
 
-                    const icon = L.divIcon({
-                        className: 'custom-div-icon',
-                        html: `<div class='glass-marker ${colorClass} ${extraClass}'>
-                                <div class='glass-marker-circle'>
-                                    <span class='glass-marker-number'>${st.bikes}</span>
-                                </div>
-                            </div>`,
-                        iconSize: [32, 32],
-                        iconAnchor: [16, 16]
+                    // Use CircleMarker instead of divIcon - much more performant!
+                    const marker = L.circleMarker([st.lat, st.lon], {
+                        radius: isFav ? 9 : 7,
+                        fillColor: color,
+                        color: isFav ? '#fbbf24' : '#fff',
+                        weight: isFav ? 3 : 2,
+                        opacity: 1,
+                        fillOpacity: fillOpacity
                     });
 
-                    const marker = L.marker([st.lat, st.lon], { icon: icon });
-
                     marker.bindPopup(`
-                        <div style="padding: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                                <h3 style="font-size: 15px; font-weight: 700; color: #fff; margin: 0; flex: 1; line-height: 1.3;">${st.name}</h3>
-                                <button onclick="app.toggleFavorite('${st.station_id}')" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-left: 8px; font-size: 18px; transition: all 0.2s;">
-                                    ${isFav ? '❤️' : '🤍'}
+                        <div class="station-popup-content">
+                            <div class="station-popup-header">
+                                <h3 class="station-popup-title">${st.name}</h3>
+                                <button onclick="app.toggleFavorite('${st.station_id}')" class="station-fav-btn" title="${isFav ? 'Quitar de favoritos' : 'Añadir a favoritos'}">
+                                    <i data-lucide="${isFav ? 'heart' : 'heart'}" style="${isFav ? 'fill: #ef4444; color: #ef4444;' : 'color: rgba(255,255,255,0.5);'}"></i>
                                 </button>
                             </div>
                             
-                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px;">
-                                <div style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(217, 119, 6, 0.1)); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 12px; padding: 10px; text-align: center;">
-                                    <div style="font-size: 22px; font-weight: 700; color: #fbbf24; margin-bottom: 2px;">${st.elec_bikes}</div>
-                                    <div style="font-size: 10px; color: rgba(251, 191, 36, 0.8); text-transform: uppercase; letter-spacing: 0.5px;">⚡ Eléctricas</div>
+                            <div class="station-popup-body">
+                                <div class="station-bikes-grid">
+                                    <div class="station-bike-card electric">
+                                        <div class="bike-card-icon">
+                                            <i data-lucide="zap"></i>
+                                        </div>
+                                        <div class="bike-card-content">
+                                            <div class="bike-card-value">${st.elec_bikes}</div>
+                                            <div class="bike-card-label">Eléctricas</div>
+                                        </div>
+                                    </div>
+                                    <div class="station-bike-card mechanical">
+                                        <div class="bike-card-icon">
+                                            <i data-lucide="bike"></i>
+                                        </div>
+                                        <div class="bike-card-content">
+                                            <div class="bike-card-value">${st.mech_bikes}</div>
+                                            <div class="bike-card-label">Mecánicas</div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 10px; text-align: center;">
-                                    <div style="font-size: 22px; font-weight: 700; color: #e2e8f0; margin-bottom: 2px;">${st.mech_bikes}</div>
-                                    <div style="font-size: 10px; color: rgba(226, 232, 240, 0.7); text-transform: uppercase; letter-spacing: 0.5px;">🚲 Mecánicas</div>
+                                
+                                <div class="station-docks-card">
+                                    <div class="docks-card-icon">
+                                        <i data-lucide="circle-parking"></i>
+                                    </div>
+                                    <div class="docks-card-content">
+                                        <div class="docks-card-label">Anclajes libres</div>
+                                        <div class="docks-card-value">${st.docks}</div>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div style="background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 12px; padding: 10px; text-align: center;">
-                                <div style="font-size: 11px; color: rgba(156, 163, 175, 0.9); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.5px;">Anclajes Libres</div>
-                                <div style="font-size: 20px; font-weight: 700; color: #818cf8;">🅿️ ${st.docks}</div>
                             </div>
                         </div>
                     `, {
-                        maxWidth: 280,
+                        maxWidth: 320,
                         className: 'custom-popup'
                     });
+
+                    // Initialize Lucide icons in popup after it opens
+                    marker.on('popupopen', () => {
+                        setTimeout(() => lucide.createIcons(), 50);
+                    });
+
                     markers.push(marker);
                 });
 
@@ -2496,12 +3360,21 @@
             },
 
             openAccount: function () {
-                document.getElementById('account-screen').classList.add('active');
+                document.getElementById('account-screen').classList.add('show');
                 lucide.createIcons();
             },
 
             closeAccount: function () {
-                document.getElementById('account-screen').classList.remove('active');
+                document.getElementById('account-screen').classList.remove('show');
+            },
+
+            showPersonalInfo: function () {
+                document.getElementById('personal-info-modal').classList.add('show');
+                lucide.createIcons();
+            },
+
+            hidePersonalInfo: function () {
+                document.getElementById('personal-info-modal').classList.remove('show');
             },
 
             setupNavigation: function () {
@@ -2874,46 +3747,80 @@
                 const totalDist = (walk1.properties.summary.distance + bike.properties.summary.distance + walk2.properties.summary.distance) / 1000;
                 const totalTime = (walk1.properties.summary.duration + bike.properties.summary.duration + walk2.properties.summary.duration) / 60;
 
-                const elDist = document.getElementById('route-distance');
-                const elTime = document.getElementById('route-duration');
-                const elElev = document.getElementById('route-elevation');
+                const totalDistance = (walk1.properties.summary.distance + bike.properties.summary.distance + walk2.properties.summary.distance);
+                const totalDuration = (walk1.properties.summary.duration + bike.properties.summary.duration + walk2.properties.summary.duration);
 
-                if (elDist) elDist.textContent = `${totalDist.toFixed(2)} km`;
-                if (elTime) elTime.textContent = `${Math.round(totalTime)} min`;
-                if (elElev) elElev.textContent = 'Multi';
-
-                // --- INSTRUCTIONS ---
                 const list = document.getElementById('instructions-list');
-                let html = '';
+                const totalMins = Math.round(totalDuration / 60);
+                const totalKm = (totalDistance / 1000).toFixed(2);
 
-                const addSection = (prop, title, color, icon) => {
+                // Hide all station markers when showing route
+                if (app.markerLayer) {
+                    app.map.removeLayer(app.markerLayer);
+                }
+
+                // Build stats section (only Duration and Distance)
+                let html = `
+                    <div class="route-stats">
+                        <div class="route-stat-card">
+                            <span class="route-stat-icon">⏱️</span>
+                            <span class="route-stat-label">Duración</span>
+                            <span class="route-stat-value">${totalMins} min</span>
+                        </div>
+                        <div class="route-stat-card">
+                            <span class="route-stat-icon">📍</span>
+                            <span class="route-stat-label">Distancia</span>
+                            <span class="route-stat-value">${totalKm} km</span>
+                        </div>
+                    </div>
+                `;
+
+                // Build route segments
+                html += '<div class="route-segments">';
+
+                const addSegment = (prop, title, type, stationInfo) => {
                     const mins = Math.round(prop.summary.duration / 60);
                     const dist = (prop.summary.distance / 1000).toFixed(1);
+                    const icon = type === 'walk' ? '🚶' : '🚲';
+
                     html += `
-                        <div style="background:${color}15; padding:10px; border-radius:12px; margin:15px 0 8px 0; border:1px solid ${color}30;">
-                            <div style="font-weight:bold; color:${color}; display:flex; align-items:center; gap:8px; font-size:13px;">
-                                <span style="font-size:16px">${icon}</span> ${title}
+                        <div class="route-segment ${type}">
+                            <div class="route-segment-header">
+                                <span class="route-segment-icon">${icon}</span>
+                                <span class="route-segment-title">${title}</span>
+                                <span class="route-segment-meta">${mins} min • ${dist} km</span>
                             </div>
-                            <div style="font-size:11px; opacity:0.8; margin-left:28px;">${mins} min • ${dist} km</div>
-                        </div>`;
+                            ${stationInfo ? `<div class="route-segment-details">${stationInfo}</div>` : ''}
+                        </div>
+                    `;
                 };
 
-                addSection(walk1.properties, `Caminar a ${pickupSt.name}`, '#94a3b8', '🚶');
-                addSection(bike.properties, `Bici a ${dropoffSt.name} (Prioridad Bice)`, '#6366f1', '🚲');
-                addSection(walk2.properties, `Caminar a destino`, '#94a3b8', '🚶');
+                addSegment(walk1.properties, `Caminar a la estación`, 'walk', pickupSt.name);
+                addSegment(bike.properties, `Recorrido en bicicleta`, 'bike', `Desde ${pickupSt.name} hasta ${dropoffSt.name}`);
+                addSegment(walk2.properties, `Caminar a destino`, 'walk', null);
 
+                html += '</div>';
+
+                // Build action buttons
                 const googleMapsUrl = `https://www.google.com/maps/dir/${this.originCoords.lat},${this.originCoords.lon}/${pickupSt.lat},${pickupSt.lon}/${dropoffSt.lat},${dropoffSt.lon}/${this.destinationCoords.lat},${this.destinationCoords.lon}/data=!4m2!4m1!3e3`;
 
                 html += `
-                    <a href="${googleMapsUrl}" target="_blank" style="display:block; text-decoration:none;">
-                        <button style="width:100%; padding:12px; background:#10b981; border:none; border-radius:12px; margin-top:15px; font-weight:bold; color:white; font-size:14px; box-shadow:0 4px 12px rgba(16, 185, 129, 0.3);">
-                            Comenzar Ruta (Google Maps)
+                    <div class="route-action-buttons">
+                        <a href="${googleMapsUrl}" target="_blank" style="flex:1; text-decoration:none;">
+                            <button class="route-action-btn primary">
+                                <i data-lucide="navigation"></i>
+                                Comenzar Ruta
+                            </button>
+                        </a>
+                        <button class="route-action-btn secondary" onclick="routing.clearRoute(); app.switchView('map')">
+                            <i data-lucide="map"></i>
+                            Ver mapa
                         </button>
-                    </a>
-                    <button onclick="app.switchView('map')" style="width:100%; padding:10px; background:rgba(255,255,255,0.1); border-radius:10px; margin-top:10px; font-weight:bold; color: #cbd5e1;">Ver en mapa</button>
+                    </div>
                 `;
 
                 list.innerHTML = html;
+                lucide.createIcons();
             },
 
             displayRoute(route) {
@@ -2924,24 +3831,62 @@
                 if (this.routeLayer) app.map.removeLayer(this.routeLayer);
                 if (this.markersLayer) app.map.removeLayer(this.markersLayer);
 
+                // Hide all station markers when showing route
+                if (app.markerLayer) {
+                    app.map.removeLayer(app.markerLayer);
+                }
+
                 const latlngs = coords.map(c => [c[1], c[0]]);
                 this.routeLayer = L.polyline(latlngs, { color: '#6366f1', weight: 4 }).addTo(app.map);
                 app.map.fitBounds(this.routeLayer.getBounds(), { padding: [50, 50] });
 
                 const summary = props.summary || props;
-                document.getElementById('route-distance').textContent = `${(summary.distance / 1000).toFixed(2)} km`;
-                document.getElementById('route-duration').textContent = `${Math.round(summary.duration / 60)} min`;
+                const mins = Math.round(summary.duration / 60);
+                const km = (summary.distance / 1000).toFixed(2);
 
                 const googleMapsUrl = `https://www.google.com/maps/dir/${this.originCoords.lat},${this.originCoords.lon}/${this.destinationCoords.lat},${this.destinationCoords.lon}/data=!4m2!4m1!3e2`;
 
-                document.getElementById('instructions-list').innerHTML = `
-                    <div class="instruction-text" style="margin-bottom:15px;">Ruta directa a pie.</div>
-                    <a href="${googleMapsUrl}" target="_blank" style="display:block; text-decoration:none;">
-                        <button style="width:100%; padding:12px; background:#10b981; border:none; border-radius:12px; font-weight:bold; color:white; font-size:14px; box-shadow:0 4px 12px rgba(16, 185, 129, 0.3);">
-                            Comenzar Ruta (Google Maps)
+                const html = `
+                    <div class="route-stats">
+                        <div class="route-stat-card">
+                            <span class="route-stat-icon">⏱️</span>
+                            <span class="route-stat-label">Duración</span>
+                            <span class="route-stat-value">${mins} min</span>
+                        </div>
+                        <div class="route-stat-card">
+                            <span class="route-stat-icon">📍</span>
+                            <span class="route-stat-label">Distancia</span>
+                            <span class="route-stat-value">${km} km</span>
+                        </div>
+                    </div>
+
+                    <div class="route-segments">
+                        <div class="route-segment walk">
+                            <div class="route-segment-header">
+                                <span class="route-segment-icon">🚶</span>
+                                <span class="route-segment-title">Caminar a destino</span>
+                                <span class="route-segment-meta">${mins} min • ${km} km</span>
+                            </div>
+                            <div class="route-segment-details">Ruta directa a pie</div>
+                        </div>
+                    </div>
+
+                    <div class="route-action-buttons">
+                        <a href="${googleMapsUrl}" target="_blank" style="flex:1; text-decoration:none;">
+                            <button class="route-action-btn primary">
+                                <i data-lucide="navigation"></i>
+                                Comenzar Ruta
+                            </button>
+                        </a>
+                        <button class="route-action-btn secondary" onclick="routing.clearRoute(); app.switchView('map')">
+                            <i data-lucide="map"></i>
+                            Ver mapa
                         </button>
-                    </a>
+                    </div>
                 `;
+
+                document.getElementById('instructions-list').innerHTML = html;
+                lucide.createIcons();
                 document.getElementById('route-results').classList.remove('hidden');
             },
 
@@ -2949,6 +3894,12 @@
             clearRoute: function () {
                 if (this.routeLayer) app.map.removeLayer(this.routeLayer);
                 if (this.markersLayer) app.map.removeLayer(this.markersLayer);
+
+                // Restore station markers
+                if (app.data && app.data.length > 0) {
+                    app.renderStations();
+                }
+
                 document.getElementById('route-results').classList.add('hidden');
                 document.getElementById('route-origin').value = '';
                 document.getElementById('route-destination').value = '';
@@ -3222,17 +4173,22 @@
                     document.getElementById('profile-auto-renew').textContent = '-';
                 }
 
-                // Personal info
-                document.getElementById('profile-member-id').textContent = data.id || '-';
-                document.getElementById('profile-phone').textContent = data.phoneNumber || data.details?.phone1 || '-';
-                document.getElementById('profile-city').textContent = data.details?.city?.trim() || '-';
-
-                // Card info
+                // Personal info - populate modal
+                const memberId = data.id || '-';
+                const email = data.email || data.username || '-';
+                const phone = data.phoneNumber || data.details?.phone1 || '-';
+                const city = data.details?.city?.trim() || '-';
+                let card = 'No registrada';
                 if (data.card && data.card.cardNumberFourDigits) {
-                    document.getElementById('profile-card').textContent = `•••• ${data.card.cardNumberFourDigits}`;
-                } else {
-                    document.getElementById('profile-card').textContent = 'No registrada';
+                    card = `•••• ${data.card.cardNumberFourDigits}`;
                 }
+
+                // Update modal fields
+                document.getElementById('modal-member-id').textContent = memberId;
+                document.getElementById('modal-email').textContent = email;
+                document.getElementById('modal-phone').textContent = phone;
+                document.getElementById('modal-city').textContent = city;
+                document.getElementById('modal-card').textContent = card;
 
                 // Fetch and display usage stats
                 this.fetchProfileStats();
