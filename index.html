@@ -1344,11 +1344,14 @@
             </button>
         </div>
 
-        <div class="qr-instructions">
-            <strong>Cómo escanear</strong>
-            Apunta la cámara al código QR de la bicicleta. El escaneo se realizará automáticamente cuando el código sea
-            detectado.
+        <div class="login-input-group" style="margin-top: 15px;">
+            <label for="manual-qr-code">O introduce el código manualmente</label>
+            <input type="text" id="manual-qr-code" placeholder="Código de la bicicleta" autocomplete="off">
         </div>
+
+        <button class="calculate-btn" onclick="qrScanner.submitManualCode()" style="margin-top: 15px;">
+            Desbloquear Bicicleta
+        </button>
     </div>
 
     <!-- Account Screen -->
@@ -2715,9 +2718,6 @@
             },
 
             retrieveBike: async function (qrData) {
-                // PLACEHOLDER: This will be replaced with actual API integration
-                // when the user provides the API endpoint details
-
                 console.log('Retrieving bike with QR:', qrData);
 
                 try {
@@ -2733,32 +2733,38 @@
 
                     this.showStatus('Procesando solicitud...', 'info');
 
-                    // PLACEHOLDER API CALL
-                    // Replace this section when API endpoint is provided
-                    /*
-                    const response = await fetch('API_ENDPOINT_HERE', {
-                        method: 'POST', // or GET, depending on API
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${auth.token}` // if needed
-                        },
-                        body: JSON.stringify({
-                            qrCode: qrData,
-                            // other required parameters
-                        })
-                    });
+                    // Use the same proxy as auth with CODIGAZO header
+                    const response = await fetch(
+                        `${auth.PROXY_URL}?endpoint=/v1/authenticate`,
+                        {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'x-auth-token': auth.token,
+                                'CODIGAZO': qrData
+                            }
+                        }
+                    );
 
                     if (!response.ok) {
+                        if (response.status === 401) {
+                            throw new Error('No autorizado. Inicia sesión nuevamente.');
+                        } else if (response.status === 404) {
+                            throw new Error('Bicicleta no encontrada.');
+                        } else if (response.status === 400) {
+                            throw new Error('Código QR inválido.');
+                        }
                         throw new Error(`Error ${response.status}: ${response.statusText}`);
                     }
 
                     const result = await response.json();
-                    */
-
-                    // SIMULATED SUCCESS (remove when implementing real API)
-                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    console.log('Bike unlock response:', result);
 
                     this.showStatus('✓ Bicicleta desbloqueada exitosamente!', 'success');
+
+                    // Clear manual input
+                    const manualInput = document.getElementById('manual-qr-code');
+                    if (manualInput) manualInput.value = '';
 
                     // Stop scanner after successful unlock
                     setTimeout(() => {
@@ -2819,6 +2825,20 @@
                 if (!statusEl) return;
 
                 statusEl.classList.remove('show');
+            },
+
+            submitManualCode: function () {
+                const manualInput = document.getElementById('manual-qr-code');
+                if (!manualInput) return;
+
+                const code = manualInput.value.trim();
+                if (!code) {
+                    this.showStatus('Por favor, introduce un código', 'error');
+                    return;
+                }
+
+                console.log('Manual code submitted:', code);
+                this.onQRCodeDetected(code);
             }
         };
 
