@@ -545,63 +545,73 @@
         #account-screen {
             position: fixed;
             top: 0;
-            left: 0;
-            width: 100vw;
+            right: -100%;
+            width: 100%;
+            max-width: 500px;
             height: 100vh;
-            background: rgba(15, 23, 42, 0.98);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: -8px 0 40px rgba(0, 0, 0, 0.5);
             z-index: 2000;
-            display: none;
-            padding: 20px;
-        }
-
-        #account-screen.active {
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
         }
 
+        #account-screen.show {
+            right: 0;
+        }
+
         .account-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
+            flex-shrink: 0;
+            padding: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.05));
         }
 
         .account-title {
-            font-size: 28px;
-            font-weight: bold;
+            font-size: 24px;
+            font-weight: 700;
             color: #fff;
+            margin: 0;
+        }
+
+        /* This .close-btn is specific to the account screen */
+        #account-screen .close-btn {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #account-screen .close-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
         }
 
         .account-content {
             flex: 1;
             overflow-y: auto;
-            padding-right: 5px;
+            padding: 25px;
+            padding-bottom: 40px;
+            /* Hide scrollbar */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
 
-        /* Custom scrollbar for account section */
         .account-content::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .account-content::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .account-content::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 3px;
-        }
-
-        .account-content::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.25);
-        }
-
-        /* Firefox scrollbar */
-        .account-content {
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+            display: none;
         }
 
         .account-section {
@@ -609,14 +619,16 @@
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 15px;
             padding: 20px;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
         }
 
         .account-section h3 {
-            font-size: 16px;
+            font-size: 13px;
             font-weight: 600;
-            color: #fff;
-            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            margin: 0 0 12px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
         }
 
         .account-section p {
@@ -888,28 +900,28 @@
         }
 
         .profile-detail-label {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .profile-detail-value {
             font-size: 13px;
             color: #fff;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .logout-btn {
             width: 100%;
-            padding: 14px;
-            background: rgba(239, 68, 68, 0.15);
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.1));
             border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 12px;
+            border-radius: 14px;
             color: #fca5a5;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 15px;
+            margin-top: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -917,7 +929,9 @@
         }
 
         .logout-btn:hover {
-            background: rgba(239, 68, 68, 0.25);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.15));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
 
         .logout-btn svg {
@@ -2656,12 +2670,12 @@
             },
 
             openAccount: function () {
-                document.getElementById('account-screen').classList.add('active');
+                document.getElementById('account-screen').classList.add('show');
                 lucide.createIcons();
             },
 
             closeAccount: function () {
-                document.getElementById('account-screen').classList.remove('active');
+                document.getElementById('account-screen').classList.remove('show');
             },
 
             setupNavigation: function () {
