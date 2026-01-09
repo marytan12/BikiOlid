@@ -930,6 +930,61 @@
             font-weight: 500;
         }
 
+        /* Usage Stats Grid */
+        .usage-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .usage-stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .usage-stat-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .usage-stat-card.highlight {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .usage-stat-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .usage-stat-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .usage-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .usage-stat-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
         /* Swap button */
         .swap-btn {
             width: 40px;
@@ -1599,6 +1654,41 @@
                             <div class="subscription-detail">
                                 <span class="subscription-label">Renovación auto.</span>
                                 <span class="subscription-value" id="profile-auto-renew">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Usage Stats Section -->
+                <div class="account-section">
+                    <h3>📊 Estadísticas de Uso</h3>
+                    <div class="usage-stats-grid">
+                        <div class="usage-stat-card">
+                            <div class="usage-stat-icon">🚴</div>
+                            <div class="usage-stat-info">
+                                <span class="usage-stat-value" id="stats-total-trips">-</span>
+                                <span class="usage-stat-label">Viajes totales</span>
+                            </div>
+                        </div>
+                        <div class="usage-stat-card">
+                            <div class="usage-stat-icon">⏱️</div>
+                            <div class="usage-stat-info">
+                                <span class="usage-stat-value" id="stats-total-time">-</span>
+                                <span class="usage-stat-label">Tiempo total</span>
+                            </div>
+                        </div>
+                        <div class="usage-stat-card">
+                            <div class="usage-stat-icon">📈</div>
+                            <div class="usage-stat-info">
+                                <span class="usage-stat-value" id="stats-avg-time">-</span>
+                                <span class="usage-stat-label">Media por viaje</span>
+                            </div>
+                        </div>
+                        <div class="usage-stat-card highlight">
+                            <div class="usage-stat-icon">📅</div>
+                            <div class="usage-stat-info">
+                                <span class="usage-stat-value" id="stats-trips-year">-</span>
+                                <span class="usage-stat-label">Viajes este año</span>
                             </div>
                         </div>
                     </div>
@@ -2607,7 +2697,91 @@
                     document.getElementById('profile-card').textContent = 'No registrada';
                 }
 
+                // Fetch and display usage stats
+                this.fetchProfileStats();
+
                 lucide.createIcons();
+            },
+
+            fetchProfileStats: async function () {
+                if (!this.token) return;
+
+                try {
+                    // Use customer base for stats endpoint: /customer/v3.0/profile/stats
+                    const response = await fetch(
+                        `/api/biki-proxy?base=customer&endpoint=/v3.0/profile/stats`,
+                        {
+                            method: 'GET',
+                            headers: this.getProxyHeaders()
+                        }
+                    );
+
+                    if (!response.ok) {
+                        console.error('Stats fetch failed:', response.status);
+                        return;
+                    }
+
+                    const stats = await response.json();
+                    console.log('Profile stats:', stats);
+
+                    // Update stats display
+                    this.displayProfileStats(stats);
+
+                } catch (error) {
+                    console.error('Profile stats error:', error);
+                }
+            },
+
+            displayProfileStats: function (stats) {
+                // Total trips
+                document.getElementById('stats-total-trips').textContent = stats.totalTrips || 0;
+
+                // Total time (convert seconds to readable format)
+                const totalSeconds = stats.tripDuration || 0;
+                document.getElementById('stats-total-time').textContent = this.formatDuration(totalSeconds);
+
+                // Average trip time
+                const avgSeconds = stats.averageTripDuration || 0;
+                document.getElementById('stats-avg-time').textContent = this.formatDuration(Math.round(avgSeconds));
+
+                // Trips this year
+                document.getElementById('stats-trips-year').textContent = stats.totalTripsThisYear || 0;
+
+                // If we have activePlan from stats, update subscription section with fresh data
+                if (stats.activePlan) {
+                    const plan = stats.activePlan;
+                    document.getElementById('profile-plan-name').textContent = plan.planName || '-';
+
+                    const statusEl = document.getElementById('profile-plan-status');
+                    statusEl.textContent = this.translatePlanStatus(plan.status);
+                    statusEl.style.color = plan.status === 'Active' ? '#10b981' :
+                        plan.status === 'Completed' ? '#f59e0b' : '#94a3b8';
+
+                    if (plan.endTime) {
+                        const endDate = new Date(plan.endTime);
+                        document.getElementById('profile-plan-end').textContent = endDate.toLocaleDateString('es-ES', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        });
+                    }
+
+                    document.getElementById('profile-auto-renew').textContent = plan.autoRenew ? 'Sí' : 'No';
+                }
+            },
+
+            formatDuration: function (totalSeconds) {
+                if (totalSeconds < 60) {
+                    return `${totalSeconds}s`;
+                }
+
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+                if (hours > 0) {
+                    return `${hours}h ${minutes}m`;
+                }
+                return `${minutes}m`;
             },
 
             translateRentReason: function (reason) {
