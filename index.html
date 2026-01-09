@@ -414,90 +414,168 @@
             transform: scale(0.95);
         }
 
-        /* Route Input Styles */
-        .route-input {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .route-input input {
-            width: 100%;
-            padding: 18px 18px 18px 52px;
+        /* Route Input Styles Redesign */
+        .route-search-container {
             background: rgba(255, 255, 255, 0.06);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            color: #fff;
-            font-size: 15px;
-            outline: none;
-            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            position: relative;
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
         }
 
-        .route-input input:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(99, 102, 241, 0.5);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-        }
-
-        .route-input input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
-        }
-
-        .route-input i {
-            position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 22px;
-            height: 22px;
-        }
-
-        /* Route Type Buttons */
-        .route-type-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .route-type-btn {
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 15px;
-            color: rgba(255, 255, 255, 0.6);
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .route-timeline-decoration {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
-            font-size: 11px;
+            padding-top: 12px;
+            padding-bottom: 12px;
+            width: 20px;
         }
 
-        .route-type-btn:active {
-            transform: scale(0.95);
+        .route-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 2;
         }
 
-        .route-type-btn.active {
-            background: rgba(99, 102, 241, 0.2);
-            border-color: rgba(99, 102, 241, 0.5);
-            color: #fff;
+        .route-dot.start {
+            background: #10b981;
         }
 
-        /* Calculate Button */
-        .calculate-btn {
+        .route-dot.end {
+            background: #ef4444;
+        }
+
+        .route-line {
+            width: 2px;
+            flex: 1;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 4px 0;
+            border-radius: 2px;
+        }
+
+        .route-inputs-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .route-input-group {
+            position: relative;
+        }
+
+        .route-input-group input {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            background: transparent;
             border: none;
-            border-radius: 15px;
             color: #fff;
+            padding: 12px 0;
             font-size: 16px;
-            font-weight: 600;
+            outline: none;
+            border-radius: 0;
+        }
+
+        .route-input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .route-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 5px 0;
+        }
+
+        .swap-locations-btn {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.8);
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 20px;
+            z-index: 5;
         }
+
+        .swap-locations-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        /* Calculate Button Redesign */
+        .calculate-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 20px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 5px;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calculate-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(255, 255, 255, 0.2), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .calculate-btn:hover::after {
+            opacity: 1;
+        }
+
+        .calculate-btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .btn-content svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Route Type Grid - Hidden/Legacy */
 
         .calculate-btn:active {
             transform: scale(0.98);
@@ -2687,25 +2765,38 @@
             </button>
         </div>
 
-        <div class="route-input">
-            <i data-lucide="circle" style="color: #10b981;"></i>
-            <input type="text" id="route-origin" placeholder="Desde..." autocomplete="off">
-            <div id="origin-suggestions" class="autocomplete-dropdown hidden"></div>
+        <div class="route-search-container">
+            <div class="route-timeline-decoration">
+                <div class="route-dot start"></div>
+                <div class="route-line"></div>
+                <div class="route-dot end"></div>
+            </div>
+
+            <div class="route-inputs-wrapper">
+                <div class="route-input-group">
+                    <input type="text" id="route-origin" placeholder="¿Dónde estás?" autocomplete="off">
+                    <div id="origin-suggestions" class="autocomplete-dropdown hidden"></div>
+                </div>
+
+                <div class="route-divider"></div>
+
+                <div class="route-input-group">
+                    <input type="text" id="route-destination" placeholder="¿A dónde quieres ir?" autocomplete="off">
+                    <div id="destination-suggestions" class="autocomplete-dropdown hidden"></div>
+                </div>
+            </div>
+
+            <button class="swap-locations-btn" onclick="routing.swapLocations()" title="Invertir trayecto">
+                <i data-lucide="arrow-down-up"></i>
+            </button>
         </div>
 
-        <button class="swap-btn" onclick="routing.swapLocations()">
-            <i data-lucide="arrow-down-up"></i>
+        <button class="calculate-btn" onclick="routing.calculateRoute()">
+            <span class="btn-content">
+                <i data-lucide="navigation"></i>
+                Calcular Ruta
+            </span>
         </button>
-
-        <div class="route-input">
-            <i data-lucide="map-pin" style="color: #ef4444;"></i>
-            <input type="text" id="route-destination" placeholder="Hasta..." autocomplete="off">
-            <div id="destination-suggestions" class="autocomplete-dropdown hidden"></div>
-        </div>
-
-
-
-        <button class="calculate-btn" onclick="routing.calculateRoute()">Calcular Ruta</button>
 
         <div id="route-results" class="route-results hidden">
             <div class="route-stats">
@@ -4034,7 +4125,7 @@
 
                 // Restore station markers
                 if (app.data && app.data.length > 0) {
-                    app.renderStations();
+                    app.renderMap();
                 }
 
                 document.getElementById('route-results').classList.add('hidden');
