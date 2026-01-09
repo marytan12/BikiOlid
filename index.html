@@ -3384,50 +3384,97 @@
                 const buttons = document.querySelectorAll('.nav-btn');
 
                 // Set initial position
-                setTimeout(() => {
+                const updateIndicatorPosition = () => {
                     const activeBtn = document.querySelector('.nav-btn.active');
                     if (activeBtn && indicator) {
+                        indicator.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
                         indicator.style.width = `${activeBtn.offsetWidth}px`;
                         indicator.style.left = `${activeBtn.offsetLeft}px`;
+                        // Reset transforms potentially set during drag
+                        indicator.style.transform = 'translateY(-50%) translateZ(0)';
                     }
-                }, 100);
+                };
+
+                // Init after slight delay to ensure layout
+                setTimeout(updateIndicatorPosition, 100);
+
+                // Re-calculating on resize is good practice
+                window.addEventListener('resize', updateIndicatorPosition);
 
                 // Drag Logic
                 let startX = 0;
-                let currentLeft = 0;
                 let isDragging = false;
-                let navWidth = 0;
-                let indicatorWidth = 0;
                 let rafId = null;
 
+                // Physics constants
+                const MAX_STRETCH = 35; // Pixels to expand when between buttons (Liquid effect)
+
                 nav.addEventListener('touchstart', (e) => {
+                    const activeBtn = document.querySelector('.nav-btn.active');
+                    if (!activeBtn) return;
+
                     isDragging = true;
                     startX = e.touches[0].clientX;
-                    currentLeft = indicator.offsetLeft;
 
-                    // Cache layout values
-                    navWidth = nav.offsetWidth;
-                    indicatorWidth = indicator.offsetWidth;
-
+                    // Kill transition for instant tracking
                     indicator.style.transition = 'none';
                 }, { passive: true });
 
                 nav.addEventListener('touchmove', (e) => {
                     if (!isDragging) return;
-
-                    // Use rAF to throttle updates and prevent layout thrashing
                     if (rafId) return;
 
                     rafId = requestAnimationFrame(() => {
                         const currentX = e.touches[0].clientX;
-                        const deltaX = currentX - startX;
-                        let newLeft = currentLeft + deltaX;
+                        const deltaX = (currentX - startX);
 
-                        // Use cached values
-                        const maxLeft = navWidth - indicatorWidth;
-                        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+                        // Calculate where the center of the indicator *should* be based on finger
+                        const activeBtn = document.querySelector('.nav-btn.active');
+                        const startCenter = activeBtn.offsetLeft + (activeBtn.offsetWidth / 2);
+                        let targetCenter = startCenter + deltaX;
 
-                        indicator.style.left = `${newLeft}px`;
+                        // Bounds check (Center must stay within nav)
+                        const minCenter = 20;
+                        const maxCenter = nav.offsetWidth - 20;
+                        targetCenter = Math.max(minCenter, Math.min(targetCenter, maxCenter));
+
+                        // --- LIQUID PHYSICS ---
+                        let nearestBtn = buttons[0];
+                        let minVal = Infinity;
+
+                        // Find distance to nearest button center
+                        buttons.forEach(btn => {
+                            const btnCenter = btn.offsetLeft + (btn.offsetWidth / 2);
+                            const dist = Math.abs(targetCenter - btnCenter);
+                            if (dist < minVal) {
+                                minVal = dist;
+                                nearestBtn = btn;
+                            }
+                        });
+
+                        // Calculate stretch factor
+                        // We assume standard button width as pitch
+                        const btnWidth = nearestBtn.offsetWidth || 60;
+                        const maxDist = btnWidth / 1.5; // Stretch maxes out slightly before midpoint to create "snap" feel
+
+                        // Ratio: 0 = on center (no stretch), 1 = max stretch point
+                        const ratio = Math.min(minVal, maxDist) / maxDist;
+
+                        // Use Sine wave for smooth liquid expansion/contraction
+                        const stretch = MAX_STRETCH * Math.sin(ratio * Math.PI / 2);
+
+                        // Calculate final dimensions
+                        const finalWidth = btnWidth + stretch;
+                        const finalLeft = targetCenter - (finalWidth / 2);
+
+                        // Apply
+                        indicator.style.width = `${finalWidth}px`;
+                        indicator.style.left = `${finalLeft}px`;
+
+                        // Optional: Scale height slightly down when stretched to conserve "volume"
+                        // const scaleY = 1 - (stretch / MAX_STRETCH) * 0.15;
+                        // indicator.style.transform = `translateY(-50%) scaleY(${scaleY}) translateZ(0)`;
+
                         rafId = null;
                     });
                 }, { passive: true });
@@ -3440,9 +3487,7 @@
                         rafId = null;
                     }
 
-                    indicator.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-
-                    // Snap to nearest button
+                    // Determine drop target (nearest button)
                     const currentCenter = indicator.offsetLeft + (indicator.offsetWidth / 2);
                     let closestBtn = buttons[0];
                     let minDiff = Infinity;
@@ -3456,13 +3501,15 @@
                         }
                     });
 
-                    // Switch view if different
+                    // Trigger Switch View ONLY on drop
                     const view = closestBtn.dataset.view;
-                    if (view !== this.currentView) {
+                    const activeView = document.querySelector('.nav-btn.active').dataset.view;
+
+                    if (view !== activeView) {
                         this.switchView(view);
                     } else {
-                        // Just snap back if same
-                        indicator.style.left = `${closestBtn.offsetLeft}px`;
+                        // Snap back if same
+                        updateIndicatorPosition();
                     }
                 });
             }
