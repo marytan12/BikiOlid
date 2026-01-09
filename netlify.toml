@@ -1,0 +1,29 @@
+# netlify.toml
+
+[build]
+  # Ajusta esto si tu comando es diferente (ej. "npm run build")
+  command = "npm run build"
+  # Ajusta esto según tu framework (ej. "dist", "build", "out")
+  publish = "dist" 
+
+# 1. Configuración de Headers (CORS) - Equivalente a tu vercel.json
+[[headers]]
+  # Aplica estos headers a todas las rutas que empiecen por /api/
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Credentials = "true"
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET,OPTIONS,POST"
+    Access-Control-Allow-Headers = "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, x-auth-token"
+
+# 2. Redirección para que tus funciones sigan funcionando en /api/
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# 3. (OPCIONAL) Si tu web es React/Vue/Vite (SPA), necesitas esto para que no de 404 al recargar
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
