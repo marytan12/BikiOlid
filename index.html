@@ -2702,6 +2702,7 @@
                 }
             },
 
+
             onQRCodeDetected: function (qrData) {
                 console.log('QR Code detected:', qrData);
 
@@ -2713,9 +2714,17 @@
                     navigator.vibrate(200);
                 }
 
-                // Call bike retrieval API
-                this.retrieveBike(qrData);
+                // Ask for confirmation before proceeding
+                const confirmed = confirm(`¿Desbloquear bicicleta con el código:\n\n${qrData}\n\n¿Continuar?`);
+
+                if (confirmed) {
+                    // Call bike retrieval API
+                    this.retrieveBike(qrData);
+                } else {
+                    this.showStatus('Operación cancelada', 'info');
+                }
             },
+
 
             retrieveBike: async function (qrData) {
                 console.log('Retrieving bike with QR:', qrData);
@@ -2855,4 +2864,3 @@
 </body>
 
 </html>
-
