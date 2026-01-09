@@ -30,8 +30,8 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- jsQR Library for QR Code Scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <!-- ZXing Library for DataMatrix Scanning -->
+    <script src="https://unpkg.com/@zxing/library@0.18.6"></script>
 
     <style>
         /* Reset and Base */
@@ -2717,7 +2717,7 @@
     <!-- QR Scanner Panel -->
     <div id="qr-panel" class="view-panel">
         <div class="view-panel-header">
-            <h2 class="view-panel-title">Escanear QR</h2>
+            <h2 class="view-panel-title">Escanear DataMatrix</h2>
             <button class="close-btn" onclick="app.switchView('map')">
                 <i data-lucide="x"></i>
             </button>
@@ -4393,10 +4393,23 @@
             lastScannedCode: null,
             lastScannedTime: 0,
 
+            codeReader: null,
+
             init: function () {
                 this.video = document.getElementById('qr-video');
                 this.canvas = document.getElementById('qr-canvas');
                 this.canvasContext = this.canvas.getContext('2d');
+
+                // Initialize ZXing Reader for DataMatrix
+                if (typeof ZXing !== 'undefined') {
+                    const hints = new Map();
+                    const formats = [ZXing.BarcodeFormat.DATA_MATRIX];
+                    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
+                    this.codeReader = new ZXing.BrowserMultiFormatReader(hints);
+                    console.log('ZXing Code Reader initialized for DataMatrix');
+                } else {
+                    console.error('ZXing library not loaded');
+                }
             },
 
             startScanner: async function () {
@@ -4410,12 +4423,15 @@
                         video: {
                             facingMode: { ideal: 'environment' }, // Rear camera preferred
                             width: { ideal: 1280 },
-                            height: { ideal: 720 }
+                            height: { ideal: 720 },
+                            aspectRatio: 1.7777777778
                         }
                     };
 
                     this.stream = await navigator.mediaDevices.getUserMedia(constraints);
                     this.video.srcObject = this.stream;
+                    // Required for iOS
+                    this.video.setAttribute("playsinline", true);
 
                     // Wait for video to be ready
                     await new Promise((resolve) => {
@@ -4431,7 +4447,7 @@
                     // Start scanning loop
                     this.scanningInterval = setInterval(() => this.scanFrame(), 300);
 
-                    console.log('QR Scanner started successfully');
+                    console.log('DataMatrix Scanner started successfully');
 
                 } catch (error) {
                     console.error('Camera access error:', error);
@@ -4480,7 +4496,7 @@
                 }
 
                 this.hideStatus();
-                console.log('QR Scanner stopped');
+                console.log('Scanner stopped');
             },
 
             scanFrame: function () {
@@ -4495,22 +4511,26 @@
                 // Draw current video frame to canvas
                 this.canvasContext.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
 
-                // Get image data from canvas
-                const imageData = this.canvasContext.getImageData(0, 0, this.canvas.width, this.canvas.height);
+                // Scan for DataMatrix using ZXing
+                // We use the canvas directly specifically to maintain our manual stream control
+                if (this.codeReader) {
+                    try {
+                        const result = this.codeReader.decodeFromCanvas(this.canvas);
 
-                // Scan for QR code using jsQR library
-                if (typeof jsQR !== 'undefined') {
-                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                        inversionAttempts: 'dontInvert'
-                    });
-
-                    if (code && code.data) {
-                        // Prevent duplicate scans within 3 seconds
-                        const now = Date.now();
-                        if (code.data !== this.lastScannedCode || now - this.lastScannedTime > 3000) {
-                            this.lastScannedCode = code.data;
-                            this.lastScannedTime = now;
-                            this.onQRCodeDetected(code.data);
+                        if (result) {
+                            const code = result.getText();
+                            // Prevent duplicate scans within 3 seconds
+                            const now = Date.now();
+                            if (code !== this.lastScannedCode || now - this.lastScannedTime > 3000) {
+                                this.lastScannedCode = code;
+                                this.lastScannedTime = now;
+                                this.onQRCodeDetected(code);
+                            }
+                        }
+                    } catch (err) {
+                        // ZXing throws if no code is found, which is normal behavior
+                        if (err && !(err instanceof ZXing.NotFoundException)) {
+                            console.error('Scan error:', err);
                         }
                     }
                 }
