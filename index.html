@@ -944,44 +944,92 @@
             line-height: 1.4;
         }
 
-        /* Subscription Card */
-        .subscription-card {
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 10px;
+        /* Subscription Section - New Design */
+        .subscription-section {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.08));
+            border: 1px solid rgba(99, 102, 241, 0.25);
         }
 
-        .subscription-name {
-            font-size: 15px;
-            font-weight: 700;
-            color: #a5b4fc;
-            margin-bottom: 12px;
-            padding-bottom: 10px;
+        .subscription-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .subscription-details {
+        .subscription-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .subscription-icon svg {
+            width: 26px;
+            height: 26px;
+            color: #fff;
+        }
+
+        .subscription-title-info h3 {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+        }
+
+        .subscription-status {
+            display: inline-block;
+            padding: 3px 10px;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 12px;
+            color: #10b981;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .subscription-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 12px;
         }
 
-        .subscription-detail {
+        .subscription-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .subscription-item svg {
+            width: 18px;
+            height: 18px;
+            color: rgba(255, 255, 255, 0.5);
+            flex-shrink: 0;
+        }
+
+        .subscription-item div {
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 2px;
         }
 
-        .subscription-label {
+        .sub-label {
             font-size: 10px;
             color: rgba(255, 255, 255, 0.5);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        .subscription-value {
+        .sub-value {
             font-size: 13px;
             color: #fff;
             font-weight: 500;
@@ -2048,44 +2096,44 @@
                     </div>
                 </div>
 
-                <div class="account-section">
-                    <h3>Estado de la cuenta</h3>
-                    <div class="profile-stats">
-                        <div class="profile-stat">
-                            <span class="profile-stat-label">Puede alquilar</span>
-                            <span class="profile-stat-value" id="profile-can-rent">-</span>
+                <!-- Subscription Section -->
+                <div class="account-section subscription-section">
+                    <div class="subscription-header">
+                        <div class="subscription-icon">
+                            <i data-lucide="crown"></i>
                         </div>
-                        <div class="profile-stat">
-                            <span class="profile-stat-label">Bici eléctrica</span>
-                            <span class="profile-stat-value" id="profile-can-rent-electric">-</span>
-                        </div>
-                        <div class="profile-stat">
-                            <span class="profile-stat-label">Suspendido</span>
-                            <span class="profile-stat-value" id="profile-suspended">-</span>
+                        <div class="subscription-title-info">
+                            <h3 id="profile-plan-name">-</h3>
+                            <span class="subscription-status" id="profile-plan-status">-</span>
                         </div>
                     </div>
-                </div>
-
-                <div class="account-section">
-                    <h3>Suscripción</h3>
-                    <div class="subscription-card">
-                        <div class="subscription-name" id="profile-plan-name">-</div>
-                        <div class="subscription-details">
-                            <div class="subscription-detail">
-                                <span class="subscription-label">Estado</span>
-                                <span class="subscription-value" id="profile-plan-status">-</span>
+                    <div class="subscription-grid">
+                        <div class="subscription-item">
+                            <i data-lucide="calendar"></i>
+                            <div>
+                                <span class="sub-label">Válido hasta</span>
+                                <span class="sub-value" id="profile-plan-end">-</span>
                             </div>
-                            <div class="subscription-detail">
-                                <span class="subscription-label">Precio</span>
-                                <span class="subscription-value" id="profile-plan-price">-</span>
+                        </div>
+                        <div class="subscription-item">
+                            <i data-lucide="refresh-cw"></i>
+                            <div>
+                                <span class="sub-label">Renovación</span>
+                                <span class="sub-value" id="profile-auto-renew">-</span>
                             </div>
-                            <div class="subscription-detail">
-                                <span class="subscription-label">Válido hasta</span>
-                                <span class="subscription-value" id="profile-plan-end">-</span>
+                        </div>
+                        <div class="subscription-item">
+                            <i data-lucide="bike"></i>
+                            <div>
+                                <span class="sub-label">Puede alquilar</span>
+                                <span class="sub-value" id="profile-can-rent">-</span>
                             </div>
-                            <div class="subscription-detail">
-                                <span class="subscription-label">Renovación auto.</span>
-                                <span class="subscription-value" id="profile-auto-renew">-</span>
+                        </div>
+                        <div class="subscription-item">
+                            <i data-lucide="zap"></i>
+                            <div>
+                                <span class="sub-label">Bici eléctrica</span>
+                                <span class="sub-value" id="profile-can-rent-electric">-</span>
                             </div>
                         </div>
                     </div>
@@ -3074,41 +3122,49 @@
 
                 // Account status
                 const canRentEl = document.getElementById('profile-can-rent');
-                canRentEl.textContent = data.canRent ? 'Sí' : 'No';
-                canRentEl.style.color = data.canRent ? '#10b981' : '#f87171';
+                if (canRentEl) {
+                    canRentEl.textContent = data.canRent ? 'Sí' : 'No';
+                    canRentEl.style.color = data.canRent ? '#10b981' : '#f87171';
+                }
 
                 const canRentElectricEl = document.getElementById('profile-can-rent-electric');
-                canRentElectricEl.textContent = data.canRentElectrical ? 'Sí' : 'No';
-                canRentElectricEl.style.color = data.canRentElectrical ? '#10b981' : '#f87171';
-
-                const suspendedEl = document.getElementById('profile-suspended');
-                suspendedEl.textContent = data.suspended ? 'Sí' : 'No';
-                suspendedEl.style.color = data.suspended ? '#f87171' : '#10b981';
+                if (canRentElectricEl) {
+                    canRentElectricEl.textContent = data.canRentElectrical ? 'Sí' : 'No';
+                    canRentElectricEl.style.color = data.canRentElectrical ? '#10b981' : '#f87171';
+                }
 
                 // Subscription/Plan info
                 if (data.plan) {
-                    document.getElementById('profile-plan-name').textContent = this.translatePlanName(data.plan.planName) || '-';
+                    const planNameEl = document.getElementById('profile-plan-name');
+                    if (planNameEl) planNameEl.textContent = this.translatePlanName(data.plan.planName) || '-';
 
                     const statusEl = document.getElementById('profile-plan-status');
-                    statusEl.textContent = this.translatePlanStatus(data.plan.status);
-                    statusEl.style.color = data.plan.status === 'Completed' ? '#f59e0b' :
-                        data.plan.status === 'Active' ? '#10b981' : '#94a3b8';
-
-                    document.getElementById('profile-plan-price').textContent = data.plan.total ? `${data.plan.total}€` : '-';
-
-                    // End date
-                    if (data.plan.endTime) {
-                        const endDate = new Date(data.plan.endTime);
-                        document.getElementById('profile-plan-end').textContent = endDate.toLocaleDateString('es-ES', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                        });
-                    } else {
-                        document.getElementById('profile-plan-end').textContent = '-';
+                    if (statusEl) {
+                        statusEl.textContent = this.translatePlanStatus(data.plan.status);
+                        statusEl.style.background = data.plan.status === 'Active' ?
+                            'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)';
+                        statusEl.style.borderColor = data.plan.status === 'Active' ?
+                            'rgba(16, 185, 129, 0.4)' : 'rgba(245, 158, 11, 0.4)';
+                        statusEl.style.color = data.plan.status === 'Active' ? '#10b981' : '#f59e0b';
                     }
 
-                    document.getElementById('profile-auto-renew').textContent = data.plan.autoRenew ? 'Sí' : 'No';
+                    // End date
+                    const endEl = document.getElementById('profile-plan-end');
+                    if (endEl) {
+                        if (data.plan.endTime) {
+                            const endDate = new Date(data.plan.endTime);
+                            endEl.textContent = endDate.toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                            });
+                        } else {
+                            endEl.textContent = '-';
+                        }
+                    }
+
+                    const autoRenewEl = document.getElementById('profile-auto-renew');
+                    if (autoRenewEl) autoRenewEl.textContent = data.plan.autoRenew ? 'Automática' : 'Manual';
                 } else {
                     document.getElementById('profile-plan-name').textContent = 'Sin suscripción';
                     document.getElementById('profile-plan-status').textContent = '-';
