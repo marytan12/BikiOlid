@@ -54,7 +54,7 @@ export const handler = async (event, context) => {
 
     // Auth headers
     if (auth) reqHeaders['authorization'] = `Basic ${auth}`;
-    
+
     // Auth token (Nota el cambio de req.headers a event.headers)
     // Netlify pone los headers en minúsculas a veces, buscamos con cuidado
     const incomingToken = event.headers['x-auth-token'] || event.headers['X-Auth-Token'];
@@ -64,12 +64,17 @@ export const handler = async (event, context) => {
         const fullUrl = `${API_BASE}${endpoint}`;
         console.log('Proxying request to:', fullUrl);
 
+        // Add Content-Type for POST requests (Critical Fix)
+        if (event.httpMethod === 'POST') {
+            reqHeaders['Content-Type'] = 'application/json';
+        }
+
         // Preparar el body para la petición externa
         let bodyPayload = undefined;
         if (event.httpMethod === 'POST' && event.body) {
             // En Netlify, event.body es un STRING, no un objeto JSON. Hay que parsearlo si lo necesitas
             // pero si lo vas a reenviar tal cual, puedes mandarlo directo o parsearlo para asegurar validez.
-            bodyPayload = event.body; 
+            bodyPayload = event.body;
         }
 
         const response = await fetch(fullUrl, {
@@ -87,7 +92,7 @@ export const handler = async (event, context) => {
         } else {
             data = await response.text();
             // Si es texto, intentamos envolverlo en JSON o devolverlo como string
-            try { data = JSON.parse(data) } catch(e) {}
+            try { data = JSON.parse(data) } catch (e) { }
         }
 
         // RETORNO FINAL (Sintaxis Netlify)
