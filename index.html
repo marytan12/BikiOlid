@@ -3348,15 +3348,26 @@
 
                     const isFav = this.favorites.has(st.station_id);
 
-                    // Use CircleMarker instead of divIcon - much more performant!
-                    const marker = L.circleMarker([st.lat, st.lon], {
-                        radius: isFav ? 9 : 7,
-                        fillColor: color,
-                        color: isFav ? '#fbbf24' : '#fff',
-                        weight: isFav ? 3 : 2,
-                        opacity: 1,
-                        fillOpacity: fillOpacity
+                    // Use DivIcon to show numbers - Optimized for performance
+                    const bikeCount = st.bikes;
+                    let markerClass = 'glass-marker-circle';
+
+                    if (isFav) markerClass += ' marker-fav';
+                    if (bikeCount === 0) markerClass += ' marker-red';
+                    else if (bikeCount < 3) markerClass += ' marker-orange';
+                    else markerClass += ' marker-green';
+
+                    // Create icon using string concatenation for perf
+                    const iconHtml = `<div class="${markerClass}"><span class="glass-marker-number">${bikeCount}</span></div>`;
+
+                    const icon = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: iconHtml,
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16]
                     });
+
+                    const marker = L.marker([st.lat, st.lon], { icon: icon });
 
                     marker.bindPopup(`
                         <div class="station-popup-content">
