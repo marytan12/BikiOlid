@@ -397,18 +397,34 @@
             max-width: 400px;
             height: 70px;
             border-radius: 35px;
+            /* Default fully rounded */
             z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: space-around;
             padding: 0 10px;
-            will-change: transform;
+
             background: rgba(35, 48, 56, 0.5);
             /* Gunmetal 50% opacity */
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+
+            will-change: transform, border-radius;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            /* Match preview anim */
+        }
+
+        /* Merged state when card is above */
+        .bottom-nav.merged {
+            border-top-left-radius: 12px;
+            /* Flatten top to meet card */
+            border-top-right-radius: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            /* Faint top border */
+            box-shadow: 0 4px 32px rgba(0, 0, 0, 0.2);
+            /* Reduced upward shadow */
         }
 
         .nav-btn {
@@ -3662,8 +3678,9 @@
                 document.querySelector('#mini-mech-count').textContent = station.mech_bikes;
                 document.querySelector('#mini-docks-count').textContent = station.docks;
 
-                // Animate: Show Preview (Emerging from behind nav)
+                // Animate: Show Preview & Merge Nav
                 document.getElementById('station-mini-preview').classList.add('active');
+                document.querySelector('.bottom-nav').classList.add('merged');
 
                 // Bind View Details
                 document.getElementById('mini-details-btn').onclick = (e) => {
@@ -3674,6 +3691,7 @@
 
             closeMiniPreview: function () {
                 document.getElementById('station-mini-preview').classList.remove('active');
+                document.querySelector('.bottom-nav').classList.remove('merged');
                 // Don't clear selectedStation immediately
             },
 
