@@ -2626,38 +2626,38 @@
 
 
 
-        /* Station Mini Preview - Liquid Expansion Mode */
+        /* Station Mini Preview - Liquid Protrusion Mode */
         .station-mini-preview {
             position: fixed;
-            bottom: 20px;
-            /* Exact match to bottom-nav */
+            bottom: 85px;
+            /* Sit right on top of nav (Nav top is ~90px) */
             left: 50%;
-            transform: translateX(-50%) scale(0.95);
+            transform: translateX(-50%) scale(0.9) translateY(20px);
+            /* Start slightly down and small */
             width: 90%;
-            max-width: 400px;
-            /* Match standard nav max-width */
+            max-width: 380px;
+            /* Slightly narrower than nav (400px) to look like a "neck" or bubble */
             padding: 16px;
 
             border-radius: 35px;
-            /* Match nav pill radius */
+            /* Fully rounded */
             background: rgba(35, 48, 56, 0.5);
-            /* EXACT MATCH: Gunmetal 50% opacity */
+            /* Match Gunmetal Nav */
 
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            /* Match nav border */
 
             color: white;
             z-index: 900;
-            /* Behind nav (nav is 1000) */
+            /* Behind nav */
 
             opacity: 0;
             pointer-events: none;
 
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            /* Match nav shadow */
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            /* Upward shadow */
 
             display: flex;
             flex-direction: column;
@@ -2667,8 +2667,8 @@
 
         .station-mini-preview.active {
             opacity: 1;
-            /* Move up to sit on top of the nav (70px height + 10px margin) */
-            transform: translateX(-50%) translateY(-80px) scale(1);
+            transform: translateX(-50%) scale(1) translateY(0);
+            /* Rises up to natural position */
             pointer-events: all;
         }
 
