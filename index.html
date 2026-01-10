@@ -5142,7 +5142,9 @@
                 const durationMin = Math.round(durationMs / 60000);
                 const durationStr = this.formatDuration(durationMin * 60);
 
-                const cost = trip.cost ? parseFloat(trip.cost).toFixed(2) : '0.00';
+                // API returns 'price' (e.g. 0.25), fall back to 'cost' if needed
+                const rawPrice = trip.price !== undefined ? trip.price : (trip.cost || 0);
+                const cost = parseFloat(rawPrice).toFixed(2);
 
                 // Capitalize first letter of day
                 let dayName = startDate.toLocaleDateString('es-ES', { weekday: 'long' });
