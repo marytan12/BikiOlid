@@ -3731,10 +3731,11 @@
                         setTimeout(() => lucide.createIcons(), 50);
                     });
 
-                    markers.push(marker);
+                    clusterGroup.addLayer(marker);
                 });
 
-                this.markerLayer = L.layerGroup(markers).addTo(this.map);
+                this.markerLayer = clusterGroup;
+                this.map.addLayer(this.markerLayer);
             },
 
             switchView: function (view) {
@@ -3888,10 +3889,18 @@
                     let isDragging = false;
 
                     panel.addEventListener('touchstart', (e) => {
-                        // Only start if touching near top of panel
+                        // Don't interfere with buttons or if panel is scrolled
+                        const target = e.target;
+                        if (target.closest('button') || target.closest('.close-btn')) {
+                            return;
+                        }
+
+                        // Only start if touching near top of panel and panel is at scroll top
                         const touch = e.touches[0];
                         const panelRect = panel.getBoundingClientRect();
-                        if (touch.clientY - panelRect.top < 60) {
+                        const scrollTop = panel.scrollTop || 0;
+
+                        if (touch.clientY - panelRect.top < 60 && scrollTop === 0) {
                             startY = touch.clientY;
                             isDragging = true;
                             panel.style.transition = 'none';
