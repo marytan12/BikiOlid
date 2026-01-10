@@ -93,9 +93,9 @@
             height: 32px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.15);
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            /* Backdrop filter removed for performance */
+            /* backdrop-filter: blur(4px); */
+            /* -webkit-backdrop-filter: blur(4px); */
             border: 2px solid rgba(255, 255, 255, 0.3);
             display: flex;
             align-items: center;
@@ -116,21 +116,27 @@
 
         /* Color variants with gradient overlays */
         .marker-green .glass-marker-circle {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(5, 150, 105, 0.6));
-            border-color: rgba(16, 185, 129, 0.5);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.8), rgba(5, 150, 105, 0.9));
+            border-color: rgba(16, 185, 129, 0.8);
             box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
         }
 
         .marker-orange .glass-marker-circle {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.4), rgba(217, 119, 6, 0.6));
-            border-color: rgba(245, 158, 11, 0.5);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.8), rgba(217, 119, 6, 0.9));
+            border-color: rgba(245, 158, 11, 0.8);
             box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
         }
 
         .marker-red .glass-marker-circle {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.4), rgba(220, 38, 38, 0.6));
-            border-color: rgba(239, 68, 68, 0.5);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.8), rgba(220, 38, 38, 0.9));
+            border-color: rgba(239, 68, 68, 0.8);
             box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+        }
+
+        .marker-blue .glass-marker-circle {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(37, 99, 235, 0.9));
+            border-color: rgba(59, 130, 246, 0.8);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
         }
 
         /* Favorite indicator */
@@ -3353,9 +3359,16 @@
                     let markerClass = 'glass-marker-circle';
 
                     if (isFav) markerClass += ' marker-fav';
-                    if (bikeCount === 0) markerClass += ' marker-red';
-                    else if (bikeCount < 3) markerClass += ' marker-orange';
-                    else markerClass += ' marker-green';
+                    if (bikeCount === 0) {
+                        markerClass += ' marker-red';
+                    } else if (elecBikes > 0 && mechBikes === 0) {
+                        markerClass += ' marker-blue';
+                    } else if (mechBikes > 0 && elecBikes === 0) {
+                        markerClass += ' marker-orange';
+                    } else {
+                        if (bikeCount < 3) markerClass += ' marker-orange';
+                        else markerClass += ' marker-green';
+                    }
 
                     // Create icon using string concatenation for perf
                     const iconHtml = `<div class="${markerClass}"><span class="glass-marker-number">${bikeCount}</span></div>`;
