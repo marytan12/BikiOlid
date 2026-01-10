@@ -2717,6 +2717,19 @@
         .qr-confirmation-btn-confirm:hover {
             box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
         }
+
+        /* Override for Instructions Container - Remove Card Style */
+        .instructions-container {
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin-top: 20px;
+        }
+
+        .route-results {
+            margin-top: 20px;
+        }
     </style>
 </head>
 
@@ -2799,20 +2812,6 @@
         </button>
 
         <div id="route-results" class="route-results hidden">
-            <div class="route-stats">
-                <div class="route-stat-card">
-                    <div class="route-stat-label">Distancia</div>
-                    <div class="route-stat-value" id="route-distance">-</div>
-                </div>
-                <div class="route-stat-card">
-                    <div class="route-stat-label">Tiempo</div>
-                    <div class="route-stat-value" id="route-duration">-</div>
-                </div>
-                <div class="route-stat-card">
-                    <div class="route-stat-label">Elevación</div>
-                    <div class="route-stat-value" id="route-elevation">-</div>
-                </div>
-            </div>
             <div class="instructions-container">
                 <div id="instructions-list"></div>
             </div>
@@ -5143,7 +5142,7 @@
                 const durationMin = Math.round(durationMs / 60000);
                 const durationStr = this.formatDuration(durationMin * 60);
 
-                const cost = trip.cost ? (trip.cost / 100).toFixed(2) : '0.00';
+                const cost = trip.cost ? parseFloat(trip.cost).toFixed(2) : '0.00';
 
                 // Capitalize first letter of day
                 let dayName = startDate.toLocaleDateString('es-ES', { weekday: 'long' });
