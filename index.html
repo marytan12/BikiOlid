@@ -301,12 +301,12 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            z-index: 1000;
+            z-index: 2100;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: transform 0.2s ease, background 0.3s ease;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             will-change: transform;
             background: var(--bg-glass);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -324,10 +324,44 @@
         .account-btn svg {
             width: 20px;
             height: 20px;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .account-btn.morphing svg {
+            transform: rotate(90deg) scale(0);
+            opacity: 0;
+        }
+
+        .account-btn.active {
+            transform: rotate(180deg);
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .account-btn.active::before,
+        .account-btn.active::after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 2px;
+            background: #fff;
+            border-radius: 1px;
+        }
+
+        .account-btn.active::before {
+            transform: rotate(45deg);
+        }
+
+        .account-btn.active::after {
+            transform: rotate(-45deg);
         }
 
         .account-btn:active {
             transform: scale(0.95);
+        }
+
+        .account-btn.active:active {
+            transform: rotate(180deg) scale(0.95);
         }
 
         /* Bottom Navigation Pill */
@@ -685,7 +719,7 @@
         #account-screen {
             position: fixed;
             top: 0;
-            right: -100%;
+            right: 0;
             width: 100%;
             max-width: 480px;
             height: 100vh;
@@ -696,16 +730,24 @@
             backdrop-filter: blur(40px) saturate(180%);
             -webkit-backdrop-filter: blur(40px) saturate(180%);
             box-shadow: none;
-            /* Hide shadow when closed */
             z-index: 2000;
-            transition: right 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
             display: flex;
             flex-direction: column;
             border-left: 1px solid rgba(255, 255, 255, 0.1);
+            /* Liquid animation properties */
+            transform-origin: calc(100% - 35px) 35px;
+            transform: scale(0);
+            opacity: 0;
+            border-radius: 50%;
+            transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+                border-radius 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            will-change: transform, opacity, border-radius;
         }
 
         #account-screen.show {
-            right: 0;
+            transform: scale(1);
+            opacity: 1;
+            border-radius: 0;
             box-shadow: -20px 0 60px rgba(0, 0, 0, 0.6),
                 inset 1px 0 1px rgba(255, 255, 255, 0.1);
         }
@@ -3695,12 +3737,36 @@
             },
 
             openAccount: function () {
-                document.getElementById('account-screen').classList.add('show');
+                const btn = document.querySelector('.account-btn');
+                const screen = document.getElementById('account-screen');
+
+                // Trigger button morphing animation
+                btn.classList.add('morphing');
+
+                // After icon disappears, show X and expand screen
+                setTimeout(() => {
+                    btn.classList.add('active');
+                    screen.classList.add('show');
+                }, 250);
+
                 lucide.createIcons();
             },
 
             closeAccount: function () {
-                document.getElementById('account-screen').classList.remove('show');
+                const btn = document.querySelector('.account-btn');
+                const screen = document.getElementById('account-screen');
+
+                // Collapse screen first
+                screen.classList.remove('show');
+
+                // After screen collapses, morph button back
+                setTimeout(() => {
+                    btn.classList.remove('active');
+                }, 300);
+
+                setTimeout(() => {
+                    btn.classList.remove('morphing');
+                }, 600);
             },
 
             showPersonalInfo: function () {
