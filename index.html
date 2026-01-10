@@ -132,38 +132,38 @@
 
         /* Color variants with gradient overlays */
         /* Color variants with gradient overlays */
-        .marker-green .glass-marker-circle {
+        .glass-marker-circle.marker-green {
             background: linear-gradient(135deg, rgba(16, 185, 129, 0.8), rgba(5, 150, 105, 0.9));
             border-color: rgba(16, 185, 129, 0.8);
             box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
         }
 
-        .marker-orange .glass-marker-circle {
+        .glass-marker-circle.marker-orange {
             background: linear-gradient(135deg, var(--color-orange), #ff4500);
             border-color: var(--color-orange);
             box-shadow: 0 4px 16px rgba(255, 91, 4, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
         }
 
-        .marker-red .glass-marker-circle {
+        .glass-marker-circle.marker-red {
             background: linear-gradient(135deg, rgba(239, 68, 68, 0.8), rgba(220, 38, 38, 0.9));
             border-color: rgba(239, 68, 68, 0.8);
             box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
         }
 
-        .marker-blue .glass-marker-circle {
+        .glass-marker-circle.marker-blue {
             background: linear-gradient(135deg, var(--color-midnight), #096b73);
             border-color: var(--color-midnight);
             box-shadow: 0 4px 16px rgba(7, 80, 86, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
         }
 
         /* Favorite indicator */
-        .marker-fav .glass-marker-circle {
+        .glass-marker-circle.marker-fav {
             border: 3px solid rgba(251, 191, 36, 0.8);
             box-shadow: 0 4px 20px rgba(251, 191, 36, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
             transform: scale(1.1);
         }
 
-        .marker-fav .glass-marker-circle::before {
+        .glass-marker-circle.marker-fav::before {
             content: '⭐';
             position: absolute;
             top: -6px;
