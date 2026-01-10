@@ -4109,7 +4109,14 @@
             // Geolocation Logic
             locateUser: function () {
                 this.vibrate('medium');
-                this.map.locate({ setView: true, maxZoom: 16 });
+
+                if (this.userLocation) {
+                    // If we already have the location, fly to it immediately
+                    this.map.flyTo(this.userLocation, 16);
+                }
+
+                // Always request updated location (watch or single shot)
+                this.map.locate({ setView: !this.userLocation, maxZoom: 16 });
             },
 
             onLocationFound: function (e) {
@@ -4196,9 +4203,9 @@
                 const start = [this.userLocation.lng, this.userLocation.lat]; // OSRM expects Lon,Lat
                 const end = [station.lon, station.lat];
 
-                // OSRM Public Demo API (Driving/Cycling)
+                // OSRM Public Demo API (Walking/Foot)
                 // Note: For production, use own OSRM server or valid provider. This is strict demo.
-                const url = `https://router.project-osrm.org/route/v1/driving/${start.join(',')};${end.join(',')}?overview=full&geometries=geojson`;
+                const url = `https://router.project-osrm.org/route/v1/foot/${start.join(',')};${end.join(',')}?overview=full&geometries=geojson`;
 
                 try {
                     const response = await fetch(url);
