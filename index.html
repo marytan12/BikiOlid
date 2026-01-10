@@ -538,6 +538,23 @@
             transform: translateY(0) translateZ(0);
         }
 
+        /* Swipe to Close Handle */
+        .panel-handle {
+            width: 40px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            margin: 0 auto 16px auto;
+            transition: all 0.3s ease;
+            cursor: grab;
+        }
+
+        .panel-handle:active {
+            cursor: grabbing;
+            background: rgba(255, 255, 255, 0.5);
+            width: 50px;
+        }
+
         .view-panel-header {
             display: flex;
             justify-content: space-between;
@@ -3834,6 +3851,61 @@
                 document.getElementById('personal-info-modal').classList.remove('show');
             },
 
+            setupSwipeToClose: function () {
+                const panels = document.querySelectorAll('.view-panel');
+
+                panels.forEach(panel => {
+                    let startY = 0;
+                    let currentY = 0;
+                    let isDragging = false;
+
+                    panel.addEventListener('touchstart', (e) => {
+                        // Only start if touching near top of panel
+                        const touch = e.touches[0];
+                        const panelRect = panel.getBoundingClientRect();
+                        if (touch.clientY - panelRect.top < 60) {
+                            startY = touch.clientY;
+                            isDragging = true;
+                            panel.style.transition = 'none';
+                        }
+                    }, { passive: true });
+
+                    panel.addEventListener('touchmove', (e) => {
+                        if (!isDragging) return;
+
+                        currentY = e.touches[0].clientY;
+                        const deltaY = currentY - startY;
+
+                        // Only allow dragging down
+                        if (deltaY > 0) {
+                            panel.style.transform = `translateY(${deltaY}px)`;
+                        }
+                    }, { passive: true });
+
+                    panel.addEventListener('touchend', () => {
+                        if (!isDragging) return;
+                        isDragging = false;
+
+                        const deltaY = currentY - startY;
+                        panel.style.transition = 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
+
+                        // Close if dragged down more than 100px
+                        if (deltaY > 100) {
+                            // Trigger close for specific panel
+                            if (panel.id === 'routes-panel' || panel.id === 'favorites-panel' || panel.id === 'history-panel') {
+                                this.switchView('map');
+                            }
+                        } else {
+                            // Bounce back
+                            panel.style.transform = 'translateY(0)';
+                        }
+
+                        startY = 0;
+                        currentY = 0;
+                    });
+                });
+            },
+
             setupNavigation: function () {
                 const nav = document.querySelector('.bottom-nav');
                 const indicator = document.getElementById('nav-indicator');
@@ -5646,6 +5718,7 @@
         // Initialize
         window.addEventListener('DOMContentLoaded', () => {
             app.init();
+            app.setupSwipeToClose();
             routing.init();
             auth.init();
             qrScanner.init();
