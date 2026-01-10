@@ -359,14 +359,17 @@
             top: 50%;
             transform: translateY(-50%) translateZ(0);
             height: 50px;
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            /* More transparent */
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 25px;
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(12px) saturate(150%);
+            /* Stronger glass */
+            -webkit-backdrop-filter: blur(12px) saturate(150%);
             z-index: -1;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), inset 0 0 10px rgba(255, 255, 255, 0.05);
+            /* Added inner glow */
             will-change: transform, width, left;
         }
 
