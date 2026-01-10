@@ -2629,16 +2629,16 @@
         /* Station Mini Preview Card */
         .station-mini-preview {
             position: fixed;
-            bottom: 90px;
+            bottom: 25px;
+            /* Match bottom-nav position initially */
             left: 50%;
-            transform: translateX(-50%) translateY(20px);
+            transform: translateX(-50%) scale(0.9);
+            /* Start slightly smaller */
             width: 90%;
             max-width: 360px;
             padding: 16px;
             border-radius: 40px;
-            /* More rounded like pill */
             background: rgba(15, 23, 42, 0.6);
-            /* Match nav pill */
             backdrop-filter: blur(10px) saturate(180%);
             -webkit-backdrop-filter: blur(10px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2646,11 +2646,29 @@
             z-index: 1500;
             opacity: 0;
             pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
             gap: 12px;
+            transform-origin: bottom center;
+            /* Expand from bottom */
+        }
+
+        /* Unified Animation: Hide bottom nav when preview is active */
+        .bottom-nav.contract {
+            transform: translateX(-50%) scale(0.8);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .station-mini-preview.active {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-65px) scale(1);
+            /* Move up and expand */
+            bottom: 25px;
+            /* Keep base position */
+            pointer-events: all;
         }
 
         /* Station Details Close Button */
@@ -3594,8 +3612,12 @@
                 document.querySelector('#mini-mech-count').textContent = station.mech_bikes;
                 document.querySelector('#mini-docks-count').textContent = station.docks;
 
-                // Show Preview
-                document.getElementById('station-mini-preview').classList.add('active');
+                // Animate: Contract Nav -> Expand Preview
+                document.querySelector('.bottom-nav').classList.add('contract');
+                setTimeout(() => {
+                    document.getElementById('station-mini-preview').classList.add('active');
+                }, 50);
+
 
                 // Bind View Details
                 document.getElementById('mini-details-btn').onclick = (e) => {
@@ -3606,6 +3628,7 @@
 
             closeMiniPreview: function () {
                 document.getElementById('station-mini-preview').classList.remove('active');
+                document.querySelector('.bottom-nav').classList.remove('contract');
                 // Don't clear selectedStation immediately to allow transition
             },
 
