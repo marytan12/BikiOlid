@@ -3660,11 +3660,11 @@
                 this.log('Vibration API is available');
 
                 const patterns = {
-                    light: [10],        // Quick tap
-                    medium: [20],       // Moderate tap
-                    heavy: [30],        // Strong tap
-                    double: [10, 50, 10], // Double tap
-                    success: [10, 30, 10] // Success pattern
+                    light: [100],        // 100ms - should be very noticeable
+                    medium: [150],       // 150ms - strong tap
+                    heavy: [200],        // 200ms - very strong
+                    double: [100, 100, 100], // Double tap pattern
+                    success: [100, 50, 100] // Success pattern
                 };
 
                 try {
