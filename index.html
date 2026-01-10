@@ -66,13 +66,9 @@
         }
 
         /* Dark mode map tiles */
-        /* Dark mode map tiles removed by request */
-        /* .leaflet-layer,
-        .leaflet-control-zoom-in,
-        .leaflet-control-zoom-out,
-        .leaflet-control-attribution {
+        .inverted-map-layer {
             filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
-        } */
+        }
 
         /* Hide Leaflet attribution and controls */
         .leaflet-control-attribution,
@@ -3115,12 +3111,12 @@
             </div>
             <div class="personal-info-body">
                 <div class="map-style-grid">
-                    <div class="map-style-card active" onclick="app.changeMapStyle('standard', this)"
-                        data-style="standard">
-                        <div class="map-style-preview standard"></div>
+                    <div class="map-style-card active" onclick="app.changeMapStyle('inverted', this)"
+                        data-style="inverted">
+                        <div class="map-style-preview light" style="filter: invert(1) hue-rotate(180deg);"></div>
                         <div class="map-style-info">
-                            <span class="map-style-name">Estándar</span>
-                            <span class="map-style-desc">OpenStreetMap</span>
+                            <span class="map-style-name">Normal (Invertido)</span>
+                            <span class="map-style-desc">Alto contraste</span>
                         </div>
                         <div class="map-style-check"><i data-lucide="check"></i></div>
                     </div>
@@ -3129,14 +3125,6 @@
                         <div class="map-style-info">
                             <span class="map-style-name">Modo Oscuro</span>
                             <span class="map-style-desc">Ideal para la noche</span>
-                        </div>
-                        <div class="map-style-check"><i data-lucide="check"></i></div>
-                    </div>
-                    <div class="map-style-card" onclick="app.changeMapStyle('light', this)" data-style="light">
-                        <div class="map-style-preview light"></div>
-                        <div class="map-style-info">
-                            <span class="map-style-name">Modo Claro</span>
-                            <span class="map-style-desc">Alto contraste</span>
                         </div>
                         <div class="map-style-check"><i data-lucide="check"></i></div>
                     </div>
@@ -3173,13 +3161,12 @@
             },
 
             mapLayers: {
-                standard: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                inverted: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
                 dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-                light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
                 satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
             },
             currentLayer: null,
-            currentStyle: 'standard',
+            currentStyle: 'inverted',
 
             showMapPersonalization: function () {
                 document.getElementById('map-personalization-modal').classList.add('show');
@@ -3208,10 +3195,17 @@
                     this.map.removeLayer(this.currentLayer);
                 }
 
-                this.currentLayer = L.tileLayer(this.mapLayers[style], {
+                const options = {
                     maxZoom: 19,
                     attribution: ''
-                }).addTo(this.map);
+                };
+
+                // Add inverted class if style is inverted
+                if (style === 'inverted') {
+                    options.className = 'inverted-map-layer';
+                }
+
+                this.currentLayer = L.tileLayer(this.mapLayers[style], options).addTo(this.map);
 
                 this.currentStyle = style;
                 localStorage.setItem('biki_map_style', style);
@@ -3239,7 +3233,10 @@
                 this.setupNavigation();
 
                 // Load saved map style
-                const savedStyle = localStorage.getItem('biki_map_style') || 'standard';
+                let savedStyle = localStorage.getItem('biki_map_style') || 'inverted';
+                // Fallback for legacy saved styles
+                if (savedStyle === 'standard' || savedStyle === 'light') savedStyle = 'inverted';
+
                 this.changeMapStyle(savedStyle);
 
                 await this.fetchVehicleTypes();
