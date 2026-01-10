@@ -2891,7 +2891,7 @@
     </div>
 
     <!-- Account Button -->
-    <button class="account-btn glass-effect" onclick="app.openAccount()">
+    <button class="account-btn glass-effect" onclick="app.toggleAccount()">
         <i data-lucide="user"></i>
     </button>
 
@@ -3716,6 +3716,15 @@
                 }
             },
 
+            toggleAccount: function () {
+                const screen = document.getElementById('account-screen');
+                if (screen.classList.contains('show')) {
+                    this.closeAccount();
+                } else {
+                    this.openAccount();
+                }
+            },
+
             openAccount: function () {
                 const btn = document.querySelector('.account-btn');
                 const screen = document.getElementById('account-screen');
@@ -4534,6 +4543,11 @@
                     // Clear form
                     document.getElementById('login-email').value = '';
                     document.getElementById('login-password').value = '';
+
+                    // Reload page to refresh all features with authenticated state
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
 
                 } catch (error) {
                     console.error('Login error:', error);
