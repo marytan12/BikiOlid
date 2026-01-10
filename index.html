@@ -293,6 +293,68 @@
             letter-spacing: 1px;
         }
 
+        /* ==================== SKELETON LOADING ==================== */
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg,
+                    rgba(255, 255, 255, 0.03) 0%,
+                    rgba(255, 255, 255, 0.08) 50%,
+                    rgba(255, 255, 255, 0.03) 100%);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+            border-radius: 8px;
+        }
+
+        .skeleton-text {
+            height: 14px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .skeleton-text.large {
+            height: 20px;
+        }
+
+        .skeleton-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .skeleton-station-card {
+            height: 120px;
+        }
+
+        .skeleton-trip-card {
+            height: 140px;
+        }
+
+        .skeleton-profile-section {
+            height: 80px;
+            margin-bottom: 16px;
+        }
+
+        .skeleton-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .skeleton-container.hidden {
+            display: none;
+        }
+
         /* Account Button */
         .account-btn {
             position: fixed;
@@ -3631,6 +3693,11 @@
             },
 
             switchView: function (view) {
+                // Haptic feedback on view change
+                if (typeof haptic !== 'undefined') {
+                    haptic.medium();
+                }
+
                 this.currentView = view;
                 const indicator = document.getElementById('nav-indicator');
 
@@ -3948,6 +4015,27 @@
                         updateIndicatorPosition();
                     }
                 });
+            }
+        };
+
+        // ==================== HAPTIC FEEDBACK UTILITY ====================
+        const haptic = {
+            vibrate: function (pattern) {
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(pattern);
+                }
+            },
+            light: function () {
+                this.vibrate([10]);
+            },
+            medium: function () {
+                this.vibrate([20]);
+            },
+            success: function () {
+                this.vibrate([30, 50, 30]);
+            },
+            error: function () {
+                this.vibrate([50, 100, 50]);
             }
         };
 
