@@ -2849,35 +2849,46 @@
     <!-- QR Scanner Panel -->
     <div id="qr-panel" class="view-panel">
         <div class="view-panel-header">
-            <h2 class="view-panel-title">Escanear DataMatrix</h2>
+            <h2 class="view-panel-title">Escanear Bici</h2>
             <button class="close-btn" onclick="app.switchView('map')">
                 <i data-lucide="x"></i>
             </button>
         </div>
 
-        <div id="qr-status" class="qr-status"></div>
-
-        <div id="qr-video-container">
-            <video id="qr-video" autoplay playsinline></video>
-            <canvas id="qr-canvas"></canvas>
-            <div class="qr-overlay">
-                <div class="qr-corner top-left"></div>
-                <div class="qr-corner top-right"></div>
-                <div class="qr-corner bottom-left"></div>
-                <div class="qr-corner bottom-right"></div>
+        <div id="qr-glass-container" class="qr-glass-container">
+            <div id="qr-video-container">
+                <video id="qr-video" autoplay playsinline></video>
+                <canvas id="qr-canvas"></canvas>
+                <div class="qr-scanner-overlay">
+                    <div class="scanner-corner top-left"></div>
+                    <div class="scanner-corner top-right"></div>
+                    <div class="scanner-corner bottom-left"></div>
+                    <div class="scanner-corner bottom-right"></div>
+                    <div class="scanner-line"></div>
+                </div>
             </div>
-            <button id="flashlight-btn" class="flashlight-btn" onclick="qrScanner.toggleFlashlight()">
+
+            <button id="flashlight-btn" class="flashlight-btn glass-effect" onclick="qrScanner.toggleFlashlight()">
                 <i data-lucide="flashlight"></i>
             </button>
+
+            <div id="qr-status" class="qr-status"></div>
         </div>
 
-        <div class="login-input-group" style="margin-top: 15px;">
-            <label for="manual-qr-code">O introduce el código manualmente</label>
-            <input type="text" id="manual-qr-code" placeholder="Código de la bicicleta" autocomplete="off">
+        <div class="route-search-container" style="margin-top: 25px; margin-bottom: 10px; align-items: center;">
+            <div class="route-input-group" style="width: 100%;">
+                <i data-lucide="keyboard"
+                    style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.5); width: 20px;"></i>
+                <input type="text" id="manual-qr-code" placeholder="Código manual (ej. 1234)" autocomplete="off"
+                    style="padding-left: 35px;">
+            </div>
         </div>
 
-        <button class="calculate-btn" onclick="qrScanner.submitManualCode()" style="margin-top: 3px;">
-            Desbloquear Bicicleta
+        <button class="calculate-btn" onclick="qrScanner.submitManualCode()">
+            <span class="btn-content">
+                <i data-lucide="unlock"></i>
+                Desbloquear
+            </span>
         </button>
     </div>
 
