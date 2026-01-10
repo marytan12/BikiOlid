@@ -2776,8 +2776,8 @@
             gap: 8px;
             box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
             transition: transform 0.2s ease;
-            margin: 20px auto 0 auto;
-            /* Center horizontally */
+            margin: 15px auto 25px auto;
+            /* Center horizontally & Lift up */
             width: 100%;
             max-width: 320px;
             /* Limit width */
@@ -3833,8 +3833,8 @@
                                 </div>
                             </div>
 
-                             <!-- Add Route Action -->
-                            <button class="calculate-btn glass-effect" style="margin-top: 20px; width: 100%;" onclick="app.displayRoute('${st.lat}', '${st.lon}')">
+                            <!-- Add Route Action -->
+                            <button class="calculate-btn glass-effect" style="margin-top: 15px; width: 100%;" onclick="app.calculateRoute(app.selectedStation)">
                                 <i data-lucide="navigation"></i>
                                 <span>Cómo llegar</span>
                             </button>
@@ -4176,8 +4176,65 @@
                 if (miniDist) miniDist.textContent = distText;
 
                 // Update Full Modal (if open)
-                const modalDist = document.getElementById('modal-distance'); // Assuming generic place or add specific ID
-                // Note: The modal doesn't have a specific distance ID visible in previous snippets, will check.
+                const modalDist = document.getElementById('modal-distance');
+                if (modalDist) modalDist.textContent = distText;
+            },
+
+            // Routing Logic
+            calculateRoute: async function (station) {
+                if (!this.userLocation) {
+                    alert("Necesitamos tu ubicación para calcular la ruta.");
+                    this.locateUser();
+                    return;
+                }
+
+                this.vibrate('medium');
+
+                // Close modal to show map
+                document.getElementById('station-details-modal').classList.remove('show');
+
+                const start = [this.userLocation.lng, this.userLocation.lat]; // OSRM expects Lon,Lat
+                const end = [station.lon, station.lat];
+
+                // OSRM Public Demo API (Driving/Cycling)
+                // Note: For production, use own OSRM server or valid provider. This is strict demo.
+                const url = `https://router.project-osrm.org/route/v1/driving/${start.join(',')};${end.join(',')}?overview=full&geometries=geojson`;
+
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (data.code !== 'Ok') throw new Error('Route failed');
+
+                    const route = data.routes[0];
+                    const coordinates = route.geometry.coordinates.map(coord => [coord[1], coord[0]]); // Flip back to Lat,Lon for Leaflet
+
+                    // Clear previous route
+                    if (this.routeLayer) {
+                        this.map.removeLayer(this.routeLayer);
+                    }
+
+                    // Draw Polyline
+                    this.routeLayer = L.polyline(coordinates, {
+                        color: '#00d4ff', // Cyan / Electric Blue
+                        weight: 5,
+                        opacity: 0.8,
+                        lineJoin: 'round'
+                    }).addTo(this.map);
+
+                    // Fit Map
+                    this.map.fitBounds(this.routeLayer.getBounds(), { padding: [50, 50] });
+
+                    // Add user marker if missing
+                    if (!this.userMarker) {
+                        const userIcon = L.divIcon({ className: 'user-location-marker', iconSize: [20, 20] });
+                        this.userMarker = L.marker(this.userLocation, { icon: userIcon }).addTo(this.map);
+                    }
+
+                } catch (e) {
+                    console.error('Routing error:', e);
+                    alert('No se pudo calcular la ruta. Inténtalo de nuevo.');
+                }
             },
 
             // Haptic feedback helper
