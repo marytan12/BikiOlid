@@ -2626,6 +2626,158 @@
 
 
 
+        /* Station Mini Preview Card */
+        .station-mini-preview {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            width: 90%;
+            max-width: 360px;
+            padding: 16px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(36, 50, 68, 0.9));
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            z-index: 1500;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .station-mini-preview.active {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: all;
+        }
+
+        .mini-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mini-title-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #mini-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        #mini-distance {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .mini-close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+        }
+
+        .mini-stats {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .mini-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .mini-stat.elec {
+            color: var(--color-blue);
+        }
+
+        .mini-stat.mech {
+            color: var(--color-orange);
+        }
+
+        .mini-stat.docks {
+            color: var(--text-muted);
+        }
+
+        .mini-stat svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .mini-action-btn {
+            background: var(--color-orange);
+            border: none;
+            padding: 10px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .mini-action-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* Station Details Modal (Full Screen) */
+        .station-details-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2100;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: flex-end;
+            /* Bottom sheet style on mobile */
+            justify-content: center;
+        }
+
+        .station-details-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Reuse popup styles for the modal content but adjust */
+        .station-details-modal .station-popup-wrapper {
+            width: 100%;
+            max-width: 480px;
+            border-radius: 24px 24px 0 0;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .station-details-modal.show .station-popup-wrapper {
+            transform: translateY(0);
+        }
+
         .flashlight-btn {
             position: absolute;
             bottom: 25px;
@@ -2881,35 +3033,45 @@
         <span id="overlay-trip-timer">00:00:00</span>
     </div>
 
-    <!-- Station Mini-Preview Card -->
-    <div id="station-minicard" class="station-minicard">
-        <div class="minicard-content">
-            <div class="minicard-header">
-                <span class="minicard-station-name"></span>
-                <button class="minicard-close" onclick="app.closeMinicard()">
-                    <i data-lucide="x"></i>
-                </button>
-            </div>
-            <div class="minicard-bikes">
-                <div class="minicard-bike-item electric">
-                    <i data-lucide="zap"></i>
-                    <span class="minicard-bike-count">0</span>
-                </div>
-                <div class="minicard-bike-item mechanical">
-                    <i data-lucide="bike"></i>
-                    <span class="minicard-bike-count">0</span>
-                </div>
-            </div>
-            <button class="minicard-details-btn" onclick="app.openMinicardDetails()">
-                Ver detalles
-            </button>
-        </div>
-    </div>
-
     <!-- Account Button -->
     <button class="account-btn glass-effect" onclick="app.toggleAccount()">
         <i data-lucide="user"></i>
     </button>
+
+    <!-- Station Mini Preview -->
+    <div id="station-mini-preview" class="station-mini-preview glass-effect">
+        <div class="mini-header">
+            <div class="mini-title-group">
+                <h3 id="mini-name">Station Name</h3>
+                <span id="mini-distance">0m</span>
+            </div>
+            <button class="mini-close-btn" onclick="app.closeMiniPreview()">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <div class="mini-stats">
+            <div class="mini-stat elec">
+                <i data-lucide="zap"></i>
+                <span id="mini-elec-count">0</span>
+            </div>
+            <div class="mini-stat mech">
+                <i data-lucide="bike"></i>
+                <span id="mini-mech-count">0</span>
+            </div>
+            <div class="mini-stat docks">
+                <i data-lucide="circle-parking"></i>
+                <span id="mini-docks-count">0</span>
+            </div>
+        </div>
+        <button id="mini-details-btn" class="mini-action-btn">
+            Ver detalles complete
+        </button>
+    </div>
+
+    <!-- Station Details Modal (Replaces Popup) -->
+    <div id="station-details-modal" class="station-details-modal glass-effect">
+        <!-- Content injected via JS -->
+    </div>
 
     <!-- Bottom Navigation Pill -->
     <div class="bottom-nav glass-effect">
@@ -3366,6 +3528,120 @@
             },
             currentLayer: null,
             currentStyle: 'inverted',
+            selectedStation: null,
+
+            // Mini Preview & Details Logic
+            showMiniPreview: function (station) {
+                this.selectedStation = station;
+                this.vibrate('light');
+
+                // Populate Mini Preview
+                document.getElementById('mini-name').textContent = station.name;
+                // Calculate distance placeholder
+                document.getElementById('mini-distance').textContent = 'A 150m';
+
+                document.querySelector('#mini-elec-count').textContent = station.elec_bikes;
+                document.querySelector('#mini-mech-count').textContent = station.mech_bikes;
+                document.querySelector('#mini-docks-count').textContent = station.docks;
+
+                // Show Preview
+                document.getElementById('station-mini-preview').classList.add('active');
+
+                // Bind View Details
+                document.getElementById('mini-details-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    this.openStationDetails();
+                };
+            },
+
+            closeMiniPreview: function () {
+                document.getElementById('station-mini-preview').classList.remove('active');
+                // Don't clear selectedStation immediately to allow transition
+            },
+
+            openStationDetails: function () {
+                if (!this.selectedStation) return;
+                this.vibrate('medium');
+                this.closeMiniPreview();
+
+                const st = this.selectedStation;
+                const modal = document.getElementById('station-details-modal');
+
+                // Reuse HTML logic (adapted for modal)
+                const isFavorite = this.favorites.has(st.id);
+                const favClass = isFavorite ? 'fill-current text-red-500' : '';
+
+                // Generate content
+                const content = `
+                    <div class="station-popup-wrapper" onclick="event.stopPropagation()">
+                        <div class="station-popup-header">
+                            <div class="station-popup-title-group">
+                                <h3 class="station-popup-title">${st.name}</h3>
+                                <div class="station-popup-subtitle">
+                                    <span class="status-dot ${st.status === 'OPERATIVE' ? 'active' : 'inactive'}"></span>
+                                    ${st.status === 'OPERATIVE' ? 'Operativa' : 'Mantenimiento'}
+                                </div>
+                            </div>
+                            <button class="station-fav-btn" onclick="app.toggleFavorite('${st.id}')">
+                                <i data-lucide="heart" class="${favClass}"></i>
+                            </button>
+                            <button class="station-close-btn" onclick="document.getElementById('station-details-modal').classList.remove('show')">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="station-popup-body">
+                            <div class="station-bikes-grid">
+                                <div class="station-bike-card electric">
+                                    <div class="bike-card-icon">
+                                        <i data-lucide="zap"></i>
+                                    </div>
+                                    <div class="bike-card-content">
+                                        <div class="bike-card-value">${st.elec_bikes}</div>
+                                        <div class="bike-card-label">Eléctricas</div>
+                                    </div>
+                                </div>
+                                <div class="station-bike-card mechanical">
+                                    <div class="bike-card-icon">
+                                        <i data-lucide="bike"></i>
+                                    </div>
+                                    <div class="bike-card-content">
+                                        <div class="bike-card-value">${st.mech_bikes}</div>
+                                        <div class="bike-card-label">Mecánicas</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="station-docks-card">
+                                <div class="docks-card-icon">
+                                    <i data-lucide="circle-parking"></i>
+                                </div>
+                                <div class="docks-card-content">
+                                    <div class="docks-card-label">Anclajes libres</div>
+                                    <div class="docks-card-value">${st.docks}</div>
+                                </div>
+                            </div>
+
+                             <!-- Add Route Action -->
+                            <button class="calculate-btn glass-effect" style="margin-top: 20px; width: 100%;" onclick="app.displayRoute('${st.lat}', '${st.lon}')">
+                                <i data-lucide="navigation"></i>
+                                <span>Cómo llegar</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                modal.innerHTML = content;
+                modal.classList.add('show');
+
+                // Close on backdrop click
+                modal.onclick = (e) => {
+                    if (e.target === modal) modal.classList.remove('show');
+                };
+
+                // Init icons
+                setTimeout(() => lucide.createIcons(), 50);
+            },
 
             showMapPersonalization: function () {
                 document.getElementById('map-personalization-modal').classList.add('show');
@@ -3437,6 +3713,11 @@
                     minZoom: 13,
                     maxZoom: 18
                 }).setView([41.652, -4.724], 14);
+
+                // Global map click handler
+                this.map.on('click', () => {
+                    this.closeMiniPreview();
+                });
 
                 this.setupNavigation();
 
@@ -3588,57 +3869,13 @@
 
                     const marker = L.marker([st.lat, st.lon], { icon: icon });
 
-                    marker.bindPopup(`
-                        <div class="station-popup-content">
-                            <div class="station-popup-header">
-                                <h3 class="station-popup-title">${st.name}</h3>
-                                <button onclick="app.toggleFavorite('${st.station_id}')" class="station-fav-btn" title="${isFav ? 'Quitar de favoritos' : 'Añadir a favoritos'}">
-                                    <i data-lucide="${isFav ? 'heart' : 'heart'}" style="${isFav ? 'fill: #ef4444; color: #ef4444;' : 'color: rgba(255,255,255,0.5);'}"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="station-popup-body">
-                                <div class="station-bikes-grid">
-                                    <div class="station-bike-card electric">
-                                        <div class="bike-card-icon">
-                                            <i data-lucide="zap"></i>
-                                        </div>
-                                        <div class="bike-card-content">
-                                            <div class="bike-card-value">${st.elec_bikes}</div>
-                                            <div class="bike-card-label">Eléctricas</div>
-                                        </div>
-                                    </div>
-                                    <div class="station-bike-card mechanical">
-                                        <div class="bike-card-icon">
-                                            <i data-lucide="bike"></i>
-                                        </div>
-                                        <div class="bike-card-content">
-                                            <div class="bike-card-value">${st.mech_bikes}</div>
-                                            <div class="bike-card-label">Mecánicas</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="station-docks-card">
-                                    <div class="docks-card-icon">
-                                        <i data-lucide="circle-parking"></i>
-                                    </div>
-                                    <div class="docks-card-content">
-                                        <div class="docks-card-label">Anclajes libres</div>
-                                        <div class="docks-card-value">${st.docks}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `, {
-                        maxWidth: 320,
-                        className: 'custom-popup'
+                    // Custom click handler for Mini Preview
+                    marker.on('click', (e) => {
+                        L.DomEvent.stopPropagation(e);
+                        this.showMiniPreview(st);
                     });
 
-                    // Initialize Lucide icons in popup after it opens
-                    marker.on('popupopen', () => {
-                        setTimeout(() => lucide.createIcons(), 50);
-                    });
+                    markers.push(marker);
 
                     markers.push(marker);
                 });
