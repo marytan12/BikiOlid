@@ -4203,9 +4203,9 @@
                 const start = [this.userLocation.lng, this.userLocation.lat]; // OSRM expects Lon,Lat
                 const end = [station.lon, station.lat];
 
-                // OSRM Public Demo API (Walking/Foot)
-                // Note: For production, use own OSRM server or valid provider. This is strict demo.
-                const url = `https://router.project-osrm.org/route/v1/foot/${start.join(',')};${end.join(',')}?overview=full&geometries=geojson`;
+                // OpenStreetMap.de Foot Routing (Specialized for Walking)
+                // Better quality for pedestrian paths than generic OSRM demo
+                const url = `https://routing.openstreetmap.de/routed-foot/route/v1/foot/${start.join(',')};${end.join(',')}?overview=full&geometries=geojson`;
 
                 try {
                     const response = await fetch(url);
