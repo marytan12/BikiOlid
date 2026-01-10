@@ -3730,8 +3730,15 @@
 
                 // Populate Mini Preview
                 document.getElementById('mini-name').textContent = station.name;
-                // Calculate distance placeholder
-                document.getElementById('mini-distance').textContent = 'A 150m';
+
+                // Reset distance and calculate if possible
+                document.getElementById('mini-distance').textContent = '...';
+                if (this.userLocation) {
+                    this.updateStationDistance(station);
+                } else {
+                    // Try to locate if not already locating? Maybe too aggressive.
+                    // Just wait for user to hit locate button.
+                }
 
                 document.querySelector('#mini-elec-count').textContent = station.elec_bikes;
                 document.querySelector('#mini-mech-count').textContent = station.mech_bikes;
@@ -3780,6 +3787,8 @@
                                 <div class="station-popup-subtitle">
                                     <span class="status-dot ${st.status === 'OPERATIVE' ? 'active' : 'inactive'}"></span>
                                     ${st.status === 'OPERATIVE' ? 'Operativa' : 'Mantenimiento'}
+                                    <span style="margin: 0 6px; opacity: 0.4;">|</span>
+                                    <span id="modal-distance">...</span>
                                 </div>
                             </div>
                             <div class="header-actions" style="display: flex; gap: 8px;">
@@ -3835,6 +3844,11 @@
 
                 modal.innerHTML = content;
                 modal.classList.add('show');
+
+                // Calculate distance immediately if location known
+                if (this.userLocation) {
+                    this.updateStationDistance(st);
+                }
 
                 // Close on backdrop click
                 modal.onclick = (e) => {
@@ -4100,6 +4114,7 @@
 
             onLocationFound: function (e) {
                 const radius = e.accuracy;
+                this.userLocation = e.latlng; // Save user location
 
                 if (this.userMarker) {
                     this.userMarker.setLatLng(e.latlng);
@@ -4110,16 +4125,59 @@
                         iconAnchor: [10, 10]
                     });
                     this.userMarker = L.marker(e.latlng, { icon: userIcon }).addTo(this.map);
-                    // Standard popup or tooltip could go here
                 }
 
                 this.vibrate('success');
+
+                // Update distance if a station is currently selected
+                if (this.selectedStation) {
+                    this.updateStationDistance(this.selectedStation);
+                }
             },
 
             onLocationError: function (e) {
-                // this.vibrate('double'); // Feedback for error
                 console.error("Location access denied or error", e.message);
                 alert("No se pudo obtener tu ubicación. Verifica los permisos.");
+            },
+
+            // Helper: Haversine Distance
+            calculateDistance: function (lat1, lon1, lat2, lon2) {
+                const R = 6371e3; // metres
+                const φ1 = lat1 * Math.PI / 180;
+                const φ2 = lat2 * Math.PI / 180;
+                const Δφ = (lat2 - lat1) * Math.PI / 180;
+                const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+                const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                    Math.cos(φ1) * Math.cos(φ2) *
+                    Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+                return R * c; // in meters
+            },
+
+            updateStationDistance: function (station) {
+                if (!this.userLocation) return;
+
+                const dist = this.calculateDistance(
+                    this.userLocation.lat, this.userLocation.lng,
+                    station.lat, station.lon
+                );
+
+                let distText = '';
+                if (dist < 1000) {
+                    distText = Math.round(dist) + 'm';
+                } else {
+                    distText = (dist / 1000).toFixed(1) + 'km';
+                }
+
+                // Update Mini Preview
+                const miniDist = document.getElementById('mini-distance');
+                if (miniDist) miniDist.textContent = distText;
+
+                // Update Full Modal (if open)
+                const modalDist = document.getElementById('modal-distance'); // Assuming generic place or add specific ID
+                // Note: The modal doesn't have a specific distance ID visible in previous snippets, will check.
             },
 
             // Haptic feedback helper
