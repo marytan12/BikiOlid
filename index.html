@@ -2806,7 +2806,7 @@
         <button class="nav-btn" data-view="routes" onclick="app.switchView('routes')">
             <i data-lucide="navigation"></i>
         </button>
-        <button class="nav-btn" data-view="qr" onclick="app.switchView('qr')">
+        <button id="nav-btn-qr" class="nav-btn hidden" data-view="qr" onclick="app.switchView('qr')">
             <i data-lucide="scan"></i>
         </button>
         <button class="nav-btn" data-view="history" onclick="app.switchView('history')">
@@ -4446,6 +4446,10 @@
                 document.getElementById('login-form-container').classList.add('hidden');
                 document.getElementById('profile-container').classList.remove('hidden');
 
+                // Show QR button
+                const qrBtn = document.getElementById('nav-btn-qr');
+                if (qrBtn) qrBtn.classList.remove('hidden');
+
                 // Name and email from details
                 const firstName = data.details?.firstname || '';
                 const lastName = data.details?.lastname || '';
@@ -4716,6 +4720,10 @@
                 // Show login form, hide profile
                 document.getElementById('login-form-container').classList.remove('hidden');
                 document.getElementById('profile-container').classList.add('hidden');
+
+                // Hide QR button
+                const qrBtn = document.getElementById('nav-btn-qr');
+                if (qrBtn) qrBtn.classList.add('hidden');
 
                 lucide.createIcons();
             },
