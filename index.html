@@ -2653,6 +2653,52 @@
             gap: 12px;
         }
 
+        /* Station Details Close Button */
+        .station-close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            transition: all 0.2s ease;
+        }
+
+        .station-close-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Calculate Route Button */
+        .calculate-btn {
+            background: linear-gradient(135deg, var(--color-blue), #2563eb);
+            border: none;
+            padding: 14px;
+            border-radius: 16px;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+            transition: transform 0.2s ease;
+            margin: 20px auto 0 auto;
+            /* Center horizontally */
+            width: 100%;
+            max-width: 320px;
+            /* Limit width */
+        }
+
+        .calculate-btn:active {
+            transform: scale(0.98);
+        }
+
         .station-mini-preview.active {
             opacity: 1;
             transform: translateX(-50%) translateY(0);
@@ -3572,8 +3618,10 @@
                 const modal = document.getElementById('station-details-modal');
 
                 // Reuse HTML logic (adapted for modal)
-                const isFavorite = this.favorites.has(st.id);
+                const isFavorite = this.favorites.has(st.station_id || st.id);
                 const favClass = isFavorite ? 'fill-current text-red-500' : '';
+                const favColor = isFavorite ? '#ef4444' : 'rgba(255,255,255,0.7)';
+                const favFill = isFavorite ? '#ef4444' : 'none';
 
                 // Generate content
                 const content = `
@@ -3586,12 +3634,14 @@
                                     ${st.status === 'OPERATIVE' ? 'Operativa' : 'Mantenimiento'}
                                 </div>
                             </div>
-                            <button class="station-fav-btn" onclick="app.toggleFavorite('${st.id}')">
-                                <i data-lucide="heart" class="${favClass}"></i>
-                            </button>
-                            <button class="station-close-btn" onclick="document.getElementById('station-details-modal').classList.remove('show')">
-                                <i data-lucide="x"></i>
-                            </button>
+                            <div class="header-actions" style="display: flex; gap: 8px;">
+                                <button class="station-close-btn" onclick="app.toggleFavorite('${st.station_id || st.id}'); app.openStationDetails()" style="border-color: ${isFavorite ? '#ef4444' : 'rgba(255,255,255,0.2)'}">
+                                    <i data-lucide="heart" style="color: ${favColor}; fill: ${favFill}"></i>
+                                </button>
+                                <button class="station-close-btn" onclick="document.getElementById('station-details-modal').classList.remove('show')">
+                                    <i data-lucide="x"></i>
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="station-popup-body">
