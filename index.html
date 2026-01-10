@@ -50,6 +50,11 @@
             --color-sand: #F4D47C;
             --color-silver: #D3DBDD;
 
+            /* Additional Colors for Markers */
+            --color-emerald: #10b981;
+            --color-blue: #3b82f6;
+            --color-red: #ef4444;
+
             --bg-main: var(--color-gunmetal);
             --bg-glass: rgba(7, 80, 86, 0.85);
             /* Midnight Glass */
@@ -133,30 +138,48 @@
             z-index: 10;
         }
 
-        /* Color variants with gradient overlays */
-        /* Color variants with gradient overlays */
-        .glass-marker-circle.marker-green {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.8), rgba(5, 150, 105, 0.9));
-            border-color: rgba(16, 185, 129, 0.8);
-            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-        }
+        /* Map Markers - Liquid Glass */
+        .glass-marker-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
 
-        .glass-marker-circle.marker-orange {
-            background: linear-gradient(135deg, var(--color-orange), #ff4500);
-            border-color: var(--color-orange);
-            box-shadow: 0 4px 16px rgba(255, 91, 4, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            /* Default/Green for Standard Mixed */
+            background: linear-gradient(135deg, var(--color-emerald), #059669);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .glass-marker-circle.marker-red {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.8), rgba(220, 38, 38, 0.9));
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.95));
             border-color: rgba(239, 68, 68, 0.8);
             box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
         }
 
+        .glass-marker-circle.marker-orange {
+            background: linear-gradient(135deg, var(--color-orange), #f97316);
+            border-color: rgba(251, 146, 60, 0.8);
+            box-shadow: 0 4px 16px rgba(249, 115, 22, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+        }
+
         .glass-marker-circle.marker-blue {
-            background: linear-gradient(135deg, var(--color-midnight), #09cee0);
-            border-color: var(--color-midnight);
-            box-shadow: 0 4px 16px rgba(7, 80, 86, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            background: linear-gradient(135deg, var(--color-blue), #2563eb);
+            border-color: rgba(59, 130, 246, 0.8);
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+        }
+
+        .glass-marker-circle.marker-green {
+            /* Explicit green class if needed, though default handles it */
+            background: linear-gradient(135deg, var(--color-emerald), #059669);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
         }
 
         /* Favorite indicator */
@@ -2629,24 +2652,25 @@
         /* Station Mini Preview - Liquid Protrusion Mode */
         .station-mini-preview {
             position: fixed;
-            bottom: 85px;
-            /* Sit right on top of nav (Nav top is ~90px) */
+            bottom: 89px;
+            /* Sit FLUSH on nav (Nav top is 90px, 1px overlap) */
             left: 50%;
             transform: translateX(-50%) scale(0.9) translateY(20px);
-            /* Start slightly down and small */
             width: 90%;
             max-width: 380px;
-            /* Slightly narrower than nav (400px) to look like a "neck" or bubble */
             padding: 16px;
 
-            border-radius: 35px;
-            /* Fully rounded */
+            /* Top rounded, bottom flat/merged */
+            border-radius: 35px 35px 10px 10px;
+
             background: rgba(35, 48, 56, 0.5);
             /* Match Gunmetal Nav */
-
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
+
+            /* Border: All except bottom to merge */
             border: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: none;
 
             color: white;
             z-index: 900;
@@ -2656,13 +2680,13 @@
             pointer-events: none;
 
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-            /* Upward shadow */
+            /* Remove bottom shadow to avoid line */
+            box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.15);
 
             display: flex;
             flex-direction: column;
             gap: 12px;
-            transform-origin: bottom center;
+            /* transform-origin: bottom center; - removed to use standard transform */
         }
 
         .station-mini-preview.active {
