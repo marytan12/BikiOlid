@@ -3414,16 +3414,16 @@
                     let markerClass = 'glass-marker-circle';
 
                     if (isFav) markerClass += ' marker-fav';
+
+                    // Priority Logic:
                     if (bikeCount === 0) {
-                        markerClass += ' marker-red';
+                        markerClass += ' marker-red'; // Empty = Red
                     } else if (elecBikes > 0 && mechBikes === 0) {
-                        markerClass += ' marker-blue';
+                        markerClass += ' marker-blue'; // Only Electric = Blue
                     } else if (mechBikes > 0 && elecBikes === 0) {
-                        markerClass += ' marker-orange';
+                        markerClass += ' marker-orange'; // Only Mechanical = Orange
                     } else {
-                        // Mixed types
-                        if (bikeCount < 3) markerClass += ' marker-orange';
-                        else markerClass += ' marker-green';
+                        markerClass += ' marker-green'; // Mixed/Standard = Green
                     }
 
                     // Create icon using string concatenation for perf
