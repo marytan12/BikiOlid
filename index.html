@@ -3632,7 +3632,11 @@
 
             // Haptic feedback helper
             vibrate: function (pattern = 'light') {
-                if (!navigator.vibrate) return;
+                console.log('Vibrate called with pattern:', pattern);
+                if (!navigator.vibrate) {
+                    console.warn('Vibration API not supported');
+                    return;
+                }
 
                 const patterns = {
                     light: [10],        // Quick tap
@@ -3642,7 +3646,12 @@
                     success: [10, 30, 10] // Success pattern
                 };
 
-                navigator.vibrate(patterns[pattern] || patterns.light);
+                try {
+                    const result = navigator.vibrate(patterns[pattern] || patterns.light);
+                    console.log('Vibration result:', result, 'for pattern:', pattern);
+                } catch (e) {
+                    console.error('Vibration error:', e);
+                }
             },
 
             switchView: function (view) {
