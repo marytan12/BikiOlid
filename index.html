@@ -3101,7 +3101,7 @@
     </div>
 
     <!-- QR Scanner Panel -->
-    <div id="qr-panel" class="view-panel">
+    <div id="qr-panel" class="view-panel hidden">
         <div class="view-panel-header">
             <h2 class="view-panel-title">Escanear Bici</h2>
             <button class="close-btn" onclick="app.switchView('map')">
@@ -3785,7 +3785,7 @@
                 const views = {
                     'map': 'map',
                     'routes': 'routes-panel',
-                    'qr': 'qr-scanner-container',
+                    'qr': 'qr-panel',
                     'history': 'history-panel',
                     'favorites': 'favorites-panel'
                 };
@@ -5724,6 +5724,10 @@
             routing.init();
             auth.init();
             qrScanner.init();
+
+            // Force Map View
+            app.currentView = null; // Reset to allow switch
+            app.switchView('map');
         });
     </script>
 
