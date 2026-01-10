@@ -3813,10 +3813,10 @@
                             </div>
                             <div class="header-actions" style="display: flex; gap: 8px;">
                                 <button class="station-close-btn" onclick="app.toggleFavorite('${st.station_id || st.id}'); app.openStationDetails()" style="border-color: ${isFavorite ? '#ef4444' : 'rgba(255,255,255,0.2)'}">
-                                    <i data-lucide="heart" style="color: ${favColor}; fill: ${favFill}"></i>
+                                    <i data-lucide="heart" style="color: ${favColor}; fill: ${favFill}; width: 18px; height: 18px;"></i>
                                 </button>
                                 <button class="station-close-btn" onclick="document.getElementById('station-details-modal').classList.remove('show')">
-                                    <i data-lucide="x"></i>
+                                    <i data-lucide="x" style="width: 18px; height: 18px;"></i>
                                 </button>
                             </div>
                         </div>
@@ -5277,7 +5277,7 @@
                 const rentAlert = document.getElementById('rent-status-alert');
                 if (!data.canRent && data.cantRentReason) {
                     document.getElementById('rent-status-title').textContent = this.translateRentReason(data.cantRentReason);
-                    document.getElementById('rent-status-description').textContent = data.cantRentReasonDescription || '';
+                    document.getElementById('rent-status-description').textContent = this.translateRentReasonDescription(data.cantRentReasonDescription) || '';
                     rentAlert.classList.remove('hidden');
                 } else {
                     rentAlert.classList.add('hidden');
@@ -5451,6 +5451,18 @@
                 };
                 return translations[reason] || reason;
             },
+
+            translateRentReasonDescription: function (description) {
+                const translations = {
+                    'No active product found for customer.': 'No se encontró ninguna suscripción activa.',
+                    'Customer account is suspended.': 'La cuenta del cliente está suspendida.',
+                    'No payment method registered.': 'No hay método de pago registrado.',
+                    'Payment card has expired.': 'La tarjeta de pago ha expirado.',
+                    'Insufficient balance.': 'Saldo insuficiente.'
+                };
+                return translations[description] || description;
+            },
+
 
             translatePlanStatus: function (status) {
                 const translations = {
