@@ -230,19 +230,6 @@
             transform: rotate(90deg);
         }
 
-        /* Animated Flowing Route */
-        @keyframes dash-flow {
-            to {
-                stroke-dashoffset: -30;
-            }
-        }
-
-        .flowing-route-line {
-            stroke-dasharray: 10, 15;
-            animation: dash-flow 1.5s linear infinite;
-            filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.5));
-        }
-
         /* Liquid Glass Effect - Optimized for mobile */
         .glass-effect {
             background: var(--bg-glass);
@@ -1408,104 +1395,14 @@
             background: #3b82f6;
             width: 20px;
             height: 20px;
-        }
-
-        /* 📊 Gamified Stats CSS */
-        .gamified-stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .stat-ring-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 16px;
+            border-radius: 50%;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            position: relative;
-            backdrop-filter: blur(8px);
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
         }
-
-        .ring-container {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            margin-bottom: 8px;
-        }
-
-        .ring-icon {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .progress-ring__circle {
-            transition: stroke-dashoffset 1s ease-in-out;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-        }
-
-        .stat-info-center {
-            text-align: center;
-        }
-
-        .stat-value-big {
-            display: block;
-            font-size: 20px;
-            font-weight: 700;
-            color: #fff;
-            line-height: 1.2;
-        }
-
-        .stat-label-small {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.5);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Mini Stats */
-        .mini-stats-row {
-            grid-column: span 2;
-            display: flex;
-            gap: 12px;
-        }
-
-        .mini-stat-card {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .mini-stat-text {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .mini-value {
-            font-size: 16px;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        .mini-label {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-
 
         .map-style-check svg {
             width: 12px;
@@ -2954,36 +2851,6 @@
         .route-results {
             margin-top: 20px;
         }
-
-        /* 🚀 Smooth View Transitions */
-        .view-panel,
-        #map,
-        #qr-scanner-container,
-        #history-panel,
-        #favorites-panel,
-        #account-screen {
-            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .view-hidden-animated {
-            opacity: 0 !important;
-            transform: scale(0.95) !important;
-            pointer-events: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
-
-        /* Ensure map stays behind when hidden */
-        #map.view-hidden-animated {
-            z-index: -1;
-        }
     </style>
 </head>
 
@@ -3024,7 +2891,7 @@
     </div>
 
     <!-- Routes Panel -->
-    <div id="routes-panel" class="view-panel hidden">
+    <div id="routes-panel" class="view-panel">
         <div class="view-panel-header">
             <h2 class="view-panel-title">Planificar Ruta</h2>
             <button class="close-btn" onclick="routing.clearRoute(); app.switchView('map')">
@@ -3073,7 +2940,7 @@
     </div>
 
     <!-- Favorites Panel -->
-    <div id="favorites-panel" class="view-panel hidden">
+    <div id="favorites-panel" class="view-panel">
         <div class="view-panel-header">
             <h2 class="view-panel-title">Favoritos</h2>
             <button class="close-btn" onclick="app.switchView('map')">
@@ -3087,7 +2954,7 @@
     </div>
 
     <!-- Trip History Panel -->
-    <div id="history-panel" class="view-panel glass-panel hidden">
+    <div id="history-panel" class="view-panel glass-panel">
         <div class="view-panel-header">
             <h2 id="history-panel-title" class="view-panel-title">Historial <span id="history-trip-count"
                     style="font-size: 0.6em; opacity: 0.6; font-weight: 400; vertical-align: middle;"></span></h2>
@@ -3101,7 +2968,7 @@
     </div>
 
     <!-- QR Scanner Panel -->
-    <div id="qr-panel" class="view-panel hidden">
+    <div id="qr-panel" class="view-panel">
         <div class="view-panel-header">
             <h2 class="view-panel-title">Escanear Bici</h2>
             <button class="close-btn" onclick="app.switchView('map')">
@@ -3311,58 +3178,33 @@
                 <!-- Usage Stats Section -->
                 <div class="account-section">
                     <h3>📊 Estadísticas de Uso</h3>
-                    <div class="gamified-stats-grid">
-                        <!-- Trips Ring Card -->
-                        <div class="stat-ring-card">
-                            <div class="ring-container">
-                                <svg class="progress-ring" width="80" height="80">
-                                    <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.1)"
-                                        stroke-width="6" fill="transparent" r="34" cx="40" cy="40" />
-                                    <circle class="progress-ring__circle" stroke="#10b981" stroke-width="6"
-                                        fill="transparent" r="34" cx="40" cy="40" stroke-dasharray="213"
-                                        stroke-dashoffset="100" id="ring-trips" />
-                                </svg>
-                                <div class="ring-icon"><i data-lucide="bike"></i></div>
-                            </div>
-                            <div class="stat-info-center">
-                                <span class="stat-value-big" id="stats-total-trips">-</span>
-                                <span class="stat-label-small">Viajes</span>
+                    <div class="usage-stats-grid">
+                        <div class="usage-stat-card">
+                            <div class="usage-stat-icon">🚴</div>
+                            <div class="usage-stat-info">
+                                <span class="usage-stat-value" id="stats-total-trips">-</span>
+                                <span class="usage-stat-label">Viajes totales</span>
                             </div>
                         </div>
-
-                        <!-- Time Ring Card -->
-                        <div class="stat-ring-card">
-                            <div class="ring-container">
-                                <svg class="progress-ring" width="80" height="80">
-                                    <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.1)"
-                                        stroke-width="6" fill="transparent" r="34" cx="40" cy="40" />
-                                    <circle class="progress-ring__circle" stroke="#3b82f6" stroke-width="6"
-                                        fill="transparent" r="34" cx="40" cy="40" stroke-dasharray="213"
-                                        stroke-dashoffset="150" id="ring-time" />
-                                </svg>
-                                <div class="ring-icon"><i data-lucide="clock"></i></div>
-                            </div>
-                            <div class="stat-info-center">
-                                <span class="stat-value-big" id="stats-total-time">-</span>
-                                <span class="stat-label-small">Horas</span>
+                        <div class="usage-stat-card">
+                            <div class="usage-stat-icon">⏱️</div>
+                            <div class="usage-stat-info">
+                                <span class="usage-stat-value" id="stats-total-time">-</span>
+                                <span class="usage-stat-label">Tiempo total</span>
                             </div>
                         </div>
-
-                        <!-- Mini Stats Row -->
-                        <div class="mini-stats-row">
-                            <div class="mini-stat-card">
-                                <i data-lucide="timer" style="color: #f59e0b;"></i>
-                                <div class="mini-stat-text">
-                                    <span class="mini-value" id="stats-avg-time">-</span>
-                                    <span class="mini-label">Media/Viaje</span>
-                                </div>
+                        <div class="usage-stat-card">
+                            <div class="usage-stat-icon">📈</div>
+                            <div class="usage-stat-info">
+                                <span class="usage-stat-value" id="stats-avg-time">-</span>
+                                <span class="usage-stat-label">Media por viaje</span>
                             </div>
-                            <div class="mini-stat-card">
-                                <i data-lucide="calendar" style="color: #ec4899;"></i>
-                                <div class="mini-stat-text">
-                                    <span class="mini-value" id="stats-trips-year">-</span>
-                                    <span class="mini-label">Este Año</span>
-                                </div>
+                        </div>
+                        <div class="usage-stat-card highlight">
+                            <div class="usage-stat-icon">📅</div>
+                            <div class="usage-stat-info">
+                                <span class="usage-stat-value" id="stats-trips-year">-</span>
+                                <span class="usage-stat-label">Viajes este año</span>
                             </div>
                         </div>
                     </div>
@@ -3763,93 +3605,50 @@
                 this.markerLayer = L.layerGroup(markers).addTo(this.map);
             },
 
-            switchView: function (viewName) {
-                if (this.currentView === viewName) return;
+            switchView: function (view) {
+                this.currentView = view;
+                const indicator = document.getElementById('nav-indicator');
 
-                // Transition Guard
-                if (this.isTransitioning) return;
-                this.isTransitioning = true;
-
-                const oldView = this.currentView;
-                this.currentView = viewName;
-
-                // Update Bottom Nav
+                // Update nav buttons and move indicator
                 document.querySelectorAll('.nav-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.view === viewName);
+                    if (btn.dataset.view === view) {
+                        btn.classList.add('active');
+                        // Move indicator
+                        if (indicator) {
+                            indicator.style.width = `${btn.offsetWidth}px`;
+                            indicator.style.left = `${btn.offsetLeft}px`;
+                        }
+                    } else {
+                        btn.classList.remove('active');
+                    }
                 });
 
-                // Update Indicator
-                this.setupNavigation();
+                // Show/hide panels
+                document.getElementById('routes-panel').classList.remove('active');
+                document.getElementById('favorites-panel').classList.remove('active');
+                document.getElementById('history-panel').classList.remove('active');
+                document.getElementById('qr-panel').classList.remove('active');
 
-                // Map of view names to DOM IDs
-                const views = {
-                    'map': 'map',
-                    'routes': 'routes-panel',
-                    'qr': 'qr-panel',
-                    'history': 'history-panel',
-                    'favorites': 'favorites-panel'
-                };
-
-                const oldEl = document.getElementById(views[oldView]);
-                const newEl = document.getElementById(views[viewName]);
-
-                // 1. Animate Out Old View
-                if (oldEl) {
-                    oldEl.classList.add('view-hidden-animated');
-
-                    // Special case: If leaving map, we might need to hide controls
-                    if (oldView === 'map') {
-                        document.querySelector('.account-btn')?.classList.add('hidden');
-                        document.querySelector('.active-trip-overlay')?.classList.add('hidden');
-                    }
+                // Stop QR scanner when leaving QR view
+                if (this.currentView !== 'qr' && qrScanner.isScanning) {
+                    qrScanner.stopScanner();
                 }
 
-                // 2. Prepare New View (Hidden but ready)
-                if (newEl) {
-                    newEl.classList.remove('hidden'); // Make visible in DOM
-                    newEl.classList.add('view-hidden-animated'); // But kept transparent/scaled
-                }
-
-                // 3. Wait for Exit Animation, then Animate In
-                setTimeout(() => {
-                    // Hide old permanently
-                    if (oldEl) {
-                        oldEl.classList.add('hidden');
-                    }
-
-                    // Show new
-                    if (newEl) {
-                        // Force reflow
-                        void newEl.offsetWidth;
-                        newEl.classList.remove('view-hidden-animated');
-
-                        // Map resize trigger
-                        if (viewName === 'map') {
-                            setTimeout(() => {
-                                this.map.invalidateSize();
-                                document.querySelector('.account-btn')?.classList.remove('hidden');
-                                document.querySelector('.active-trip-overlay')?.classList.remove('hidden');
-                            }, 50);
-                        }
-                    }
-
-                    // Clean up QR
-                    if (oldView === 'qr') {
-                        qrScanner.stopScanner();
-                    }
-                    if (viewName === 'qr') {
-                        qrScanner.startScanner();
-                    }
-
-                    this.isTransitioning = false;
-                }, 300);
-
-                // Specific Action Logic (preserved from original)
-                if (viewName === 'history') {
-                    tripHistory.renderTrips();
-                } else if (viewName === 'favorites') {
+                if (view === 'routes') {
+                    document.getElementById('routes-panel').classList.add('active');
+                } else if (view === 'favorites') {
+                    document.getElementById('favorites-panel').classList.add('active');
                     this.updateFavoritesList();
+                } else if (view === 'history') {
+                    document.getElementById('history-panel').classList.add('active');
+                    tripHistory.loadTrips();
+                } else if (view === 'qr') {
+                    document.getElementById('qr-panel').classList.add('active');
+                    // Start QR scanner when entering QR view
+                    setTimeout(() => qrScanner.startScanner(), 100);
                 }
+
+                lucide.createIcons();
             },
 
             updateFavoritesList: function () {
@@ -4349,8 +4148,7 @@
                 const w2Coords = walk2.geometry.coordinates.map(c => [c[1], c[0]]);
 
                 const w1Layer = L.polyline(w1Coords, { color: '#94a3b8', weight: 4, dashArray: '5, 10', opacity: 0.8 });
-                // Bike Layer with Flow Animation
-                const bLayer = L.polyline(bCoords, { color: '#6366f1', weight: 5, opacity: 1, className: 'flowing-route-line' });
+                const bLayer = L.polyline(bCoords, { color: '#6366f1', weight: 5, opacity: 1 });
                 const w2Layer = L.polyline(w2Coords, { color: '#94a3b8', weight: 4, dashArray: '5, 10', opacity: 0.8 });
 
                 this.routeLayer = L.layerGroup([w1Layer, bLayer, w2Layer]).addTo(app.map);
@@ -4862,40 +4660,16 @@
             },
 
             displayProfileStats: function (stats) {
-                // Total trips - Animate Ring (Max 50 for visual effect)
-                const totalTrips = stats.totalTrips || 0;
-                document.getElementById('stats-total-trips').textContent = totalTrips;
+                // Total trips
+                document.getElementById('stats-total-trips').textContent = stats.totalTrips || 0;
 
-                const tripsRing = document.getElementById('ring-trips');
-                if (tripsRing) {
-                    const radius = tripsRing.r.baseVal.value;
-                    const circumference = radius * 2 * Math.PI;
-                    const percent = Math.min(totalTrips / 50, 1); // Goal: 50 trips
-                    const offset = circumference - (percent * circumference);
-                    tripsRing.style.strokeDasharray = `${circumference} ${circumference}`;
-                    tripsRing.style.strokeDashoffset = offset;
-                }
-
-                // Total time (convert seconds to hours for big display)
+                // Total time (convert seconds to readable format)
                 const totalSeconds = stats.tripDuration || 0;
-                const hours = Math.floor(totalSeconds / 3600);
-                document.getElementById('stats-total-time').textContent = hours;
-
-                const timeRing = document.getElementById('ring-time');
-                if (timeRing) {
-                    const radius = timeRing.r.baseVal.value;
-                    const circumference = radius * 2 * Math.PI;
-                    const percent = Math.min(hours / 20, 1); // Goal: 20 hours
-                    const offset = circumference - (percent * circumference);
-                    timeRing.style.strokeDasharray = `${circumference} ${circumference}`;
-                    timeRing.style.strokeDashoffset = offset;
-                }
+                document.getElementById('stats-total-time').textContent = this.formatDuration(totalSeconds);
 
                 // Average trip time
                 const avgSeconds = stats.averageTripDuration || 0;
-                const avgMins = Math.round(avgSeconds / 60) + ' min';
-                document.getElementById('stats-avg-time').textContent = avgMins;
-
+                document.getElementById('stats-avg-time').textContent = this.formatDuration(Math.round(avgSeconds));
 
                 // Trips this year
                 document.getElementById('stats-trips-year').textContent = stats.totalTripsThisYear || 0;
@@ -5724,10 +5498,6 @@
             routing.init();
             auth.init();
             qrScanner.init();
-
-            // Force Map View
-            app.currentView = null; // Reset to allow switch
-            app.switchView('map');
         });
     </script>
 
