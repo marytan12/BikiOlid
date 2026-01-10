@@ -26,9 +26,6 @@
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <!-- Leaflet MarkerCluster CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -296,68 +293,6 @@
             letter-spacing: 1px;
         }
 
-        /* ==================== SKELETON LOADING ==================== */
-        @keyframes shimmer {
-            0% {
-                background-position: -1000px 0;
-            }
-
-            100% {
-                background-position: 1000px 0;
-            }
-        }
-
-        .skeleton {
-            background: linear-gradient(90deg,
-                    rgba(255, 255, 255, 0.03) 0%,
-                    rgba(255, 255, 255, 0.08) 50%,
-                    rgba(255, 255, 255, 0.03) 100%);
-            background-size: 1000px 100%;
-            animation: shimmer 2s infinite;
-            border-radius: 8px;
-        }
-
-        .skeleton-text {
-            height: 14px;
-            margin-bottom: 8px;
-            border-radius: 4px;
-        }
-
-        .skeleton-text.large {
-            height: 20px;
-        }
-
-        .skeleton-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 12px;
-        }
-
-        .skeleton-station-card {
-            height: 120px;
-        }
-
-        .skeleton-trip-card {
-            height: 140px;
-        }
-
-        .skeleton-profile-section {
-            height: 80px;
-            margin-bottom: 16px;
-        }
-
-        .skeleton-container {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .skeleton-container.hidden {
-            display: none;
-        }
-
         /* Account Button */
         .account-btn {
             position: fixed;
@@ -539,23 +474,6 @@
 
         .view-panel.active {
             transform: translateY(0) translateZ(0);
-        }
-
-        /* Swipe to Close Handle */
-        .panel-handle {
-            width: 40px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 2px;
-            margin: 0 auto 16px auto;
-            transition: all 0.3s ease;
-            cursor: grab;
-        }
-
-        .panel-handle:active {
-            cursor: grabbing;
-            background: rgba(255, 255, 255, 0.5);
-            width: 50px;
         }
 
         .view-panel-header {
@@ -3607,32 +3525,7 @@
             renderMap: function () {
                 if (this.markerLayer) this.map.removeLayer(this.markerLayer);
 
-                // Create marker cluster group
-                const clusterGroup = L.markerClusterGroup({
-                    maxClusterRadius: 60,
-                    spiderfyOnMaxZoom: true,
-                    showCoverageOnHover: false,
-                    zoomToBoundsOnClick: true,
-                    iconCreateFunction: function (cluster) {
-                        const count = cluster.getChildCount();
-                        let size = 'small';
-                        let sizeClass = 'marker-cluster-small';
-
-                        if (count > 10) {
-                            size = 'large';
-                            sizeClass = 'marker-cluster-large';
-                        } else if (count > 5) {
-                            size = 'medium';
-                            sizeClass = 'marker-cluster-medium';
-                        }
-
-                        return new L.DivIcon({
-                            html: `<div class="cluster-inner">${count}</div>`,
-                            className: 'marker-cluster ' + sizeClass,
-                            iconSize: new L.Point(40, 40)
-                        });
-                    }
-                });
+                const markers = [];
 
                 this.data.forEach(st => {
                     // console.log('Rendering station:', st.station_id); // Debug info
@@ -3731,19 +3624,29 @@
                         setTimeout(() => lucide.createIcons(), 50);
                     });
 
-                    clusterGroup.addLayer(marker);
+                    markers.push(marker);
                 });
 
-                this.markerLayer = clusterGroup;
-                this.map.addLayer(this.markerLayer);
+                this.markerLayer = L.layerGroup(markers).addTo(this.map);
+            },
+
+            // Haptic feedback helper
+            vibrate: function (pattern = 'light') {
+                if (!navigator.vibrate) return;
+
+                const patterns = {
+                    light: [10],        // Quick tap
+                    medium: [20],       // Moderate tap
+                    heavy: [30],        // Strong tap
+                    double: [10, 50, 10], // Double tap
+                    success: [10, 30, 10] // Success pattern
+                };
+
+                navigator.vibrate(patterns[pattern] || patterns.light);
             },
 
             switchView: function (view) {
-                // Haptic feedback on view change
-                if (typeof haptic !== 'undefined') {
-                    haptic.medium();
-                }
-
+                this.vibrate('light'); // Add vibration feedback
                 this.currentView = view;
                 const indicator = document.getElementById('nav-indicator');
 
@@ -3839,6 +3742,7 @@
             },
 
             openAccount: function () {
+                this.vibrate('medium'); // Haptic feedback
                 const btn = document.querySelector('.account-btn');
                 const screen = document.getElementById('account-screen');
 
@@ -3855,6 +3759,7 @@
             },
 
             closeAccount: function () {
+                this.vibrate('light'); // Haptic feedback
                 const btn = document.querySelector('.account-btn');
                 const screen = document.getElementById('account-screen');
 
@@ -3878,69 +3783,6 @@
 
             hidePersonalInfo: function () {
                 document.getElementById('personal-info-modal').classList.remove('show');
-            },
-
-            setupSwipeToClose: function () {
-                const panels = document.querySelectorAll('.view-panel');
-
-                panels.forEach(panel => {
-                    let startY = 0;
-                    let currentY = 0;
-                    let isDragging = false;
-
-                    panel.addEventListener('touchstart', (e) => {
-                        // Don't interfere with buttons or if panel is scrolled
-                        const target = e.target;
-                        if (target.closest('button') || target.closest('.close-btn')) {
-                            return;
-                        }
-
-                        // Only start if touching near top of panel and panel is at scroll top
-                        const touch = e.touches[0];
-                        const panelRect = panel.getBoundingClientRect();
-                        const scrollTop = panel.scrollTop || 0;
-
-                        if (touch.clientY - panelRect.top < 60 && scrollTop === 0) {
-                            startY = touch.clientY;
-                            isDragging = true;
-                            panel.style.transition = 'none';
-                        }
-                    }, { passive: true });
-
-                    panel.addEventListener('touchmove', (e) => {
-                        if (!isDragging) return;
-
-                        currentY = e.touches[0].clientY;
-                        const deltaY = currentY - startY;
-
-                        // Only allow dragging down
-                        if (deltaY > 0) {
-                            panel.style.transform = `translateY(${deltaY}px)`;
-                        }
-                    }, { passive: true });
-
-                    panel.addEventListener('touchend', () => {
-                        if (!isDragging) return;
-                        isDragging = false;
-
-                        const deltaY = currentY - startY;
-                        panel.style.transition = 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
-
-                        // Close if dragged down more than 100px
-                        if (deltaY > 100) {
-                            // Trigger close for specific panel
-                            if (panel.id === 'routes-panel' || panel.id === 'favorites-panel' || panel.id === 'history-panel') {
-                                this.switchView('map');
-                            }
-                        } else {
-                            // Bounce back
-                            panel.style.transform = 'translateY(0)';
-                        }
-
-                        startY = 0;
-                        currentY = 0;
-                    });
-                });
             },
 
             setupNavigation: function () {
@@ -4124,27 +3966,6 @@
                         updateIndicatorPosition();
                     }
                 });
-            }
-        };
-
-        // ==================== HAPTIC FEEDBACK UTILITY ====================
-        const haptic = {
-            vibrate: function (pattern) {
-                if ('vibrate' in navigator) {
-                    navigator.vibrate(pattern);
-                }
-            },
-            light: function () {
-                this.vibrate([10]);
-            },
-            medium: function () {
-                this.vibrate([20]);
-            },
-            success: function () {
-                this.vibrate([30, 50, 30]);
-            },
-            error: function () {
-                this.vibrate([50, 100, 50]);
             }
         };
 
@@ -5755,7 +5576,6 @@
         // Initialize
         window.addEventListener('DOMContentLoaded', () => {
             app.init();
-            app.setupSwipeToClose();
             routing.init();
             auth.init();
             qrScanner.init();
@@ -5772,9 +5592,6 @@
             });
         }
     </script>
-
-    <!-- Leaflet MarkerCluster Plugin JS -->
-    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 </body>
 
