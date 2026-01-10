@@ -3342,6 +3342,7 @@
                 const markers = [];
 
                 this.data.forEach(st => {
+                    // console.log('Rendering station:', st.station_id); // Debug info
                     // Determine color based on bike availability
                     let color = '#10b981'; // green
                     let fillOpacity = 0.8;
@@ -3356,6 +3357,8 @@
 
                     // Use DivIcon to show numbers - Optimized for performance
                     const bikeCount = st.bikes;
+                    const mechBikes = st.mech_bikes;
+                    const elecBikes = st.elec_bikes;
                     let markerClass = 'glass-marker-circle';
 
                     if (isFav) markerClass += ' marker-fav';
