@@ -418,13 +418,11 @@
 
         /* Merged state when card is above */
         .bottom-nav.merged {
-            border-top-left-radius: 12px;
-            /* Flatten top to meet card */
-            border-top-right-radius: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
-            /* Faint top border */
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            /* Remove top border completely for fusion */
+            border-top: none;
             box-shadow: 0 4px 32px rgba(0, 0, 0, 0.2);
-            /* Reduced upward shadow */
         }
 
         .nav-btn {
@@ -2669,15 +2667,16 @@
         .station-mini-preview {
             position: fixed;
             bottom: 89px;
-            /* Sit FLUSH on nav (Nav top is 90px, 1px overlap) */
+            /* Sit FLUSH on nav */
             left: 50%;
             transform: translateX(-50%) scale(0.9) translateY(20px);
             width: 90%;
-            max-width: 380px;
+            max-width: 400px;
+            /* Match Nav width exactly */
             padding: 16px;
 
-            /* Top rounded, bottom flat/merged */
-            border-radius: 35px 35px 10px 10px;
+            /* Top rounded, bottom SQUARE for perfect union */
+            border-radius: 35px 35px 0 0;
 
             background: rgba(35, 48, 56, 0.5);
             /* Match Gunmetal Nav */
