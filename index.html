@@ -2629,66 +2629,53 @@
         /* Station Mini Preview - Liquid Expansion Mode */
         .station-mini-preview {
             position: fixed;
-            bottom: 25px;
+            bottom: 20px;
             /* Exact match to bottom-nav */
             left: 50%;
-            transform: translateX(-50%);
-            width: 320px;
-            /* Match standard nav width */
-            height: 70px;
-            /* Initial height matching nav */
-            padding: 0;
-            /* No padding initially */
+            transform: translateX(-50%) scale(0.95);
+            width: 90%;
+            max-width: 400px;
+            /* Match standard nav max-width */
+            padding: 16px;
 
             border-radius: 35px;
             /* Match nav pill radius */
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(10px) saturate(180%);
-            -webkit-backdrop-filter: blur(10px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(35, 48, 56, 0.5);
+            /* EXACT MATCH: Gunmetal 50% opacity */
+
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            /* Match nav border */
+
             color: white;
-            z-index: 1000;
-            /* Same level as nav initially */
+            z-index: 900;
+            /* Behind nav (nav is 1000) */
 
             opacity: 0;
-            /* Hidden until triggered */
             pointer-events: none;
 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            /* Match nav shadow */
 
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            /* Hide content while expanding */
+            gap: 12px;
+            transform-origin: bottom center;
         }
 
         .station-mini-preview.active {
             opacity: 1;
-            height: 180px;
-            /* Expanded height */
-            width: 90%;
-            /* Expand width slightly or keep it */
-            max-width: 360px;
-            padding: 16px;
-            /* Reset padding */
-            border-radius: 40px;
-            /* Slightly more rounded when big */
-            z-index: 1500;
-            /* Above everything */
+            /* Move up to sit on top of the nav (70px height + 10px margin) */
+            transform: translateX(-50%) translateY(-80px) scale(1);
             pointer-events: all;
-            background: rgba(15, 23, 42, 0.85);
-            /* Slightly darker */
         }
 
-        /* Content inside preview - fade in */
+        /* Content inside preview */
         .station-mini-preview>* {
-            opacity: 0;
-            transition: opacity 0.2s ease 0.1s;
-        }
-
-        .station-mini-preview.active>* {
             opacity: 1;
+            /* Always visible, card opacity handles fade */
         }
 
         /* Unified Animation: Hide bottom nav when preview is active */
@@ -3648,14 +3635,11 @@
                 document.querySelector('#mini-mech-count').textContent = station.mech_bikes;
                 document.querySelector('#mini-docks-count').textContent = station.docks;
 
-                // Animate: Hide Nav, Expand Preview
-                const nav = document.querySelector('.bottom-nav');
-                nav.style.opacity = '0';
-                nav.style.pointerEvents = 'none';
+                document.querySelector('#mini-mech-count').textContent = station.mech_bikes;
+                document.querySelector('#mini-docks-count').textContent = station.docks;
 
-                setTimeout(() => {
-                    document.getElementById('station-mini-preview').classList.add('active');
-                }, 50);
+                // Animate: Show Preview (Emerging from behind nav)
+                document.getElementById('station-mini-preview').classList.add('active');
 
                 // Bind View Details
                 document.getElementById('mini-details-btn').onclick = (e) => {
@@ -3666,14 +3650,6 @@
 
             closeMiniPreview: function () {
                 document.getElementById('station-mini-preview').classList.remove('active');
-
-                // Show Nav back after delay matching transition
-                setTimeout(() => {
-                    const nav = document.querySelector('.bottom-nav');
-                    nav.style.opacity = '1';
-                    nav.style.pointerEvents = 'all';
-                }, 200);
-
                 // Don't clear selectedStation immediately
             },
 
