@@ -2935,6 +2935,55 @@
             z-index: 50;
         }
 
+        /* Locate Button */
+        #locate-btn {
+            position: fixed;
+            bottom: 130px;
+            /* Above nav and preview area */
+            right: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            z-index: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            background: rgba(35, 48, 56, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.2s ease;
+        }
+
+        #locate-btn:active {
+            transform: scale(0.95);
+            background: rgba(35, 48, 56, 0.8);
+        }
+
+        /* User Location Marker */
+        .user-location-marker {
+            width: 20px;
+            height: 20px;
+            background: #3b82f6;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+            animation: pulse-blue 2s infinite;
+        }
+
+        @keyframes pulse-blue {
+            0% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+            }
+        }
+
         .flashlight-btn:hover {
             background: rgba(255, 255, 255, 0.2);
             transform: scale(1.05);
@@ -3172,8 +3221,14 @@
     </div>
 
     <!-- Account Button -->
-    <button class="account-btn glass-effect" onclick="app.toggleAccount()">
-        <i data-lucide="user"></i>
+    <div id="account-btn" class="account-btn glass-effect" onclick="app.toggleAccount()">
+        <img src="https://ui-avatars.com/api/?name=User&background=random" alt="Profile"
+            style="width: 100%; height: 100%; border-radius: 50%;">
+    </div>
+
+    <!-- Locate Me Button -->
+    <button id="locate-btn" class="glass-effect" onclick="app.locateUser()">
+        <i data-lucide="crosshair"></i>
     </button>
 
     <!-- Station Mini Preview -->
@@ -3866,6 +3921,13 @@
                     this.closeMiniPreview();
                 });
 
+                // Initialize Location Events
+                this.map.on('locationfound', (e) => this.onLocationFound(e));
+                this.map.on('locationerror', (e) => this.onLocationError(e));
+
+                // Add default tile layer
+                this.changeMapStyle(localStorage.getItem('biki_map_style') || 'dark');
+
                 this.setupNavigation();
 
                 // Load saved map style
@@ -4028,6 +4090,36 @@
                 });
 
                 this.markerLayer = L.layerGroup(markers).addTo(this.map);
+            },
+
+            // Geolocation Logic
+            locateUser: function () {
+                this.vibrate('medium');
+                this.map.locate({ setView: true, maxZoom: 16 });
+            },
+
+            onLocationFound: function (e) {
+                const radius = e.accuracy;
+
+                if (this.userMarker) {
+                    this.userMarker.setLatLng(e.latlng);
+                } else {
+                    const userIcon = L.divIcon({
+                        className: 'user-location-marker',
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10]
+                    });
+                    this.userMarker = L.marker(e.latlng, { icon: userIcon }).addTo(this.map);
+                    // Standard popup or tooltip could go here
+                }
+
+                this.vibrate('success');
+            },
+
+            onLocationError: function (e) {
+                // this.vibrate('double'); // Feedback for error
+                console.error("Location access denied or error", e.message);
+                alert("No se pudo obtener tu ubicación. Verifica los permisos.");
             },
 
             // Haptic feedback helper
