@@ -332,11 +332,12 @@
             justify-content: space-around;
             padding: 0 10px;
             will-change: transform;
-            background: var(--bg-glass-strong);
+            background: rgba(35, 48, 56, 0.5);
+            /* Gunmetal 50% opacity */
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
 
         .nav-btn {
@@ -378,17 +379,17 @@
             top: 50%;
             transform: translateY(-50%) translateZ(0);
             height: 50px;
-            background: rgba(255, 255, 255, 0.08);
-            /* More transparent */
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.1);
+            /* Slight white tint */
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 25px;
-            backdrop-filter: blur(12px) saturate(150%);
-            /* Stronger glass */
-            -webkit-backdrop-filter: blur(12px) saturate(150%);
+            backdrop-filter: blur(8px) saturate(150%);
+            /* Glass effect */
+            -webkit-backdrop-filter: blur(8px) saturate(150%);
             z-index: -1;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), inset 0 0 10px rgba(255, 255, 255, 0.05);
-            /* Added inner glow */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), inset 0 0 15px rgba(255, 255, 255, 0.1);
+            /* Inner liquid glow */
             will-change: transform, width, left;
         }
 
