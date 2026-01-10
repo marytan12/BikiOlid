@@ -3,9 +3,9 @@
     "short_name": "BikiOlid",
     "description": "App de bicicletas públicas de Valladolid",
     "start_url": "/",
-    "display": "standalone",
+    "display": "fullscreen",
     "background_color": "#0f172a",
-    "theme_color": "#6366f1",
+    "theme_color": "#fc6810",
     "orientation": "portrait",
     "icons": [
         {
