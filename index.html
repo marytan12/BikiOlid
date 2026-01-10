@@ -206,8 +206,9 @@
         .leaflet-container a.leaflet-popup-close-button {
             color: rgba(255, 255, 255, 0.6);
             font-size: 20px;
-            top: 12px;
-            right: 12px;
+            /* Vertically centered relative to header content */
+            top: 24px;
+            right: 20px;
             padding: 0;
             width: 32px;
             height: 32px;
@@ -1461,10 +1462,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 24px 24px 16px 24px;
+            /* Top/Bottom 20px to match close button center alignment (top: 20px + 16px center = 36px) */
+            padding: 20px 20px 20px 24px;
             /* Wrapper has bg, this is transparent */
             background: transparent;
             border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            /* Ensure header is tall enough */
+            min-height: 48px;
         }
 
         .station-popup-title {
@@ -1487,7 +1491,8 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            margin-right: 32px;
+            /* Space for close button (which is absolute right: 20px + width: 32px + gap) */
+            margin-right: 48px;
             /* Space for close button */
             transition: all 0.3s ease;
             flex-shrink: 0;
@@ -3349,9 +3354,18 @@
                 lucide.createIcons();
 
                 // Initialize map
+                // Initialize map
                 this.map = L.map('map', {
                     zoomControl: false,
-                    attributionControl: false
+                    attributionControl: false,
+                    // Restrict to Valladolid
+                    maxBounds: [
+                        [41.55, -4.85], // SouthWest
+                        [41.75, -4.60]  // NorthEast
+                    ],
+                    maxBoundsViscosity: 1.0,
+                    minZoom: 13,
+                    maxZoom: 18
                 }).setView([41.652, -4.724], 14);
 
                 this.setupNavigation();
