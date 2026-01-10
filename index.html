@@ -2551,13 +2551,17 @@
         }
 
         .qr-glass-container {
-            width: 100%;
-            height: 420px;
+            width: 280px;
+            /* Reduced from 100% */
+            height: 280px;
+            /* Reduced from 420px */
+            /* Center the square */
+            margin: 0 auto 25px auto;
+
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 24px;
             overflow: hidden;
-            margin-bottom: 25px;
             position: relative;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(10px);
@@ -3673,7 +3677,8 @@
                     this.vibrate('light');
 
                     // Populate Mini Preview
-                    document.getElementById('mini-name').textContent = station.name;
+                    document.getElementById('mini-station-name').textContent = station.name;
+                    document.getElementById('mini-station-address').textContent = station.address || '';
 
                     // Calculate distance real-time
                     const distEl = document.getElementById('mini-distance');
