@@ -5297,18 +5297,22 @@
                 }
 
                 // Subscription/Plan info
-                if (data.plan) {
+                const subscriptionSection = document.querySelector('.subscription-section');
+
+                // Only show subscription section if there's an active plan
+                if (data.plan && data.plan.status === 'Active') {
+                    // Show subscription section
+                    if (subscriptionSection) subscriptionSection.classList.remove('hidden');
+
                     const planNameEl = document.getElementById('profile-plan-name');
                     if (planNameEl) planNameEl.textContent = this.translatePlanName(data.plan.planName) || '-';
 
                     const statusEl = document.getElementById('profile-plan-status');
                     if (statusEl) {
                         statusEl.textContent = this.translatePlanStatus(data.plan.status);
-                        statusEl.style.background = data.plan.status === 'Active' ?
-                            'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)';
-                        statusEl.style.borderColor = data.plan.status === 'Active' ?
-                            'rgba(16, 185, 129, 0.4)' : 'rgba(245, 158, 11, 0.4)';
-                        statusEl.style.color = data.plan.status === 'Active' ? '#10b981' : '#f59e0b';
+                        statusEl.style.background = 'rgba(16, 185, 129, 0.2)';
+                        statusEl.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                        statusEl.style.color = '#10b981';
                     }
 
                     // End date
@@ -5329,11 +5333,8 @@
                     const autoRenewEl = document.getElementById('profile-auto-renew');
                     if (autoRenewEl) autoRenewEl.textContent = data.plan.autoRenew ? 'Automática' : 'Manual';
                 } else {
-                    document.getElementById('profile-plan-name').textContent = 'Sin suscripción';
-                    document.getElementById('profile-plan-status').textContent = '-';
-                    document.getElementById('profile-plan-price').textContent = '-';
-                    document.getElementById('profile-plan-end').textContent = '-';
-                    document.getElementById('profile-auto-renew').textContent = '-';
+                    // Hide subscription section completely if no active plan
+                    if (subscriptionSection) subscriptionSection.classList.add('hidden');
                 }
 
                 // Personal info - populate modal
