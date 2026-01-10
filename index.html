@@ -2890,6 +2890,16 @@
         <span id="overlay-trip-timer">00:00:00</span>
     </div>
 
+    <!-- Debug Console (Mobile) -->
+    <div id="debug-console"
+        style="position: fixed; bottom: 80px; left: 0; right: 0; max-height: 200px; background: rgba(0,0,0,0.9); color: #0f0; font-family: monospace; font-size: 10px; padding: 10px; overflow-y: auto; z-index: 9999; display: none; border-top: 2px solid #0f0;">
+        <button onclick="document.getElementById('debug-console').style.display='none'"
+            style="position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; padding: 5px 10px; cursor: pointer;">✕</button>
+        <div id="debug-log"></div>
+    </div>
+    <button onclick="document.getElementById('debug-console').style.display='block'"
+        style="position: fixed; bottom: 20px; left: 20px; z-index: 10000; background: #0f0; color: black; border: none; padding: 10px; border-radius: 50%; width: 40px; height: 40px; font-weight: bold;">?</button>
+
     <!-- Account Button -->
     <button class="account-btn glass-effect" onclick="app.toggleAccount()">
         <i data-lucide="user"></i>
@@ -3630,13 +3640,24 @@
                 this.markerLayer = L.layerGroup(markers).addTo(this.map);
             },
 
+            // Mobile debug console helper
+            log: function (msg, type = 'log') {
+                const debugLog = document.getElementById('debug-log');
+                if (debugLog) {
+                    const color = type === 'error' ? 'red' : type === 'warn' ? 'yellow' : '#0f0';
+                    debugLog.innerHTML += `<div style="color: ${color}; border-bottom: 1px solid #333; padding: 2px 0;">[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+                    debugLog.scrollTop = debugLog.scrollHeight;
+                }
+            },
+
             // Haptic feedback helper
             vibrate: function (pattern = 'light') {
-                console.log('Vibrate called with pattern:', pattern);
+                this.log(`Vibrate called: ${pattern}`);
                 if (!navigator.vibrate) {
-                    console.warn('Vibration API not supported');
+                    this.log('Vibration API NOT supported!', 'error');
                     return;
                 }
+                this.log('Vibration API is available');
 
                 const patterns = {
                     light: [10],        // Quick tap
@@ -3648,9 +3669,9 @@
 
                 try {
                     const result = navigator.vibrate(patterns[pattern] || patterns.light);
-                    console.log('Vibration result:', result, 'for pattern:', pattern);
+                    this.log(`Vibration result: ${result}`, result ? 'log' : 'error');
                 } catch (e) {
-                    console.error('Vibration error:', e);
+                    this.log(`Vibration error: ${e.message}`, 'error');
                 }
             },
 
