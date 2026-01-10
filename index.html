@@ -1112,8 +1112,9 @@
         }
 
         .profile-stat {
-            background: var(--bg-glass);
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
             padding: 12px;
             text-align: center;
         }
@@ -1166,7 +1167,7 @@
             padding: 16px;
             background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.1));
             border: 1px solid rgba(239, 68, 68, 0.2);
-            border-radius: 14px;
+            border-radius: 16px;
             color: #fca5a5;
             font-size: 15px;
             font-weight: 600;
@@ -1226,12 +1227,12 @@
         @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(30px) scale(0.95);
+                transform: translateY(10px);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0) scale(1);
+                transform: translateY(0);
             }
         }
 
@@ -1347,9 +1348,9 @@
             width: 100%;
             padding: 16px;
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
-            border: 1px solid rgba(59, 130, 246, 0.3);
+            border: 1px solid rgba(255, 91, 4, 0.3);
             border-radius: 16px;
-            color: #60a5fa;
+            color: var(--color-orange);
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
@@ -1364,9 +1365,9 @@
         }
 
         .personalize-btn:hover {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.2));
+            background: linear-gradient(135deg, rgba(255, 91, 4, 0.15), rgba(255, 91, 4, 0.1));
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+            box-shadow: 0 4px 12px rgba(255, 91, 4, 0.15);
         }
 
         .map-style-grid {
@@ -1759,11 +1760,12 @@
         .subscription-icon {
             width: 50px;
             height: 50px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            background: linear-gradient(135deg, var(--color-orange), #ff7e47);
             border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 4px 12px rgba(255, 91, 4, 0.2);
         }
 
         .subscription-icon svg {
@@ -1773,7 +1775,7 @@
         }
 
         .subscription-title-info h3 {
-            color: #fff;
+            color: var(--color-ivory);
             font-size: 16px;
             font-weight: 600;
             margin: 0 0 4px 0;
@@ -3577,7 +3579,7 @@
 
                 <!-- Usage Stats Section -->
                 <div class="account-section">
-                    <h3>📊 Estadísticas de Uso</h3>
+                    <h3 style="color: var(--color-sand);">📊 Estadísticas de Uso</h3>
                     <div class="usage-stats-grid">
                         <div class="usage-stat-card">
                             <div class="usage-stat-icon">🚴</div>
