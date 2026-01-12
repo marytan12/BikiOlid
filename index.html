@@ -5760,11 +5760,14 @@
                 }
 
                 if (confirmed && this.lastScannedCode) {
+                    // Save code before stopScanner resets it to null
+                    const scannedCode = this.lastScannedCode;
+
                     this.stopScanner();
                     app.switchView('map');
                     setTimeout(() => {
                         app.openAccount();
-                        this.retrieveBike(this.lastScannedCode);
+                        this.retrieveBike(scannedCode);
                     }, 500);
                 } else {
                     // If cancelled, reset last scanned so we can scan again immediately if needed
