@@ -5752,15 +5752,17 @@
             },
 
             onQRCodeDetected: function (code) {
-                console.log('DataMatrix detected:', code);
+                // Trim whitespace from scanned code to match manual input behavior
+                const cleanCode = code.trim();
+                console.log('DataMatrix detected:', cleanCode);
                 this.playBeep();
-                this.lastScannedCode = code;
+                this.lastScannedCode = cleanCode;
 
                 // Show confirmation modal
                 const modal = document.getElementById('qr-confirmation-modal');
                 const codeDisplay = document.getElementById('qr-confirmation-code');
                 if (modal && codeDisplay) {
-                    codeDisplay.textContent = code;
+                    codeDisplay.textContent = cleanCode;
                     modal.classList.add('show');
                     // Vibrate if available
                     if (navigator.vibrate) navigator.vibrate(200);
