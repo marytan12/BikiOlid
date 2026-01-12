@@ -3974,6 +3974,10 @@
                 await this.fetchVehicleTypes();
                 this.fetchData();
                 setInterval(() => this.fetchData(), 10000);
+
+                // Request user location automatically on startup
+                // This will calculate distances to stations from the beginning
+                this.map.locate({ setView: false, maxZoom: 16 });
             },
 
             fetchVehicleTypes: async function () {
@@ -4135,6 +4139,8 @@
                     this.map.flyTo(this.userLocation, 16);
                 }
 
+                // Mark this as a manual request
+                this.manualLocationRequest = true;
                 // Always request updated location (watch or single shot)
                 this.map.locate({ setView: !this.userLocation, maxZoom: 16 });
             },
@@ -4160,11 +4166,20 @@
                 if (this.selectedStation) {
                     this.updateStationDistance(this.selectedStation);
                 }
+
+                // Reset manual request flag
+                this.manualLocationRequest = false;
             },
 
             onLocationError: function (e) {
                 console.error("Location access denied or error", e.message);
-                alert("No se pudo obtener tu ubicación. Verifica los permisos.");
+
+                // Only show alert if this was a manual location request
+                // For automatic requests on startup, just log silently
+                if (this.manualLocationRequest) {
+                    alert("No se pudo obtener tu ubicación. Verifica los permisos.");
+                    this.manualLocationRequest = false;
+                }
             },
 
             // Helper: Haversine Distance
