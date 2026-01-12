@@ -6103,6 +6103,13 @@
             // Timer functions...
             startTimer: function () {
                 this.stopTimer();
+
+                // Show the overlay
+                const overlay = document.getElementById('active-trip-overlay');
+                if (overlay) {
+                    overlay.classList.add('visible');
+                }
+
                 const updateTimer = () => {
                     if (!this.activeTrip) return;
                     const startTime = new Date(this.activeTrip.startTime);
@@ -6113,8 +6120,13 @@
                     const seconds = elapsed % 60;
                     const timerStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
+                    // Update history panel timer
                     const timerEl = document.getElementById('active-trip-timer');
                     if (timerEl) timerEl.textContent = timerStr;
+
+                    // Update overlay timer
+                    const overlayTimerEl = document.getElementById('overlay-trip-timer');
+                    if (overlayTimerEl) overlayTimerEl.textContent = timerStr;
                 };
                 updateTimer();
                 this.timerInterval = setInterval(updateTimer, 1000);
@@ -6124,6 +6136,51 @@
                     clearInterval(this.timerInterval);
                     this.timerInterval = null;
                 }
+
+                // Hide the overlay when stopping timer
+                const overlay = document.getElementById('active-trip-overlay');
+                if (overlay) {
+                    overlay.classList.remove('visible');
+                }
+            },
+
+            startActiveTrip: function (bikeCode) {
+                // Set up active trip with current time
+                this.activeTrip = {
+                    bikeCode: bikeCode,
+                    startTime: new Date().toISOString(),
+                    _fromUnlock: true
+                };
+
+                // Show the overlay
+                const overlay = document.getElementById('active-trip-overlay');
+                if (overlay) {
+                    overlay.classList.add('visible');
+                }
+
+                // Start the timer to update overlay
+                this.startOverlayTimer();
+
+                console.log('Active trip started for bike:', bikeCode);
+            },
+
+            startOverlayTimer: function () {
+                this.stopTimer();
+                const updateTimer = () => {
+                    if (!this.activeTrip) return;
+                    const startTime = new Date(this.activeTrip.startTime);
+                    const now = new Date();
+                    const elapsed = Math.floor((now - startTime) / 1000);
+                    const hours = Math.floor(elapsed / 3600);
+                    const minutes = Math.floor((elapsed % 3600) / 60);
+                    const seconds = elapsed % 60;
+                    const timerStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                    const timerEl = document.getElementById('overlay-trip-timer');
+                    if (timerEl) timerEl.textContent = timerStr;
+                };
+                updateTimer();
+                this.timerInterval = setInterval(updateTimer, 1000);
             },
 
             renderTrips: function () {
