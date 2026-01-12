@@ -84,7 +84,7 @@
             width: 100vw;
             height: 100vh;
             z-index: 1;
-            background: var(--color-bg-main);
+            background: var(--bg-main);
             transform: translateZ(0);
             will-change: transform;
         }
@@ -110,32 +110,6 @@
             position: relative;
             width: 32px;
             height: 32px;
-        }
-
-        .glass-marker-circle {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.15);
-            /* Backdrop filter removed for performance */
-            /* backdrop-filter: blur(4px); */
-            /* -webkit-backdrop-filter: blur(4px); */
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s ease;
-            will-change: transform;
-        }
-
-        .glass-marker-number {
-            font-size: 13px;
-            font-weight: 700;
-            color: #fff;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-            z-index: 10;
         }
 
         /* Map Markers - Liquid Glass */
@@ -3959,24 +3933,24 @@
                 this.map.on('locationfound', (e) => this.onLocationFound(e));
                 this.map.on('locationerror', (e) => this.onLocationError(e));
 
-                // Add default tile layer
-                this.changeMapStyle(localStorage.getItem('biki_map_style') || 'dark');
-
                 this.setupNavigation();
 
-                // Load saved map style
+                // Load saved map style with fallback for legacy styles
                 let savedStyle = localStorage.getItem('biki_map_style') || 'inverted';
-                // Fallback for legacy saved styles
                 if (savedStyle === 'standard' || savedStyle === 'light') savedStyle = 'inverted';
-
                 this.changeMapStyle(savedStyle);
 
                 await this.fetchVehicleTypes();
                 this.fetchData();
-                setInterval(() => this.fetchData(), 10000);
+
+                // Fetch data periodically, but pause when document is hidden
+                this.dataIntervalId = setInterval(() => {
+                    if (!document.hidden) {
+                        this.fetchData();
+                    }
+                }, 10000);
 
                 // Request user location automatically on startup
-                // This will calculate distances to stations from the beginning
                 this.map.locate({ setView: false, maxZoom: 16 });
             },
 
@@ -4829,6 +4803,16 @@
 
                 if (!originText || !destText) return alert('Por favor, introduce origen y destino');
                 if (!this.originCoords || !this.destinationCoords) return alert('Por favor, selecciona ubicaciones de la lista de sugerencias');
+
+                // Validate coordinates are within Valladolid bounds
+                const isInBounds = (lat, lon) => {
+                    return lat >= 41.55 && lat <= 41.75 && lon >= -4.85 && lon <= -4.60;
+                };
+
+                if (!isInBounds(this.originCoords.lat, this.originCoords.lon) ||
+                    !isInBounds(this.destinationCoords.lat, this.destinationCoords.lon)) {
+                    return alert('Las ubicaciones deben estar dentro de Valladolid para calcular una ruta válida.');
+                }
 
                 // 1. Find nearest stations
                 const pickup = this.findNearestStation(this.originCoords.lat, this.originCoords.lon, 'pickup');
@@ -5825,8 +5809,18 @@
                     document.body.appendChild(loadingMsg);
                     lucide.createIcons();
 
+                    // Create timeout wrapper for fetch requests
+                    const fetchWithTimeout = (url, options, timeout = 30000) => {
+                        return Promise.race([
+                            fetch(url, options),
+                            new Promise((_, reject) =>
+                                setTimeout(() => reject(new Error('La solicitud ha tardado demasiado. Inténtalo de nuevo.')), timeout)
+                            )
+                        ]);
+                    };
+
                     // 1. Check bike status (using Customer API as discovered)
-                    const checkResponse = await fetch(
+                    const checkResponse = await fetchWithTimeout(
                         `/api/biki-proxy?base=customer&endpoint=/v3/bikes/${encodeURIComponent(bikeCode)}`,
                         {
                             method: 'GET',
@@ -5856,8 +5850,8 @@
                     // 2. Get user location for geofence unlock
                     const userLocation = app.userLocation || { lat: 41.652251, lng: -4.724532 }; // Fallback to Valladolid center
 
-                    // 3. Unlock request with geofence
-                    const unlockResponse = await fetch(
+                    // 3. Unlock request with geofence (with timeout)
+                    const unlockResponse = await fetchWithTimeout(
                         `/api/biki-proxy?base=customer&endpoint=/v3/bikes/${encodeURIComponent(bikeCode)}/geofence-unlock`,
                         {
                             method: 'POST',
@@ -6152,35 +6146,16 @@
                     _fromUnlock: true
                 };
 
-                // Show the overlay
+                // Show the overlay and start timer
                 const overlay = document.getElementById('active-trip-overlay');
                 if (overlay) {
                     overlay.classList.add('visible');
                 }
 
-                // Start the timer to update overlay
-                this.startOverlayTimer();
+                // Use the unified timer function
+                this.startTimer();
 
                 console.log('Active trip started for bike:', bikeCode);
-            },
-
-            startOverlayTimer: function () {
-                this.stopTimer();
-                const updateTimer = () => {
-                    if (!this.activeTrip) return;
-                    const startTime = new Date(this.activeTrip.startTime);
-                    const now = new Date();
-                    const elapsed = Math.floor((now - startTime) / 1000);
-                    const hours = Math.floor(elapsed / 3600);
-                    const minutes = Math.floor((elapsed % 3600) / 60);
-                    const seconds = elapsed % 60;
-                    const timerStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-                    const timerEl = document.getElementById('overlay-trip-timer');
-                    if (timerEl) timerEl.textContent = timerStr;
-                };
-                updateTimer();
-                this.timerInterval = setInterval(updateTimer, 1000);
             },
 
             renderTrips: function () {
