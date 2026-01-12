@@ -5774,7 +5774,10 @@
 
                 try {
                     app.switchView('map');
-                    app.activeTripOverlay.classList.remove('active'); // Hide if showing
+                    const activeTripOverlay = document.getElementById('active-trip-overlay');
+                    if (activeTripOverlay) {
+                        activeTripOverlay.classList.remove('active'); // Hide if showing
+                    }
 
                     const loadingMsg = document.createElement('div');
                     loadingMsg.id = 'unlock-loading';
