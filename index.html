@@ -5829,16 +5829,23 @@
                         throw new Error('Error verificando estado de la bicicleta.');
                     }
 
-                    // 2. Unlock request
+                    // 2. Get user location for geofence unlock
+                    const userLocation = app.userLocation || { lat: 41.652251, lng: -4.724532 }; // Fallback to Valladolid center
+
+                    // 3. Unlock request with geofence
                     const unlockResponse = await fetch(
-                        `/api/biki-proxy?base=customer&endpoint=/v3/bikes/${encodeURIComponent(bikeCode)}/unlock`,
+                        `/api/biki-proxy?base=customer&endpoint=/v3/bikes/${encodeURIComponent(bikeCode)}/geofence-unlock`,
                         {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'x-auth-token': auth.token
                             },
-                            body: JSON.stringify({}) // Empty body for unlock often required
+                            body: JSON.stringify({
+                                latitude: userLocation.lat,
+                                longitude: userLocation.lng,
+                                bluetoothMacList: []
+                            })
                         }
                     );
 
@@ -5847,10 +5854,25 @@
                         throw new Error(`Error al desbloquear: ${unlockResponse.status}`);
                     }
 
+                    // Parse response
+                    const unlockResult = await unlockResponse.json();
+
                     // Success
                     if (document.getElementById('unlock-loading')) document.getElementById('unlock-loading').remove();
 
-                    alert(`¡Bicicleta ${bikeCode} desbloqueada! Tienes 30 segundos para retirarla.`);
+                    // Success handling with proper status messages
+                    if (unlockResult.code === 'QR_CODE_UNLOCK_REQUEST_SENT') {
+                        qrScanner.showStatus('✓ ¡Bicicleta desbloqueada! Retírala del anclaje.', 'success');
+
+                        if (navigator.vibrate) {
+                            navigator.vibrate([100, 50, 100]);
+                        }
+                    } else {
+                        qrScanner.showStatus(`✓ ${unlockResult.message || 'Solicitud enviada'}`, 'success');
+                    }
+
+                    // Hide status after 3 seconds
+                    setTimeout(() => qrScanner.hideStatus(), 3000);
 
                     // Start trip monitoring
                     tripHistory.startActiveTrip(bikeCode);
