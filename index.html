@@ -4172,12 +4172,34 @@
             },
 
             onLocationError: function (e) {
-                console.error("Location access denied or error", e.message);
+                console.error("Location access error:", e.message, e.code);
 
                 // Only show alert if this was a manual location request
                 // For automatic requests on startup, just log silently
                 if (this.manualLocationRequest) {
-                    alert("No se pudo obtener tu ubicación. Verifica los permisos.");
+                    let errorMsg = "No se pudo obtener tu ubicación. ";
+
+                    // Provide specific guidance based on error code
+                    switch (e.code) {
+                        case 1: // PERMISSION_DENIED
+                            errorMsg += "Has denegado el permiso de ubicación. Por favor, activa los permisos en tu navegador.";
+                            break;
+                        case 2: // POSITION_UNAVAILABLE
+                            errorMsg += "Tu ubicación no está disponible en este momento. Verifica que el GPS esté activado.";
+                            break;
+                        case 3: // TIMEOUT
+                            errorMsg += "El GPS tardó demasiado en responder. Inténtalo de nuevo.";
+                            break;
+                        default:
+                            // Check if HTTPS is the issue
+                            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+                                errorMsg += "La geolocalización requiere una conexión segura (HTTPS).";
+                            } else {
+                                errorMsg += "Verifica los permisos de ubicación en tu navegador.";
+                            }
+                    }
+
+                    alert(errorMsg);
                     this.manualLocationRequest = false;
                 }
             },
@@ -5851,7 +5873,19 @@
 
                     if (!unlockResponse.ok) {
                         const errText = await unlockResponse.text();
-                        throw new Error(`Error al desbloquear: ${unlockResponse.status}`);
+                        let errorData;
+                        try {
+                            errorData = JSON.parse(errText);
+                        } catch (e) {
+                            throw new Error(`Error al desbloquear: ${unlockResponse.status}`);
+                        }
+
+                        // Check for specific error: No active subscription
+                        if (errorData.errorCode === 'CUSTOMER_ACTIVE_PRODUCT_NOT_FOUND') {
+                            throw new Error('No tienes una suscripción activa. Por favor, adquiere un bono para usar el servicio.');
+                        }
+
+                        throw new Error(errorData.message || `Error al desbloquear: ${unlockResponse.status}`);
                     }
 
                     // Parse response
